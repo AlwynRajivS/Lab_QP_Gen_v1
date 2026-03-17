@@ -3,24 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Lab QP Generator v9 · AI-Powered · Equations + Images</title>
+<title>Lab QP Generator v6.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script>
-// MathJax config - MUST be before loading MathJax
-window.MathJax={
-  tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],packages:{'[+]':['ams']}},
-  svg:{fontCache:'global'},
-  startup:{
-    ready(){
-      MathJax.startup.defaultReady();
-      window._mjReady=true;
-      console.log('MathJax ready');
-    }
-  }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 <style>
 :root{
   --c0:#f0f6ff;--b1:#1a56db;--b2:#2563eb;--b3:#3b82f6;--b4:#1d4ed8;
@@ -38,12 +23,10 @@ window.MathJax={
 html{scroll-behavior:smooth}
 body{font-family:var(--ff);background:var(--c0);color:var(--n1);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(59,130,246,.07) 0,transparent 60%),var(--c0);pointer-events:none}
-body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(59,130,246,.025) 39px,rgba(59,130,246,.025) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(59,130,246,.025) 39px,rgba(59,130,246,.025) 40px);pointer-events:none}
 .topbar{position:sticky;top:0;z-index:900;background:rgba(255,255,255,.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);height:60px;padding:0 24px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 8px rgba(15,40,100,.08)}
 .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--b1),var(--v1));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .tb-name{font-size:15px;font-weight:800;color:#0f172a;letter-spacing:-.4px}
 .tb-ver{font-size:9px;font-family:var(--fm);background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;padding:2px 8px;border-radius:20px;margin-left:4px}
-.tb-sub{font-size:9px;color:#64748b;font-family:var(--fm);margin-top:1px}
 .tb-gap{flex:1}
 .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:9px;font-family:var(--fm);font-weight:600;background:#f1f5f9;border:1px solid #cbd5e1;color:#64748b;transition:all var(--ease)}
 .pill.active{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
@@ -63,7 +46,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
 .si-b{background:linear-gradient(135deg,var(--b1),var(--b2))}.si-t{background:linear-gradient(135deg,var(--t1),var(--t2))}.si-g{background:linear-gradient(135deg,var(--g1),var(--g2))}.si-v{background:linear-gradient(135deg,var(--v1),var(--v2))}
 .sh h2{font-size:15px;font-weight:800;color:#0f172a;letter-spacing:-.3px}
 .sh-tag{font-size:8px;font-weight:700;font-family:var(--fm);text-transform:uppercase;padding:2px 9px;border-radius:20px;letter-spacing:.6px}
-.tag-b{background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8}.tag-g{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}.tag-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+.tag-b{background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8}
+.tag-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+.tag-g{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--r20);margin-bottom:12px;overflow:hidden;box-shadow:var(--sh)}
 .card:hover{border-color:#93c5fd}
 .card-hdr{padding:12px 20px;border-bottom:1px solid #e2eaf4;display:flex;align-items:center;gap:9px;background:linear-gradient(to right,#f8faff,#fff)}
@@ -80,31 +65,33 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
 .fi,.fsel{border:1px solid #d1d5db;background:#fff;color:#0f172a;padding:8px 11px;border-radius:var(--r8);font-family:var(--ff);font-size:12px;outline:none;transition:all var(--ease);width:100%}
 .fi:focus,.fsel:focus{border-color:#3b82f6;background:#eff6ff;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
 .fi::placeholder{color:#cbd5e1}
-.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.fr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 18px;border:none;border-radius:var(--r8);font-family:var(--ff);font-size:11.5px;font-weight:700;cursor:pointer;transition:all var(--ease)}
 .bp{background:linear-gradient(135deg,var(--b1),var(--b2));color:#fff;box-shadow:0 4px 16px rgba(26,86,219,.4)}
 .bp:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,86,219,.5)}
-.bt{background:linear-gradient(135deg,var(--t1),var(--t2));color:#fff}
-.bv{background:linear-gradient(135deg,var(--v1),var(--v2));color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4)}
-.bv:hover:not(:disabled){transform:translateY(-1px)}
 .bg_{background:#f8fafc;color:#334155;border:1px solid #d1dde8}
 .bg_:hover:not(:disabled){background:#f1f5f9;border-color:#93c5fd;color:#1d4ed8}
-.bgreen{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff}
-.bgreen:hover:not(:disabled){transform:translateY(-1px)}
+.bgreen{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 4px 16px rgba(5,150,105,.4)}
+.bv{background:linear-gradient(135deg,var(--v1),var(--v2));color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4)}
+.bv:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.5)}
 .bbig{padding:12px 28px;font-size:13px;border-radius:var(--r12)}
 .btn:disabled{opacity:.3;cursor:not-allowed!important;transform:none!important;box-shadow:none!important}
 .btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}
 .alert{padding:9px 13px;border-radius:var(--r8);font-size:11px;display:flex;align-items:flex-start;gap:8px;margin-top:10px}
-.aok{background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46}.aerr{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}.awrn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e}.ainf{background:#eff6ff;border:1px solid #93c5fd;color:#1e40af}
+.aok{background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46}
+.aerr{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+.awrn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e}
+.ainf{background:#eff6ff;border:1px solid #93c5fd;color:#1e40af}
 .notice{background:#eff6ff;border:1px solid #bfdbfe;border-left:3px solid #3b82f6;border-radius:var(--r8);padding:10px 14px;font-size:11px;color:#1e40af;display:flex;gap:8px;align-items:flex-start;margin-bottom:12px;line-height:1.6}
 .stats-bar{display:flex;flex-wrap:wrap;background:#f8faff;border:1px solid #dde8f5;border-radius:var(--r12);overflow:hidden;margin:12px 0}
 .sb{padding:12px 18px;border-right:1px solid #e2eaf4;flex:1;min-width:80px}.sb:last-child{border-right:none}
 .sbk{font-size:7.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm)}
 .sbv{font-size:21px;font-weight:800;line-height:1.15;margin-top:2px}
 .c-b{color:#1d4ed8}.c-g{color:#059669}.c-r{color:#dc2626}.c-v{color:#6d28d9}.c-o{color:#d97706}.c-w{color:#0f172a}
-/* Q GRID */
-.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;margin-top:12px}
-.qc{background:#fff;border:1.5px solid #e2eaf4;border-radius:var(--r12);padding:14px;transition:all .2s;position:relative;overflow:hidden}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;margin-top:12px}
+.qc{background:#fff;border:1.5px solid #e2eaf4;border-radius:var(--r12);padding:14px;transition:all .2s}
 .qc:hover{border-color:#93c5fd}
 .qc-hdr{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
 .qc-num{font-size:9px;font-weight:700;font-family:var(--fm);background:#dbeafe;border:1px solid #93c5fd;padding:2px 8px;border-radius:8px;color:#1d4ed8}
@@ -112,33 +99,75 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
 .qc-limit-wrap{display:flex;align-items:center;gap:4px;margin-left:auto}
 .qc-limit-lbl{font-size:8px;color:#92400e;font-family:var(--fm);font-weight:600}
 .qc-limit-inp{width:52px;font-size:10px;font-family:var(--fm);font-weight:700;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:2px 5px;text-align:center;outline:none}
-.qc-limit-inp:focus{border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.2)}
 .qc-usage{font-size:9px;font-family:var(--fm);background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:2px 7px;border-radius:7px}
 .qc-parts{display:flex;flex-direction:column;gap:5px;margin-top:6px}
-.qc-part{background:#f8faff;border:1px solid #e2eaf4;border-radius:var(--r8);padding:8px 10px;position:relative}
-.qc-part-lbl{font-size:7.5px;font-weight:700;color:#64748b;font-family:var(--fm);text-transform:uppercase;margin-bottom:3px;letter-spacing:.6px}
-.qc-part-txt{font-size:10.5px;color:#1e293b;line-height:1.55}
+.qc-part{background:#f8faff;border:1px solid #e2eaf4;border-radius:var(--r8);padding:8px 10px}
+.qc-part-txt{font-size:10.5px;color:#1e293b;line-height:1.55;font-family:'Times New Roman',serif}
+.qc-tbl-prev{font-size:10px;font-family:'Times New Roman',serif;border-collapse:collapse;margin:4px 0;width:100%}
+.qc-tbl-prev th{background:#e8edf5;font-weight:700;font-size:9px;padding:3px 7px;border:1px solid #c8d5e8;text-align:center}
+.qc-tbl-prev td{padding:3px 7px;border:1px solid #d8e2f0;font-size:9.5px;text-align:center}
 .qc-media{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.qc-thumb{height:36px;max-width:80px;object-fit:contain;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafc;cursor:pointer}
-.qc-eq-badge{font-size:8px;background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6;padding:1px 7px;border-radius:8px;font-family:var(--fm);font-weight:700}
-/* STUDENT TABLE */
+.qc-thumb{height:44px;max-width:100px;object-fit:contain;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafc}
+.eq-chip{font-family:'Times New Roman',Times,serif;font-style:italic;background:#faf5ff;border:1px solid #ddd6fe;border-radius:4px;padding:2px 9px;font-size:11px;color:#4c1d95;display:inline-block;margin:2px 2px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8.5px;font-weight:700;font-family:var(--fm);white-space:nowrap}
+.bdg-b{background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8}
+.bdg-g{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}
+.bdg-r{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b}
+.bdg-sky{background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1}
+.bdg-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+.bdg-o{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
+/* Bloom */
+.bloom-panel{margin-top:10px;border:1px solid #ddd6fe;border-radius:var(--r8);overflow:hidden;display:none}
+.bloom-panel.show{display:block}
+.bloom-hdr{background:linear-gradient(90deg,#ede9fe,#f5f3ff);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ddd6fe;flex-wrap:wrap}
+.bloom-hdr-title{font-size:10px;font-weight:700;color:#5b21b6}
+.bloom-mode-tabs{display:flex;background:#fff;border:1px solid #ddd6fe;border-radius:6px;overflow:hidden;margin-left:auto}
+.bloom-mode-tab{padding:3px 10px;font-size:9px;font-weight:700;cursor:pointer;color:#6d28d9;font-family:var(--ff);transition:all .15s}
+.bloom-mode-tab.act{background:linear-gradient(135deg,var(--v1),var(--v2));color:#fff}
+.bloom-levels{display:flex;gap:5px;flex-wrap:wrap;padding:10px}
+.bloom-btn{padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;background:none;font-family:var(--ff)}
+.bloom-btn:hover{transform:translateY(-1px)}
+.bl-R{background:#fef9c3;border-color:#fde047;color:#713f12}
+.bl-U{background:#dcfce7;border-color:#86efac;color:#166534}
+.bl-Ap{background:#dbeafe;border-color:#93c5fd;color:#1e40af}
+.bl-An{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6}
+.bl-E{background:#fce7f3;border-color:#f9a8d4;color:#9d174d}
+.bl-C{background:#ffedd5;border-color:#fdba74;color:#9a3412}
+/* Offline reframe textarea */
+.bloom-offline-area{padding:10px 12px;display:none}
+.bloom-offline-area.show{display:block}
+.bloom-custom-ta{width:100%;border:1px solid #ddd6fe;border-radius:var(--r8);padding:9px 11px;font-family:'Times New Roman',serif;font-size:11.5px;color:#1e1b4b;min-height:80px;resize:vertical;outline:none;background:#faf5ff;line-height:1.7}
+.bloom-custom-ta:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.bloom-custom-actions{display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.bloom-result{padding:0 12px 12px;display:none}
+.bloom-result.show{display:block}
+.bloom-result-text{font-size:11px;color:#1e1b4b;line-height:1.7;font-family:'Times New Roman',serif;background:#faf5ff;border:1px solid #ede9fe;border-radius:var(--r8);padding:10px 12px;margin-top:6px}
+.bloom-spin{padding:10px;text-align:center;font-size:10px;color:#7c3aed;font-family:var(--fm);display:none;align-items:center;justify-content:center;gap:8px}
+.bloom-spin.show{display:flex}
+.bloom-spin::before{content:'';width:14px;height:14px;border:2px solid #ddd6fe;border-top-color:#7c3aed;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+.bloom-tag{font-size:7.5px;padding:1px 7px;border-radius:10px;font-weight:700;font-family:var(--fm)}
+.bt-R{background:#fef9c3;color:#713f12;border:1px solid #fde047}
+.bt-U{background:#dcfce7;color:#14532d;border:1px solid #4ade80}
+.bt-Ap{background:#dbeafe;color:#1e3a8a;border:1px solid #60a5fa}
+.bt-An{background:#f3e8ff;color:#4a044e;border:1px solid #c084fc}
+.bt-E{background:#fce7f3;color:#831843;border:1px solid #f0abfc}
+.bt-C{background:#ffedd5;color:#7c2d12;border:1px solid #fb923c}
+.bt-Custom{background:#f0fdf4;color:#065f46;border:1px solid #6ee7b7}
+/* Student table */
 .stbl{width:100%;border-collapse:collapse;font-size:11.5px}
-.stbl th{background:#f1f5f9;color:#475569;padding:9px 12px;text-align:left;font-size:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;font-family:var(--fm);white-space:nowrap;position:sticky;top:0;z-index:2}
+.stbl th{background:#f1f5f9;color:#475569;padding:9px 12px;text-align:left;font-size:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;font-family:var(--fm);white-space:nowrap}
 .stbl td{padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle}
 .stbl tr:hover td{background:#eff6ff}
 .stbl tr.limit-exceeded td{background:#fff1f2!important;border-left:3px solid #ef4444}
-.stbl tr.limit-exceeded:hover td{background:#ffe4e6!important}
 .tbl-wrap{overflow-x:auto;border-radius:var(--r12);border:1px solid #e2eaf4;max-height:480px;overflow-y:auto;background:#fff}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8.5px;font-weight:700;font-family:var(--fm);white-space:nowrap}
-.bdg-b{background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8}.bdg-g{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}.bdg-r{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b}.bdg-sky{background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1}.bdg-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}.bdg-o{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
 .actl-bar{background:#f8faff;border:1px solid #dde8f5;border-radius:var(--r12);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .actl-lbl{font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.7px;font-family:var(--fm)}
 .mtabs{display:flex;background:#f1f5f9;border-radius:var(--r8);border:1px solid #e2e8f0;overflow:hidden}
 .mo{padding:6px 14px;font-size:10px;font-weight:600;cursor:pointer;color:#64748b;white-space:nowrap}
 .mo:hover{color:#1d4ed8}.mo.act{background:#2563eb;color:#fff}
 .sr{display:flex;gap:8px;margin-bottom:12px}
-.si{flex:1;border:1px solid #d1d5db;background:#fff;color:#0f172a;padding:7px 12px;border-radius:var(--r8);font-size:11.5px;outline:none;transition:all var(--ease);font-family:var(--ff)}
-.si:focus{border-color:#3b82f6;background:#eff6ff}
+.si-inp{flex:1;border:1px solid #d1d5db;background:#fff;color:#0f172a;padding:7px 12px;border-radius:var(--r8);font-size:11.5px;outline:none;transition:all var(--ease);font-family:var(--ff)}
+.si-inp:focus{border-color:#3b82f6;background:#eff6ff}
 .an-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .an-c{background:#fff;border:1px solid #e2eaf4;border-radius:var(--r12);padding:16px}
 .an-t{font-size:9px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.6px;font-family:var(--fm);margin-bottom:12px}
@@ -148,8 +177,6 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
 .bar-f{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;min-width:24px}
 .bar-f span{font-size:8px;font-weight:700;color:rgba(255,255,255,.9);font-family:var(--fm)}
 .bf1{background:linear-gradient(90deg,var(--b2),var(--b3))}.bf2{background:linear-gradient(90deg,var(--t1),var(--t2))}.bf3{background:linear-gradient(90deg,var(--v1),var(--v2))}.bf4{background:linear-gradient(90deg,var(--g1),var(--g2))}.bf-red{background:linear-gradient(90deg,#dc2626,#ef4444)}
-.hm-c{display:flex;align-items:center;justify-content:space-between;padding:5px 9px;border-radius:6px;margin-bottom:3px;font-size:9.5px;font-family:var(--fm);font-weight:600}
-/* MODAL */
 .mod-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(12px);z-index:8000;align-items:center;justify-content:center;padding:20px}
 .mod-ov.show{display:flex}
 .mod-box{background:#fff;border:1px solid #e2eaf4;border-radius:var(--r20);max-width:540px;width:100%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(15,40,100,.2)}
@@ -160,72 +187,58 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
 .mod-body{padding:14px 18px;overflow-y:auto;flex:1}
 .mod-ft{padding:11px 18px;border-top:1px solid #e2eaf4;display:flex;gap:8px;align-items:center;background:#f8fafc}
 .q-opt{border:1.5px solid #e2e8f0;border-radius:var(--r8);padding:10px 12px;cursor:pointer;margin-bottom:7px;background:#f8fafc}
-.q-opt:hover{border-color:#93c5fd;background:#eff6ff}.q-opt.sel{border-color:#3b82f6;background:#eff6ff;box-shadow:0 0 0 2px rgba(59,130,246,.12)}
+.q-opt:hover{border-color:#93c5fd;background:#eff6ff}.q-opt.sel{border-color:#3b82f6;background:#eff6ff}
 .q-opt.at-limit{opacity:.55;cursor:not-allowed;background:#fff5f5;border-color:#fca5a5}
 .qoh{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .qon{font-family:var(--fm);font-size:9.5px;font-weight:700;color:#1d4ed8;background:#dbeafe;padding:2px 7px;border-radius:7px;border:1px solid #93c5fd}
-.qot{font-size:11px;color:#475569;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-/* META */
+.qot{font-size:11px;color:#475569;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-family:'Times New Roman',serif}
 .meta-p{background:linear-gradient(135deg,#dbeafe,#eff6ff);border-radius:var(--r12);padding:12px 16px;margin-top:12px;display:none;border:1px solid #93c5fd}
 .mp-t{font-size:8px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.9px;font-family:var(--fm);margin-bottom:8px}
 .mp-g{display:flex;flex-wrap:wrap}
 .mp-i{padding:5px 14px;border-right:1px solid #bfdbfe;flex:1;min-width:80px}.mp-i:last-child{border-right:none}
 .mp-k{font-size:7px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm)}
 .mp-v{font-size:11.5px;font-weight:700;color:#1e3a8a;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* PREVIEW */
 .pnav{background:#f8faff;border-bottom:1px solid #e2eaf4;padding:9px 16px;display:flex;align-items:center;gap:8px}
 .pnav-btn{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid #e2e8f0;color:#475569;background:#fff}
 .pnav-btn:hover{border-color:#3b82f6;color:#1d4ed8}
 .pnav-lbl{font-size:10px;font-weight:700;color:#1d4ed8;font-family:var(--fm)}
 .pp{padding:18px 22px;background:#fff;color:#111;font-family:'Times New Roman',Times,serif;font-size:11pt;line-height:1.5}
-.pcut{border-top:1.5px dashed #bbb;margin:10px 0;text-align:center;padding-top:4px;font-size:8pt;color:#bbb;font-family:Arial,sans-serif}
-/* DOWNLOAD */
+.pcut{border-top:1.5px dashed #bbb;margin:10px 0;text-align:center;padding-top:4px;font-size:8pt;color:#bbb}
 .dl-p{display:none;background:linear-gradient(135deg,#f0f6ff,#eff6ff,#f5f3ff);border:1px solid #bfdbfe;border-radius:var(--r24);padding:40px;text-align:center;margin-top:14px}
 .dl-p.show{display:block}
 .dl-p h3{font-size:24px;font-weight:800;color:#0f172a;margin-bottom:5px;font-family:var(--fs)}
 .dl-p p{color:#475569;font-size:10px;margin-bottom:22px;font-family:var(--fm)}
 .dl-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.dl-meta{font-size:8px;color:#94a3b8;margin-top:14px;font-family:var(--fm);line-height:1.8}
-/* SPINNER */
-.spin-ov{display:none;position:fixed;inset:0;background:rgba(240,246,255,.95);backdrop-filter:blur(18px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.spin-ov{display:none;position:fixed;inset:0;background:rgba(240,246,255,.96);backdrop-filter:blur(18px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 .spin-ov.show{display:flex}
 .spin-ring{width:52px;height:52px;position:relative}
 .spin-ring::before,.spin-ring::after{content:'';position:absolute;border-radius:50%;animation:spin .8s linear infinite}
 .spin-ring::before{inset:0;border:3px solid rgba(59,130,246,.1);border-top-color:var(--b3)}
 .spin-ring::after{inset:6px;border:2px solid rgba(13,148,136,.1);border-top-color:var(--t2);animation-direction:reverse;animation-duration:.5s}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spin-t{color:#0f172a;font-size:16px;font-weight:800}.spin-s{color:#1d4ed8;font-size:10px;font-family:var(--fm)}
+.spin-t{color:#0f172a;font-size:16px;font-weight:800}
+.spin-s{color:#1d4ed8;font-size:10px;font-family:var(--fm)}
 .pt{width:260px;height:3px;background:#dbeafe;border-radius:2px;overflow:hidden}
 .pf{height:100%;background:linear-gradient(90deg,var(--b2),var(--t2));border-radius:2px;transition:width .3s ease;width:0}
-/* TOASTER */
 .toaster{position:fixed;bottom:22px;right:22px;z-index:99999;display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none}
 .toast{background:#fff;border:1px solid #e2eaf4;border-radius:var(--r12);padding:10px 14px;font-size:11px;color:#0f172a;box-shadow:0 8px 30px rgba(15,40,100,.15);max-width:320px;display:flex;align-items:center;gap:8px;pointer-events:all;animation:tIn .28s cubic-bezier(.22,1,.36,1)}
 .toast.tok{border-left:3px solid #10b981}.toast.terr{border-left:3px solid #ef4444}.toast.tinf{border-left:3px solid #3b82f6}.toast.twarn{border-left:3px solid #f59e0b}
 .toast.tout{animation:tOut .28s ease forwards}
 @keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
 @keyframes tOut{to{opacity:0;transform:translateX(16px)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes ai{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.ai{animation:ai .4s cubic-bezier(.22,1,.36,1) both}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,86,219,.4)}50%{box-shadow:0 0 0 10px rgba(26,86,219,0)}}
-/* Equation status overlay */
-.eq-status{position:fixed;bottom:80px;right:22px;z-index:9998;background:#1e1b4b;color:#c4b5fd;font-size:10px;font-family:var(--fm);padding:6px 14px;border-radius:20px;display:none;animation:tIn .2s ease}
-.eq-status.show{display:flex;align-items:center;gap:6px}
-.eq-spin{width:10px;height:10px;border:2px solid rgba(196,181,253,.3);border-top-color:#c4b5fd;border-radius:50%;animation:spin .6s linear infinite}
 @media(max-width:900px){.up-grid,.fr2,.fr3,.fr4,.an-grid,.q-grid{grid-template-columns:1fr}.dl-btns{flex-direction:column}}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#93c5fd;border-radius:3px}
 </style>
 </head>
 <body>
 <div class="toaster" id="toaster"></div>
-<div class="eq-status" id="eqStatus"><div class="eq-spin"></div><span id="eqStatusTxt">Rendering equations…</span></div>
 <div class="spin-ov" id="spinOv">
   <div class="spin-ring"></div>
   <div class="spin-t" id="spinT">Processing…</div>
   <div class="spin-s" id="spinS">Please wait</div>
   <div class="pt"><div class="pf" id="pf"></div></div>
 </div>
-
 <!-- ASSIGN MODAL -->
 <div class="mod-ov" id="assignModal">
   <div class="mod-box">
@@ -238,20 +251,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
     </div>
   </div>
 </div>
-
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">🧪</div>
-  <div>
-    <div style="display:flex;align-items:center;gap:4px"><span class="tb-name">Lab QP Generator</span><span class="tb-ver">v1.0</span></div>
-    
-  </div>
+  <div><div style="display:flex;align-items:center;gap:4px"><span class="tb-name">Lab QP Generator</span><span class="tb-ver">v6.0</span></div></div>
   <div class="tb-gap"></div>
   <div class="pill" id="bankPill"><div class="pill-dot"></div>No bank</div>
   <div class="pill" id="stuPill"><div class="pill-dot"></div>No students</div>
   <div class="pill" id="asnPill" style="display:none"><div class="pill-dot"></div><span id="asnTxt">0 assigned</span></div>
 </div>
-
 <div class="snav">
   <div class="snav-r">
     <div class="sn act" id="sn1"><div class="sn-n">1</div><div class="sn-l">Upload Files</div></div>
@@ -261,19 +269,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
     <div class="sn" id="sn5"><div class="sn-n">5</div><div class="sn-l">Generate</div></div>
   </div>
 </div>
-
 <div class="main">
-
-<!-- §1 UPLOAD -->
+<!-- §1 -->
 <div class="sh"><div class="sh-icon si-b">1</div><h2>Upload Source Files</h2><span class="sh-tag tag-b">Step 1</span></div>
-<div class="card ai">
+<div class="card">
   <div class="card-hdr"><span>📁</span><h3>Question Bank &amp; Student Database</h3></div>
   <div class="card-body">
-        <div class="up-grid">
+    <div class="up-grid">
       <div class="uz" id="qbZ" ondragover="ev(event,'qbZ','ov')" ondragleave="ev(event,'qbZ','')" ondrop="dr(event,'qbZ')">
         <input type="file" id="qbF" accept=".docx" onchange="handleQB(this.files[0])"/>
         <div class="uz-ic">📋</div><div class="uz-t">Question Bank</div>
-        <div class="uz-s">.DOCX · Questions + Equations + Images</div>
+        <div class="uz-s">.DOCX · Questions + Equations + Images + Tables</div>
         <div class="uz-ok" id="qbOk" style="display:none"></div><div class="uz-sz" id="qbSz"></div>
       </div>
       <div class="uz" id="stZ" ondragover="ev(event,'stZ','ov')" ondragleave="ev(event,'stZ','')" ondrop="dr(event,'stZ')">
@@ -287,10 +293,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
     <div class="meta-p" id="metaP"><div class="mp-t">📜 Detected Exam Info</div><div class="mp-g" id="metaG"></div></div>
   </div>
 </div>
-
-<!-- §2 EXAM DETAILS -->
+<!-- §2 -->
 <div class="sh"><div class="sh-icon si-t">2</div><h2>Exam Header Details</h2></div>
-<div class="card ai">
+<div class="card">
   <div class="card-hdr"><span>🎓</span><h3>Examination Information</h3></div>
   <div class="card-body">
     <div class="fr2" style="margin-bottom:10px">
@@ -311,29 +316,27 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
     <div id="rubricBlk" style="display:none"></div>
   </div>
 </div>
-
-<!-- §3 QUESTION BANK -->
-<div class="sh"><div class="sh-icon si-b">3</div><h2>Question Bank</h2><span class="sh-tag tag-b">Equations · Images · Editable Limits</span></div>
-<div class="card ai" id="qbCard">
+<!-- §3 -->
+<div class="sh"><div class="sh-icon si-b">3</div><h2>Question Bank</h2><span class="sh-tag tag-b">Lossless Eq · Images · Tables</span><span class="sh-tag tag-v" style="margin-left:4px">🧠 Bloom's</span><span class="sh-tag tag-g" style="margin-left:4px">✈️ Offline</span></div>
+<div class="card" id="qbCard">
   <div class="card-hdr"><span>📚</span><h3>Parsed Questions</h3><span id="qbLbl" style="margin-left:auto;font-size:9px;color:var(--n3);font-family:var(--fm)"></span></div>
   <div class="card-body">
-    <div class="notice"><span>✏️</span><span>Equations are rendered from DOCX math objects. The <b>Limit</b> field per question controls max students — edit directly in the orange box. Leave blank for unlimited.</span></div>
+    <div class="notice"><span>✏️</span><span>Tables inside question cells are extracted and rendered faithfully. Equations cloned losslessly. <b>Bloom's Reframe</b> works <b>offline</b> (template) or <b>online</b> (AI).</span></div>
     <div class="q-grid" id="qGrid"><div style="color:var(--n3);font-size:11px;padding:8px">Upload question bank to view…</div></div>
   </div>
 </div>
-
-<!-- §4 ASSIGN -->
-<div class="sh"><div class="sh-icon si-t">4</div><h2>Assign Questions &amp; Analytics</h2><span class="sh-tag tag-b">Constrained by Limits · Red = Over Limit</span></div>
-<div class="card ai">
+<!-- §4 -->
+<div class="sh"><div class="sh-icon si-t">4</div><h2>Assign Questions</h2></div>
+<div class="card">
   <div class="card-hdr"><span>🎲</span><h3>Question Assignment</h3></div>
   <div class="card-body">
-    <div class="notice"><span>🔴</span><div><b>Red rows</b> = question assigned beyond its student limit. Auto-assign respects limits. Use ✏️ to manually reassign. Limits are editable in Step 3.</div></div>
+    <div class="notice"><span>🎯</span><div><b>Smart mode:</b> Every question assigned at least once, then remaining filled by limit. <b>Red rows</b> = over limit.</div></div>
     <div class="actl-bar">
       <span class="actl-lbl">Mode:</span>
       <div class="mtabs">
-        <div class="mo act" id="mode-balanced" onclick="setMode('balanced')">⚖️ Balanced</div>
+        <div class="mo act" id="mode-smart" onclick="setMode('smart')">🎯 Smart (1× Each First)</div>
+        <div class="mo" id="mode-balanced" onclick="setMode('balanced')">⚖️ Balanced</div>
         <div class="mo" id="mode-random" onclick="setMode('random')">🎲 Random</div>
-        <div class="mo" id="mode-manual" onclick="setMode('manual')">✏️ Manual</div>
       </div>
       <button class="btn bp" id="assignBtn" onclick="doAssign()" disabled>⚡ Auto-Assign</button>
       <button class="btn bg_" onclick="reshuffleAll()" id="reShBtn" disabled>🔀 Re-shuffle</button>
@@ -348,21 +351,20 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
       <div class="sb"><div class="sbk">Over Limit</div><div class="sbv c-r" id="st5">0</div></div>
     </div>
     <div class="sr">
-      <input class="si" id="stuSearch" placeholder="🔍  Search name / register no…" oninput="filterStu()"/>
+      <input class="si-inp" id="stuSearch" placeholder="🔍  Search name / register no…" oninput="filterStu()"/>
       <div class="fg" style="min-width:110px"><select class="fsel" id="fAsn" onchange="filterStu()"><option value="all">All</option><option value="y">Assigned</option><option value="n">Unassigned</option><option value="over">Over Limit</option></select></div>
       <div class="fg" style="min-width:100px"><select class="fsel" id="fQ" onchange="filterStu()"><option value="all">All Qs</option></select></div>
     </div>
     <div class="tbl-wrap" id="stuWrap"><div style="padding:20px;color:var(--n3);font-size:11px;text-align:center">Upload student database…</div></div>
   </div>
 </div>
-<div class="card ai" id="anCard" style="display:none">
-  <div class="card-hdr"><span>📊</span><h3>Assignment Analytics</h3><button class="btn bg_" style="margin-left:auto;padding:3px 9px;font-size:10px" onclick="renderAn()">↺ Refresh</button></div>
+<div class="card" id="anCard" style="display:none">
+  <div class="card-hdr"><span>📊</span><h3>Analytics</h3></div>
   <div class="card-body"><div class="an-grid" id="anGrid"></div></div>
 </div>
-
-<!-- §5 GENERATE -->
-<div class="sh"><div class="sh-icon si-g">5</div><h2>Generate &amp; Export</h2><span class="sh-tag tag-g">DOCX · ZIP</span></div>
-<div class="card ai">
+<!-- §5 -->
+<div class="sh"><div class="sh-icon si-g">5</div><h2>Generate &amp; Export</h2></div>
+<div class="card">
   <div class="card-body">
     <div class="btn-row">
       <button class="btn bp bbig" id="genBtn" onclick="doGenerate()" disabled style="animation:pulse 2.5s infinite">⚡ Generate All Papers</button>
@@ -371,13 +373,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
     <div id="genAlert" style="display:none"></div>
   </div>
 </div>
-
 <div id="prvSec" style="display:none">
   <div class="sh"><div class="sh-icon si-g">✓</div><h2>Print Preview</h2></div>
   <div class="card">
     <div class="card-body" style="padding:0">
       <div class="pnav">
-        <span style="font-size:9px;color:var(--n3);font-family:var(--fm)">Page:</span>
         <button class="pnav-btn" onclick="pNav(-1)">‹ Prev</button>
         <span class="pnav-lbl" id="pLbl">—</span>
         <button class="pnav-btn" onclick="pNav(1)">Next ›</button>
@@ -387,632 +387,941 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background-image:repeati
     </div>
   </div>
 </div>
-
 <div class="dl-p" id="dlPanel">
   <div style="font-size:52px;margin-bottom:12px">✅</div>
   <h3>Question Papers Ready!</h3>
   <p id="dlDesc">Generated successfully</p>
   <div class="dl-btns">
     <button class="btn bp bbig" onclick="dlDocx()">⬇ Download DOCX (Merged)</button>
-    <button class="btn bgreen bbig" onclick="dlZip()">📦 ZIP (Individual per student)</button>
+    <button class="btn bgreen bbig" onclick="dlZip()">📦 ZIP (Individual)</button>
   </div>
-  <div class="dl-meta" id="dlMeta">11pt Times New Roman · 1.5 line spacing · 2 students/page · Equations+Images included</div>
 </div>
-
-</div><!-- /main -->
+</div>
 
 <script>
 'use strict';
-const WN='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+/* ═══ NAMESPACES ═══ */
+const WN  = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const MN  = 'http://schemas.openxmlformats.org/officeDocument/2006/math';
+const RN  = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+const AN  = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+const PICN= 'http://schemas.openxmlformats.org/drawingml/2006/picture';
+const WPN = 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing';
 
-let G={
-  questions:[],rubricCols:[],students:[],
-  assignments:{},examInfo:{},
-  docxBlobs:[],mergedBlob:null,pairedPages:[],
-  mode:'balanced',prevPage:0,_mSI:-1,_mSel:-1,
-  // imageMap: rid → {dataUrl, blob, ext, mime, isEquation:false}
-  imageMap:{},
-  // eqMap: eqKey → {ommlXml, latex, previewDataUrl}  — native OMML, no image conversion
-  eqMap:{},
-  rawZip:null
+/* ═══ STATE ═══ */
+let G = {
+  questions:[], rubricCols:[], students:[],
+  assignments:{}, examInfo:{},
+  docxBlobs:[], mergedBlob:null, pairedPages:[],
+  mode:'smart', prevPage:0, _mSI:-1, _mSel:-1,
+  imageMap:{}, rawZip:null, bloomCache:{}, scratchDoc:null
 };
 
 /* ═══ UTILS ═══ */
-const toA=nl=>{const a=[];for(let i=0;i<nl.length;i++)a.push(nl[i]);return a;};
-const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const xe=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const fmtB=b=>b<1048576?(b/1024).toFixed(0)+'KB':(b/1048576).toFixed(1)+'MB';
-const delay=ms=>new Promise(r=>setTimeout(r,ms));
-function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
-function toast(msg,type='ok',dur=3200){const tr=document.getElementById('toaster');const el=document.createElement('div');el.className=`toast t${type}`;el.innerHTML=`<span>${{ok:'✅',err:'❌',warn:'⚠️',inf:'ℹ️'}[type]||'ℹ️'}</span><span style="line-height:1.5">${msg}</span>`;tr.appendChild(el);setTimeout(()=>{el.classList.add('tout');setTimeout(()=>el.remove(),300);},dur);}
+const toA  = nl => Array.from(nl);
+const esc  = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const xesc = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtB = b  => b<1048576?(b/1024).toFixed(0)+'KB':(b/1048576).toFixed(1)+'MB';
+const delay= ms => new Promise(r=>setTimeout(r,ms));
+const gei  = (id,fb='')=>{const el=document.getElementById(id);return(el&&el.value.trim())?el.value.trim():fb;};
+function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
+function toast(msg,type='ok',dur=3200){
+  const tr=document.getElementById('toaster'),el=document.createElement('div');
+  el.className=`toast t${type}`;
+  el.innerHTML=`<span>${{ok:'✅',err:'❌',warn:'⚠️',inf:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
+  tr.appendChild(el);
+  setTimeout(()=>{el.classList.add('tout');setTimeout(()=>el.remove(),300);},dur);
+}
 function ev(e,id,cls){e.preventDefault();document.getElementById(id).className='uz'+(cls?' '+cls:'');}
-function dr(e,id){e.preventDefault();document.getElementById(id).className='uz';const f=e.dataTransfer.files[0];if(!f)return;if(id==='qbZ'){if(f.name.toLowerCase().endsWith('.docx'))handleQB(f);else toast('Must be .docx','err');}else handleStu(f);}
-function showEqStatus(txt){const el=document.getElementById('eqStatus');document.getElementById('eqStatusTxt').textContent=txt;el.classList.add('show');}
-function hideEqStatus(){document.getElementById('eqStatus').classList.remove('show');}
+function dr(e,id){
+  e.preventDefault();document.getElementById(id).className='uz';
+  const f=e.dataTransfer.files[0];if(!f)return;
+  if(id==='qbZ'){if(f.name.toLowerCase().endsWith('.docx'))handleQB(f);else toast('Must be .docx','err');}
+  else handleStu(f);
+}
 
-/* ═══════════════════════════════════════
-   MATHJAX WAIT + EQUATION RENDERING
-   ═══════════════════════════════════════ */
-async function waitMJ(ms=10000){
-  const t0=Date.now();
-  while(!window._mjReady){
-    if(Date.now()-t0>ms)return false;
-    await delay(100);
+/* ═══════════════════════════════════════════════════════════════════
+   DIRECT CHILD HELPERS — avoids getElementsByTagNameNS picking up
+   nested table rows / cells when scanning the outer question table
+   ═══════════════════════════════════════════════════════════════════ */
+function directChildren(node, localName, ns) {
+  const res=[];
+  for(let i=0;i<node.childNodes.length;i++){
+    const c=node.childNodes[i];
+    if(c.nodeType===1 && c.localName===localName && (!ns||c.namespaceURI===ns)) res.push(c);
   }
-  return true;
+  return res;
 }
-
-/* Convert OMML node tree → LaTeX recursively */
-function omml2latex(node){
-  if(!node)return'';
-  if(node.nodeType===3)return node.textContent; // text node
-  const tag=node.localName||'';
-  const kids=()=>toA(node.childNodes).map(omml2latex).join('');
-  const child=(name)=>{for(const c of node.childNodes){if(c.localName===name)return omml2latex(c);}return'';}
-  switch(tag){
-    case'oMath':case'oMathPara':return kids();
-    case'r':{
-      // get text from <m:t> child
-      let t='';
-      for(const c of node.childNodes){if(c.localName==='t')t+=c.textContent;}
-      // also handle rPr for styling but just return text
-      return t;
-    }
-    case'f':return`\\frac{${child('num')}}{${child('den')}}`;
-    case'rad':{const deg=child('deg');const e=child('e');return deg?`\\sqrt[${deg}]{${e}}`:`\\sqrt{${e}}`;}
-    case'sSup':return`${child('e')}^{${child('sup')}}`;
-    case'sSub':return`${child('e')}_{${child('sub')}}`;
-    case'sSubSup':return`${child('e')}_{${child('sub')}}^{${child('sup')}}`;
-    case'nary':{
-      let chr='\\int',sub='',sup='',e='';
-      for(const c of node.childNodes){
-        if(c.localName==='naryPr'){
-          for(const cc of c.childNodes){
-            if(cc.localName==='chr'){
-              const v=cc.getAttribute('m:val')||cc.getAttribute('val')||'∫';
-              const m={'∑':'\\sum','∏':'\\prod','∫':'\\int','∬':'\\iint','∮':'\\oint','⋃':'\\bigcup','⋂':'\\bigcap'};
-              chr=m[v]||'\\int';
-            }
-          }
-        }
-        else if(c.localName==='sub')sub=omml2latex(c);
-        else if(c.localName==='sup')sup=omml2latex(c);
-        else if(c.localName==='e')e=omml2latex(c);
-      }
-      return`${chr}${sub?'_{'+sub+'}':''}${sup?'^{'+sup+'}':''}${e?'{'+e+'}':''}`;
-    }
-    case'd':{
-      let op='(',cl=')',content='';
-      for(const c of node.childNodes){
-        if(c.localName==='dPr'){
-          for(const cc of c.childNodes){
-            if(cc.localName==='begChr')op=cc.getAttribute('m:val')||cc.getAttribute('val')||'(';
-            if(cc.localName==='endChr')cl=cc.getAttribute('m:val')||cc.getAttribute('val')||')';
-          }
-        }
-        else if(c.localName==='e')content+=omml2latex(c);
-      }
-      const lm={'(':'(','[':'[','{':'\\{','|':'|','':''}[op]||op;
-      const rm={')':')',']':']','}':'\\}','|':'|','':''}[cl]||cl;
-      return`\\left${lm}${content}\\right${rm}`;
-    }
-    case'func':{const fn=child('fName').trim();const e=child('e');const m={sin:'\\sin',cos:'\\cos',tan:'\\tan',log:'\\log',ln:'\\ln',lim:'\\lim',max:'\\max',min:'\\min',exp:'\\exp'};return`${m[fn]||fn}\\left(${e}\\right)`;}
-    case'm':{const rows=[];for(const c of node.childNodes){if(c.localName==='mr'){const cells=[];for(const cc of c.childNodes){if(cc.localName==='e')cells.push(omml2latex(cc));}rows.push(cells.join('&'));}}return`\\begin{pmatrix}${rows.join('\\\\')}\\end{pmatrix}`;}
-    case'bar':{let pos='top';for(const c of node.childNodes){if(c.localName==='barPr')for(const cc of c.childNodes){if(cc.localName==='pos')pos=cc.getAttribute('m:val')||'top';}}return pos==='bot'?`\\underline{${child('e')}}`:`\\overline{${child('e')}}`;}
-    case'acc':{let a='\\hat';for(const c of node.childNodes){if(c.localName==='accPr')for(const cc of c.childNodes){if(cc.localName==='chr'){const v=cc.getAttribute('m:val')||'̂';const m={'̂':'\\hat','̃':'\\tilde','̄':'\\bar','̇':'\\dot','̈':'\\ddot','⃗':'\\vec'};a=m[v]||'\\hat';}}}return`${a}{${child('e')}}`;}
-    case'limLow':return`${child('e')}_{${child('lim')}}`;
-    case'eqArr':{const es=[];for(const c of node.childNodes){if(c.localName==='e')es.push(omml2latex(c));}return es.join('\\\\');}
-    case'groupChr':{let pos='top';for(const c of node.childNodes){if(c.localName==='groupChrPr')for(const cc of c.childNodes){if(cc.localName==='pos')pos=cc.getAttribute('m:val')||'top';}}return pos==='bot'?`\\underbrace{${child('e')}}`:`\\overbrace{${child('e')}}`;}
-    case'borderBox':return`\\boxed{${child('e')}}`;
-    case'phant':return child('e');
-    // Property nodes — skip
-    case'naryPr':case'rPr':case'fPr':case'dPr':case'radPr':case'sSubSupPr':case'sSupPr':case'sSubPr':case'mPr':case'mrPr':case'accPr':case'barPr':case'groupChrPr':case'limLocPr':case'eqArrPr':case'borderBoxPr':case'sPrChange':
-      return'';
-    default:
-      return kids();
+// Get direct <w:tr> children of a <w:tbl> (NOT nested table rows)
+function directRows(tblNode){
+  // tbl → tbody (some parsers insert implicit tbody) → tr, OR direct tr
+  const res=[];
+  for(let i=0;i<tblNode.childNodes.length;i++){
+    const c=tblNode.childNodes[i];
+    if(c.nodeType!==1) continue;
+    if(c.localName==='tr') res.push(c);
+    else if(c.localName==='tblPr'||c.localName==='tblGrid') continue;
+    // some parsers wrap in tbody-like element — check children
+    else { for(let j=0;j<c.childNodes.length;j++){ const cc=c.childNodes[j]; if(cc.nodeType===1&&cc.localName==='tr') res.push(cc); } }
   }
+  return res;
+}
+// Get direct <w:tc> children of a <w:tr>
+function directCells(trNode){
+  return directChildren(trNode,'tc',WN);
 }
 
-function fixSymbols(s){
-  return s
-    .replace(/α/g,'\\alpha').replace(/β/g,'\\beta').replace(/γ/g,'\\gamma').replace(/δ/g,'\\delta')
-    .replace(/ε/g,'\\epsilon').replace(/θ/g,'\\theta').replace(/λ/g,'\\lambda').replace(/μ/g,'\\mu')
-    .replace(/π/g,'\\pi').replace(/ρ/g,'\\rho').replace(/σ/g,'\\sigma').replace(/τ/g,'\\tau')
-    .replace(/φ/g,'\\phi').replace(/ψ/g,'\\psi').replace(/ω/g,'\\omega')
-    .replace(/Σ/g,'\\Sigma').replace(/Π/g,'\\Pi').replace(/Δ/g,'\\Delta').replace(/Ω/g,'\\Omega')
-    .replace(/∞/g,'\\infty').replace(/≤/g,'\\leq').replace(/≥/g,'\\geq').replace(/≠/g,'\\neq')
-    .replace(/±/g,'\\pm').replace(/×/g,'\\times').replace(/÷/g,'\\div')
-    .replace(/∈/g,'\\in').replace(/∂/g,'\\partial').replace(/∇/g,'\\nabla')
-    .replace(/→/g,'\\rightarrow').replace(/⇒/g,'\\Rightarrow').replace(/⇔/g,'\\Leftrightarrow')
-    .replace(/°/g,'^{\\circ}');
+/* ═══════════════════════════════════════════════════════════════════
+   safeImp — cross-document importNode with NS fallback
+   ═══════════════════════════════════════════════════════════════════ */
+function safeImp(targetDoc, srcNode) {
+  try { return targetDoc.importNode(srcNode, true); } catch(e) {}
+  const s = new XMLSerializer().serializeToString(srcNode);
+  const nsD = [
+    'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"',
+    'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"',
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"',
+    'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"',
+    'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"',
+    'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"',
+    'xmlns:v="urn:schemas-microsoft-com:vml"',
+    'xmlns:o="urn:schemas-microsoft-com:office:office"',
+    'xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"',
+    'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"',
+    'xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"',
+    'xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"',
+  ].join(' ');
+  const parsed = new DOMParser().parseFromString(`<root ${nsD}>${s}</root>`,'application/xml');
+  const inner = parsed.documentElement.firstElementChild;
+  if(!inner) throw new Error('safeImp: failed for '+srcNode.localName);
+  try { return targetDoc.importNode(inner, true); } catch(e2) { return inner; }
 }
 
-/* Render LaTeX → PNG dataURL via MathJax SVG → canvas */
-async function latex2png(latex){
-  if(!window.MathJax)return null;
-  try{
-    const node=await window.MathJax.tex2svgPromise(latex,{display:true});
-    const svg=node.querySelector('svg');
-    if(!svg)return null;
-    const vb=(svg.getAttribute('viewBox')||'0 0 100 40').split(/\s+/).map(Number);
-    const scale=3.5;
-    const W=Math.max((vb[2]||100)*scale,80);
-    const H=Math.max((vb[3]||40)*scale,40);
-    svg.setAttribute('width',W);svg.setAttribute('height',H);
-    // Remove tabindex to avoid CORS issues
-    svg.querySelectorAll('[tabindex]').forEach(e=>e.removeAttribute('tabindex'));
-    const xml=new XMLSerializer().serializeToString(svg);
-    const blob=new Blob([xml],{type:'image/svg+xml;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    return new Promise(res=>{
-      const img=new Image();
-      img.crossOrigin='anonymous';
-      img.onload=()=>{
-        const c=document.createElement('canvas');c.width=W;c.height=H;
-        const ctx=c.getContext('2d');
-        ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
-        ctx.drawImage(img,0,0);
-        URL.revokeObjectURL(url);
-        try{res(c.toDataURL('image/png',1.0));}catch(e2){res(null);}
-      };
-      img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
-      img.src=url;
-    });
-  }catch(e){console.warn('MathJax render error:',latex,e);return null;}
+/* ═══════════════════════════════════════════════════════════════════
+   remapRIds — rewrite r:embed / r:id in cloned subtree
+   ═══════════════════════════════════════════════════════════════════ */
+function remapRIds(node, rIdMap) {
+  if(!node || node.nodeType!==1) return;
+  const ln=node.localName;
+  if(ln==='blip'){
+    for(let i=0;i<node.attributes.length;i++){
+      const a=node.attributes[i];
+      if(a.localName==='embed' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
+    }
+  }
+  if(ln==='imagedata'){
+    for(let i=0;i<node.attributes.length;i++){
+      const a=node.attributes[i];
+      if(a.localName==='id' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
+    }
+  }
+  if(ln==='hyperlink'){
+    for(let i=0;i<node.attributes.length;i++){
+      const a=node.attributes[i];
+      if(a.localName==='id' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
+    }
+  }
+  for(let i=0;i<node.childNodes.length;i++)
+    if(node.childNodes[i].nodeType===1) remapRIds(node.childNodes[i], rIdMap);
 }
 
-/* ═══════════════════════════════════════
-   DOCX IMAGE + EQUATION EXTRACTION
-   Strategy: use raw XML string scanning for robust namespace-independent detection
-   ═══════════════════════════════════════ */
-
-async function extractAllImages(zip){
+/* ═══════════════════════════════════════════════════════════════════
+   IMAGE MAP
+   ═══════════════════════════════════════════════════════════════════ */
+async function buildImageMap(zip) {
   G.imageMap={};
-  // Load relationships
-  const relsF=zip.file('word/_rels/document.xml.rels');
-  if(!relsF)return;
-  const relsXml=await relsF.async('string');
-  const relsDoc=new DOMParser().parseFromString(relsXml,'application/xml');
-  for(const rel of relsDoc.querySelectorAll('Relationship')){
+  const rF=zip.file('word/_rels/document.xml.rels'); if(!rF) return;
+  const rDoc=new DOMParser().parseFromString(await rF.async('string'),'application/xml');
+  for(const rel of rDoc.querySelectorAll('Relationship')){
     const type=rel.getAttribute('Type')||'';
-    const rid=rel.getAttribute('Id')||'';
+    if(!type.includes('/image')) continue;
+    const rId=rel.getAttribute('Id');
     const target=rel.getAttribute('Target')||'';
-    if(!type.includes('image'))continue;
-    const path=target.startsWith('/')?target.slice(1):'word/'+target;
-    const f=zip.file(path);if(!f)continue;
+    const path=target.startsWith('/')?target.slice(1):('word/'+target.replace('../',''));
+    const f=zip.file(path)||zip.file('word/media/'+target.split('/').pop());
+    if(!f) continue;
     const ext=(path.split('.').pop()||'png').toLowerCase();
-    // Skip WMF/EMF for now (they can't render in canvas easily; will handle later)
-    const mimeMap={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',bmp:'image/bmp',svg:'image/svg+xml',wmf:'image/x-wmf',emf:'image/x-emf'};
-    const mime=mimeMap[ext]||'image/png';
-    try{
-      const ab=await f.async('arraybuffer');
-      const blob=new Blob([ab],{type:mime});
-      const dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(blob);});
-      G.imageMap[rid]={dataUrl,blob,ext,mime,isEquation:false};
-    }catch(e){console.warn('img load fail',path,e);}
+    const mimes={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',bmp:'image/bmp',svg:'image/svg+xml',wmf:'image/x-wmf',emf:'image/x-emf'};
+    try {
+      const b64=await f.async('base64');
+      G.imageMap[rId]={b64,ct:mimes[ext]||'image/png',origRId:rId,ext:ext==='jpeg'?'jpg':ext};
+    } catch(e){ console.warn('img fail',path); }
   }
-  console.log('Extracted images:',Object.keys(G.imageMap).length,Object.keys(G.imageMap));
 }
 
-/*
-  Parse a DOCX table cell's XML TEXT to extract:
-  - Plain text (from <w:t> elements)
-  - Image rIds (from drawing blip embeds)
-  - Equation LaTeX (from <m:oMath> elements) → rendered to PNG → stored in imageMap
-  
-  We work on RAW XML STRING to avoid namespace prefix issues in DOMParser.
-*/
-async function parseCellXml(cellXmlStr){
-  // We'll use DOMParser but with a trick: prefix-strip approach
-  // First parse normally
-  const doc=new DOMParser().parseFromString(`<root xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:v="urn:schemas-microsoft-com:vml">${cellXmlStr}</root>`,'application/xml');
-
-  const tokens=[];// {type:'text',value} | {type:'img',rid} | {type:'eq',rid,latex} | {type:'br'}
-  let plainText='';
-
-  // Process each <w:p> paragraph
-  const paragraphs=doc.getElementsByTagNameNS(WN,'p');
-  for(let pi=0;pi<paragraphs.length;pi++){
-    const para=paragraphs[pi];
-    if(pi>0&&tokens.length)tokens.push({type:'br'});
-    let paraText='';
-
-    // Strategy: walk all descendants in document order
-    // Check for oMath elements first (they may contain w:r too)
-    const oMathEls=para.getElementsByTagNameNS('http://schemas.openxmlformats.org/officeDocument/2006/math','oMath');
-    const oMathSet=new Set(toA(oMathEls));
-
-    // Walk child nodes of paragraph
-    await walkParaNode(para,tokens,oMathSet);
-
-    // Also collect plain text for compatibility
-    const tEls=para.getElementsByTagNameNS(WN,'t');
-    for(const t of tEls)paraText+=t.textContent;
-    if(paraText.trim())plainText+=(plainText?'\n':'')+paraText.trim();
+/* ═══════════════════════════════════════════════════════════════════
+   _cellText — extract plain text from a w:tc node
+   (used for header detection and marks/limit columns only —
+   NOT used for the question cell which uses parseParasLossless)
+   ═══════════════════════════════════════════════════════════════════ */
+function _cellText(cell) {
+  const lines=[];
+  for(const p of cell.getElementsByTagNameNS(WN,'p')){
+    let l='';
+    for(const r of p.getElementsByTagNameNS(WN,'r'))
+      for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
+    for(const m of p.getElementsByTagNameNS(MN,'oMath')) l+=' '+ommlToText(m).trim();
+    if(l.trim()) lines.push(l.trim());
   }
-
-  const imageRids=tokens.filter(t=>t.type==='img').map(t=>t.rid);// eq tokens use eqKey, not rid
-  return{tokens,text:plainText,imageRids};
+  return lines.join('\n');
 }
 
-async function walkParaNode(node,tokens,oMathSet){
-  let curText='';
-  const flushText=()=>{if(curText.trim()){tokens.push({type:'text',value:curText.trim()});curText='';}};
+/* ═══════════════════════════════════════════════════════════════════
+   _getBlipRId helper
+   ═══════════════════════════════════════════════════════════════════ */
+function _getBlipRId(blipEl) {
+  for(let i=0;i<blipEl.attributes.length;i++)
+    if(blipEl.attributes[i].localName==='embed') return blipEl.attributes[i].value;
+  return null;
+}
 
-  for(const child of node.childNodes){
-    const ns=child.namespaceURI||'';
+/* ═══════════════════════════════════════════════════════════════════
+   parseParasLossless — parse a w:tc keeping rawNode for lossless clone
+   Fixed: uses direct child iteration so nested table rows/cells inside
+   the question cell are treated as part of that question, NOT as
+   separate table rows triggering new questions.
+   ═══════════════════════════════════════════════════════════════════ */
+function parseParasLossless(tcNode, imageMap) {
+  const res=[];
+  for(let i=0;i<tcNode.childNodes.length;i++){
+    const child=tcNode.childNodes[i];
+    if(child.nodeType!==1) continue;
     const ln=child.localName||'';
 
-    // OMML equation
-    if(ln==='oMath'&&ns==='http://schemas.openxmlformats.org/officeDocument/2006/math'){
-      flushText();
-      await processOmml(child,tokens);
-      continue;
+    if(ln==='p'){
+      const para=_parseParagraph(child, imageMap);
+      para.rawNode=child;
+      res.push(para);
+
+    } else if(ln==='tbl'){
+      // ── NESTED TABLE inside question cell ──
+      // Parsed for preview rendering; rawNode kept for lossless DOCX clone.
+      const tblData=_parseNestedTableDeep(child, imageMap);
+      tblData.rawNode=child;
+      res.push(tblData);
+
+    } else if(ln==='oMath'||ln==='oMathPara'){
+      const eqText=ommlToText(child);
+      res.push({ rawNode:child, text:eqText, images:[], equations:[{text:eqText}], tables:[], isMath:true });
     }
-    // oMathPara wraps oMath
-    if(ln==='oMathPara'&&ns==='http://schemas.openxmlformats.org/officeDocument/2006/math'){
-      flushText();
-      for(const c of child.childNodes){
-        if(c.localName==='oMath')await processOmml(c,tokens);
-      }
-      continue;
-    }
-    // Word run
-    if(ln==='r'&&ns===WN){
-      // Check if this run is inside an oMath (skip — handled above)
-      let inMath=false;let p=child.parentNode;
-      while(p){if(p.localName==='oMath'){inMath=true;break;}p=p.parentNode;}
-      if(inMath)continue;
-      for(const t of child.getElementsByTagNameNS(WN,'t'))curText+=t.textContent;
-      // Check for drawing inside this run
-      for(const d of child.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing','inline')){
-        flushText();
-        extractBlips(d,tokens);
-      }
-      for(const d of child.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing','anchor')){
-        flushText();
-        extractBlips(d,tokens);
-      }
-      continue;
-    }
-    // Drawing directly under paragraph
-    if(ln==='drawing'&&ns===WN){
-      flushText();
-      for(const d of child.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing','inline'))extractBlips(d,tokens);
-      for(const d of child.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing','anchor'))extractBlips(d,tokens);
-      continue;
-    }
-    // OLE object (equations as WMF)
-    if(ln==='object'&&ns===WN){
-      flushText();
-      for(const img of child.getElementsByTagNameNS('urn:schemas-microsoft-com:vml','imagedata')){
-        const rid=img.getAttribute('r:id')||img.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
-        if(rid&&G.imageMap[rid])tokens.push({type:'img',rid});
-      }
-      continue;
-    }
-    // Tracked changes
-    if((ln==='ins'||ln==='del')&&ns===WN){
-      for(const t of child.getElementsByTagNameNS(WN,'t'))curText+=t.textContent;
-      continue;
-    }
-    // Text node
-    if(child.nodeType===3)curText+=child.textContent;
   }
-  flushText();
+  // Deduplicate consecutive empty paras
+  return res.filter((p,i)=>{
+    if(!p.rawNode) return true;
+    const ln=p.rawNode.localName;
+    if(ln!=='p') return true;
+    if(p.text||p.images.length||p.equations.length) return true;
+    // keep if previous is not also empty para
+    const prev=res[i-1];
+    if(!prev) return false;
+    return !!(prev.text||prev.images.length||prev.equations.length||(prev.rawNode&&prev.rawNode.localName!=='p'));
+  });
 }
 
-function extractBlips(node,tokens){
-  // DML namespace for blip
-  const blipNS='http://schemas.openxmlformats.org/drawingml/2006/main';
-  const blips=node.getElementsByTagNameNS(blipNS,'blip');
-  for(const blip of blips){
-    const rid=blip.getAttribute('r:embed')||blip.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','embed');
-    if(rid&&!tokens.find(t=>t.rid===rid))tokens.push({type:'img',rid});
-  }
-}
-
-async function processOmml(omathNode,tokens){
-  try{
-    // PRIMARY APPROACH: Serialize original OMML XML for native embedding in DOCX.
-    // Word renders <m:oMath> perfectly — no image conversion needed.
-    const ommlXml=new XMLSerializer().serializeToString(omathNode);
-    let latex='';
-    try{latex=fixSymbols(omml2latex(omathNode)).trim();}catch(e2){}
-    // Generate browser preview via MathJax (display only, not used in DOCX)
-    let previewDataUrl=null;
-    if(latex){
-      showEqStatus('Rendering preview: '+latex.substring(0,25)+'…');
-      try{
-        const ok=await waitMJ(5000);
-        if(ok&&window.MathJax)previewDataUrl=await latex2png(latex);
-      }catch(e2){/* preview optional */}
+/* ── _parseParagraph ─────────────────────────────────────────────── */
+function _parseParagraph(pNode, imageMap) {
+  let text='';
+  const images=[], equations=[];
+  for(const pc of pNode.childNodes){
+    if(pc.nodeType!==1) continue;
+    const pln=pc.localName||'';
+    if(pln==='r'){
+      for(const t of pc.getElementsByTagNameNS(WN,'t')) text+=t.textContent;
+      for(const el of pc.getElementsByTagName('*')){
+        if(el.localName==='blip'){
+          const rId=_getBlipRId(el);
+          if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+        }
+      }
+      for(const img of pc.getElementsByTagNameNS('urn:schemas-microsoft-com:vml','imagedata')){
+        const rId=img.getAttributeNS(RN,'id')||img.getAttribute('r:id');
+        if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+      }
+    } else if(pln==='oMath'||pln==='oMathPara'){
+      const et=ommlToText(pc).trim();
+      if(et){ equations.push({text:et}); text+=' '+et+' '; }
+    } else if(pln==='drawing'){
+      for(const el of pc.getElementsByTagName('*')){
+        if(el.localName==='blip'){
+          const rId=_getBlipRId(el);
+          if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+        }
+      }
+    } else if(pln==='object'){
+      for(const img of pc.getElementsByTagNameNS('urn:schemas-microsoft-com:vml','imagedata')){
+        const rId=img.getAttributeNS(RN,'id')||img.getAttribute('r:id');
+        if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+      }
     }
-    const eqKey='eq_'+Math.random().toString(36).slice(2,10);
-    G.eqMap[eqKey]={ommlXml,latex,previewDataUrl};
-    tokens.push({type:'eq',eqKey,latex,previewDataUrl});
-    console.log('OMML stored natively:',eqKey,latex.substring(0,40));
-  }catch(e){
-    console.warn('OMML process error:',e);
-    let latex='';
-    try{latex=fixSymbols(omml2latex(omathNode)).trim();}catch(e2){}
-    if(latex)tokens.push({type:'text',value:'['+latex+']'});
   }
+  return { text:text.trim(), images, equations, tables:[], isMath:false };
 }
 
-/* ═══ PARSE DOCX ═══ */
-async function handleQB(file){
-  showAlert('upAlert','ainf','⏳ Parsing '+file.name+' …');
-  try{
+/* ── _parseNestedTableDeep — full recursive cell content extraction ── */
+function _parseNestedTableDeep(tblNode, imageMap) {
+  // Uses direct row access to avoid double-counting nested rows
+  const gridRows=[];
+  const rows=directRows(tblNode);
+  for(const tblRow of rows){
+    const gRow=[];
+    const cells=directCells(tblRow);
+    for(const gc of cells){
+      // For each cell: extract text, equations, and note any sub-tables
+      let ct=_cellTextDeep(gc);
+      gRow.push({ text:ct.trim() });
+    }
+    if(gRow.length) gridRows.push(gRow);
+  }
+  return { text:'', images:[], equations:[], tables:[{rows:gridRows, rawNode:tblNode}], isMath:false };
+}
+
+/* ── _cellTextDeep — extract text from cell including nested tables ── */
+function _cellTextDeep(cellNode) {
+  const lines=[];
+  for(const p of cellNode.getElementsByTagNameNS(WN,'p')){
+    let l='';
+    for(const r of p.getElementsByTagNameNS(WN,'r'))
+      for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
+    for(const m of p.getElementsByTagNameNS(MN,'oMath')) l+=' '+ommlToText(m).trim();
+    if(l.trim()) lines.push(l.trim());
+  }
+  return lines.join('\n');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ommlToText — PREVIEW / BLOOM text only (DOCX uses lossless clone)
+   ═══════════════════════════════════════════════════════════════════ */
+function ommlToText(node) {
+  if(!node) return '';
+  const ln=node.localName||'';
+  if(ln==='oMathPara'){ const m=node.getElementsByTagNameNS(MN,'oMath'); return m.length?ommlToText(m[0]):_omC(node); }
+  if(ln==='oMath') return _omC(node);
+  if(ln==='f'){
+    const n=node.getElementsByTagNameNS(MN,'num'),d=node.getElementsByTagNameNS(MN,'den');
+    return'('+( n.length?_omC(n[0]):'?')+')/('+( d.length?_omC(d[0]):'?')+')';
+  }
+  if(ln==='sSup'){ const e=node.getElementsByTagNameNS(MN,'e'),s=node.getElementsByTagNameNS(MN,'sup'); return(e.length?_omC(e[0]):'?')+'^{'+(s.length?_omC(s[0]):'?')+'}'; }
+  if(ln==='sSub'){ const e=node.getElementsByTagNameNS(MN,'e'),s=node.getElementsByTagNameNS(MN,'sub'); return(e.length?_omC(e[0]):'?')+'_{'+(s.length?_omC(s[0]):'?')+'}'; }
+  if(ln==='sSubSup'){ const e=node.getElementsByTagNameNS(MN,'e'),sub=node.getElementsByTagNameNS(MN,'sub'),sup=node.getElementsByTagNameNS(MN,'sup'); return(e.length?_omC(e[0]):'?')+'_{'+(sub.length?_omC(sub[0]):'?')+'}^{'+(sup.length?_omC(sup[0]):'?')+'}'; }
+  if(ln==='rad'){ const e=node.getElementsByTagNameNS(MN,'e'),dg=node.getElementsByTagNameNS(MN,'deg'); const deg=dg.length?dg[0].textContent.trim():''; return(deg&&deg!=='2'?deg+'√':'√')+'('+(e.length?_omC(e[0]):'?')+')'; }
+  if(ln==='nary'){ let chr='∫',subT='',supT='',eT=''; for(const c of node.childNodes){ if(c.localName==='naryPr') for(const cc of c.childNodes) if(cc.localName==='chr') chr=cc.getAttribute('m:val')||cc.getAttribute('val')||'∫'; else if(c.localName==='sub') subT=_omC(c); else if(c.localName==='sup') supT=_omC(c); else if(c.localName==='e') eT=_omC(c); } return chr+(subT?'_{'+subT+'}':'')+(supT?'^{'+supT+'}':'')+(eT?' '+eT:''); }
+  if(ln==='d'){ let op='(',cl=')'; const parts=[]; for(const c of node.childNodes){ if(c.localName==='dPr') for(const cc of c.childNodes){ if(cc.localName==='begChr') op=cc.getAttribute('m:val')||cc.getAttribute('val')||'('; if(cc.localName==='endChr') cl=cc.getAttribute('m:val')||cc.getAttribute('val')||')'; } else if(c.localName==='e') parts.push(_omC(c)); } return op+parts.join('; ')+cl; }
+  if(ln==='func'){ const fN=node.getElementsByTagNameNS(MN,'fName')[0],eN=node.getElementsByTagNameNS(MN,'e')[0]; return(fN?_omC(fN):'')+'('+(eN?_omC(eN):'')+')'; }
+  if(ln==='eqArr'){ const ps=[]; for(const c of node.childNodes) if(c.localName==='e') ps.push(_omC(c)); return ps.join(' = '); }
+  if(ln==='limLow'){ const e=node.getElementsByTagNameNS(MN,'e'),l=node.getElementsByTagNameNS(MN,'lim'); return(e.length?_omC(e[0]):'?')+'_{'+(l.length?_omC(l[0]):'')+'}'; }
+  if(ln==='limUpp'){ const e=node.getElementsByTagNameNS(MN,'e'),l=node.getElementsByTagNameNS(MN,'lim'); return(e.length?_omC(e[0]):'?')+'^{'+(l.length?_omC(l[0]):'')+'}'; }
+  if(ln==='m'){ const rows=[]; for(const c of node.childNodes) if(c.localName==='mr'){ const cols=[]; for(const cc of c.childNodes) if(cc.localName==='e') cols.push(_omC(cc)); rows.push('['+cols.join(', ')+']'); } return '['+rows.join('; ')+']'; }
+  if(ln==='r'){ let t=''; for(const x of node.getElementsByTagNameNS(MN,'t')) t+=x.textContent; for(const x of node.getElementsByTagNameNS(WN,'t')) t+=x.textContent; return t; }
+  if(ln==='t') return node.textContent;
+  return _omC(node);
+}
+function _omC(n){ let r=''; for(let i=0;i<n.childNodes.length;i++){ const c=n.childNodes[i]; if(c.nodeType===3) r+=c.textContent; else if(c.nodeType===1) r+=ommlToText(c); } return r; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   collectRIds / collectAllRIds
+   ═══════════════════════════════════════════════════════════════════ */
+function collectRIds(question, startN=2) {
+  const map={};let n=startN;
+  for(const para of(question.paras||[]))
+    for(const img of(para.images||[]))
+      if(img.origRId&&!map[img.origRId]) map[img.origRId]=`rId${n++}`;
+  return map;
+}
+function collectAllRIds(assignments, questions) {
+  const map={};let n=2;
+  for(const qi of new Set(Object.values(assignments)))
+    for(const para of(questions[qi].paras||[]))
+      for(const img of(para.images||[]))
+        if(img.origRId&&!map[img.origRId]) map[img.origRId]=`rId${n++}`;
+  return map;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DOCX HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+const SP   = `<w:spacing w:before="40" w:after="40" w:line="360" w:lineRule="auto"/>`;
+const SP1  = `<w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="auto"/>`;
+const TNRPR= (sz=22,bold=false)=>`<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${bold?'<w:b/><w:bCs/>':''}</w:rPr>`;
+const IMG_XML=(nRId)=>{ const uid=Math.floor(Math.random()*89000+10000); return `<w:drawing><wp:inline distT="0" distB="0" distL="114400" distR="114400"><wp:extent cx="3429000" cy="2286000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${uid}" name="Img${nRId}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Img${nRId}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${nRId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3429000" cy="2286000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`; };
+
+/* ── buildQuestionCellXml — lossless OMML clone ───────────────────── */
+function buildQuestionCellXml(question, rIdRemap) {
+  if(question.activeBloom && question.bloomReframes?.[question.activeBloom])
+    return _buildBloomXml(question.bloomReframes[question.activeBloom], question, rIdRemap);
+
+  if(!G.scratchDoc)
+    G.scratchDoc = new DOMParser().parseFromString(
+      `<root xmlns:w="${WN}" xmlns:m="${MN}" xmlns:r="${RN}" xmlns:wp="${WPN}" xmlns:a="${AN}" xmlns:pic="${PICN}"/>`,
+      'application/xml'
+    );
+
+  let xml='';
+  for(const para of(question.paras||[])){
+    if(para.rawNode){
+      try {
+        const cloned=safeImp(G.scratchDoc, para.rawNode);
+        remapRIds(cloned, rIdRemap);
+        xml+=new XMLSerializer().serializeToString(cloned);
+        continue;
+      } catch(e){ console.warn('safeImp fallback:', e.message); }
+    }
+    xml+=_buildParaFallback(para, rIdRemap);
+  }
+  if(!xml.trim()) xml=_buildBloomXml(question.text||'', question, rIdRemap);
+  return xml;
+}
+
+/* ── _buildParaFallback ───────────────────────────────────────────── */
+function _buildParaFallback(para, rIdRemap) {
+  let xml='';
+  for(const tbl of(para.tables||[])){
+    if(!tbl.rows||!tbl.rows.length) continue;
+    const nCols=tbl.rows.reduce((mx,r)=>Math.max(mx,r.length),1), colW=Math.floor(9200/nCols);
+    const BDR=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+    const MAR=`<w:tcMar><w:top w:w="40" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+    let t=`<w:tbl><w:tblPr><w:tblW w:w="${nCols*colW}" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders></w:tblPr><w:tblGrid>${Array(nCols).fill(`<w:gridCol w:w="${colW}"/>`).join('')}</w:tblGrid>`;
+    tbl.rows.forEach((row,ri)=>{
+      t+=`<w:tr>`; const isH=ri===0;
+      for(let ci=0;ci<nCols;ci++){
+        const cell=row[ci]||{text:''};
+        t+=`<w:tc><w:tcPr><w:tcW w:w="${colW}" w:type="dxa"/>${isH?`<w:shd w:val="clear" w:color="auto" w:fill="CCCCCC"/>`:''}${BDR}${MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(20,isH)}<w:t xml:space="preserve">${xesc(cell.text||'')}</w:t></w:r></w:p></w:tc>`;
+      }
+      t+=`</w:tr>`;
+    });
+    xml+=t+`</w:tbl><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+  }
+  for(const img of(para.images||[])){
+    const nRId=rIdRemap[img.origRId]; if(!nRId) continue;
+    xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/>${IMG_XML(nRId)}</w:r></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+  }
+  for(const eq of(para.equations||[])){ if(eq.text) xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:i/><w:iCs/><w:sz w:val="24"/><w:szCs w:val="24"/><w:color w:val="4C1D95"/></w:rPr><w:t xml:space="preserve">${xesc(eq.text)}</w:t></w:r></w:p>`; }
+  if(para.text&&para.text.trim()){
+    for(const line of para.text.split('\n')){
+      if(!line.trim()){xml+=`<w:p><w:pPr>${SP}</w:pPr></w:p>`;continue;}
+      xml+=`<w:p><w:pPr><w:jc w:val="both"/>${SP}</w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r></w:p>`;
+    }
+  }
+  return xml;
+}
+
+/* ── _buildBloomXml ───────────────────────────────────────────────── */
+function _buildBloomXml(text, question, rIdRemap) {
+  let xml=''; const seen=new Set();
+  for(const para of(question.paras||[]))
+    for(const img of(para.images||[])){
+      if(seen.has(img.origRId)) continue; seen.add(img.origRId);
+      const nRId=rIdRemap[img.origRId]; if(!nRId) continue;
+      xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/>${IMG_XML(nRId)}</w:r></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+    }
+  for(const line of text.split('\n')){
+    if(!line.trim()){xml+=`<w:p><w:pPr>${SP}</w:pPr></w:p>`;continue;}
+    xml+=`<w:p><w:pPr><w:jc w:val="both"/>${SP}</w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r></w:p>`;
+  }
+  return xml;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   QUESTION BANK PARSER
+   KEY FIX: Use directRows() so nested table rows inside a question
+   cell don't get picked up as additional question rows.
+   ═══════════════════════════════════════════════════════════════════ */
+async function handleQB(file) {
+  showAlert('upAlert','ainf','⏳ Parsing '+file.name+'…');
+  try {
     G.rawZip=await JSZip.loadAsync(await file.arrayBuffer());
-    await extractAllImages(G.rawZip);
+    G.scratchDoc=null;
+    await buildImageMap(G.rawZip);
     await parseQB(G.rawZip);
     document.getElementById('qbZ').classList.add('done');
-    document.getElementById('qbOk').style.display='block';document.getElementById('qbOk').textContent='✓ '+file.name;
+    document.getElementById('qbOk').style.display='block';
+    document.getElementById('qbOk').textContent='✓ '+file.name;
     document.getElementById('qbSz').textContent=fmtB(file.size);
-    hideEqStatus();
     const imgC=Object.keys(G.imageMap).length;
-    const eqC=Object.keys(G.eqMap||{}).length;
-    renderMeta();renderRubric();renderQGrid();
-    showAlert('upAlert','aok',`✅ ${G.questions.length} questions · ${imgC} images · ${eqC} equations (native OMML)`);
+    const eqC=G.questions.reduce((a,q)=>a+q.equations.length,0);
+    const tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
+    renderMeta(); renderRubric(); renderQGrid();
+    showAlert('upAlert','aok',`✅ ${G.questions.length} questions · ${imgC} images · ${eqC} equations · ${tblC} embedded tables`);
     document.getElementById('bankPill').innerHTML=`<div class="pill-dot"></div>${G.questions.length} Questions`;
     document.getElementById('bankPill').className='pill active';
-    populateQF();setStep(2);chkReady();
-    toast(`${G.questions.length} Q · ${imgC} img · ${eqC} eq`,'ok');
-  }catch(ex){hideEqStatus();showAlert('upAlert','aerr','❌ '+ex.message);toast(ex.message,'err');console.error(ex);}
+    populateQF(); setStep(2); chkReady();
+    toast(`${G.questions.length} Q · ${imgC} img · ${eqC} eq · ${tblC} tbl`,'ok');
+  } catch(ex){ showAlert('upAlert','aerr','❌ '+ex.message); toast(ex.message,'err'); console.error(ex); }
 }
 
-async function parseQB(zip){
+async function parseQB(zip) {
   const xmlStr=await zip.file('word/document.xml').async('string');
   const xd=new DOMParser().parseFromString(xmlStr,'application/xml');
-  G.questions=[];G.rubricCols=[];G.examInfo={};
+  G.questions=[]; G.rubricCols=[]; G.examInfo={};
 
-  // Extract header lines from non-table paragraphs
+  // Header info from paragraphs
   const lines=[];
   for(const p of xd.getElementsByTagNameNS(WN,'p')){
     let t='';
-    for(const r of p.getElementsByTagNameNS(WN,'r'))for(const tx of r.getElementsByTagNameNS(WN,'t'))t+=tx.textContent;
-    if(t.trim())lines.push(t.trim());
+    for(const r of p.getElementsByTagNameNS(WN,'r')) for(const tx of r.getElementsByTagNameNS(WN,'t')) t+=tx.textContent;
+    if(t.trim()) lines.push(t.trim());
   }
-  G.examInfo.title=lines[0]||'';G.examInfo.department=lines[1]||'';
+  G.examInfo.title=lines[0]||''; G.examInfo.department=lines[1]||'';
   for(const l of lines){
     const m=l.match(/Course\s*[&]\s*Class\s*[:]\s*(.+?)(?:\s+Semester\s*[:]\s*(.+?))?$/i);
-    if(m){G.examInfo.courseClass=(m[1]||'').trim();G.examInfo.semester=(m[2]||'').trim();}
-    const m3=l.match(/Subject.*?[:]\s*(.+?)$/i);if(m3)G.examInfo.subject=m3[1].trim();
-    const m2=l.match(/Staff.*?[:]\s*(.+?)$/i);if(m2){G.examInfo.staff=m2[1].trim();}
-    const m4=l.match(/Date.*?[:]\s*(.+?)$/i);if(m4)G.examInfo.date=m4[1].trim();
+    if(m){ G.examInfo.courseClass=(m[1]||'').trim(); G.examInfo.semester=(m[2]||'').trim(); }
+    const m3=l.match(/Subject.*?[:]\s*(.+?)$/i); if(m3) G.examInfo.subject=m3[1].trim();
+    const m2=l.match(/Staff.*?[:]\s*(.+?)$/i);   if(m2) G.examInfo.staff=m2[1].trim();
+    const m4=l.match(/Date.*?[:]\s*(.+?)$/i);     if(m4) G.examInfo.date=m4[1].trim();
   }
 
-  const tbls=xd.getElementsByTagNameNS(WN,'tbl');
-  for(let ti=0;ti<tbls.length;ti++){
-    const rows=toA(tbls[ti].getElementsByTagNameNS(WN,'tr'));
-    if(!rows.length)continue;
-    const c0=getCellsText(rows[0]);
-    const h0=(c0[0]||'').toLowerCase();
+  // ── OUTER TABLES: use only direct child nodes of document body ──
+  // This ensures we only see top-level tables, not tables nested inside
+  // question cells (which would otherwise be picked up by getElementsByTagNameNS)
+  const bodyNode = xd.getElementsByTagNameNS(WN,'body')[0];
+  if(!bodyNode){ console.warn('No w:body found'); return; }
+
+  // Get direct child tables of body
+  const topLevelTbls = directChildren(bodyNode, 'tbl', WN);
+
+  for(const tbl of topLevelTbls){
+    // Get only DIRECT rows of this top-level table
+    const rows = directRows(tbl);
+    if(!rows.length) continue;
+
+    // Read header row using direct cells
+    const headerCells = directCells(rows[0]);
+    const c0 = headerCells.map(tc=>_cellText(tc));
+    const h0 = (c0[0]||'').toLowerCase();
+
+    // Rubric / aim table detection
     if(h0.includes('aim')||h0.includes('rubric')||h0.includes('apparatus')){
-      G.rubricCols=c0.filter(c=>c.trim());continue;
+      G.rubricCols=c0.filter(c=>c.trim()); continue;
     }
-    if(!h0.includes('q.no')&&!h0.includes('q. no')&&!c0.some(c=>c.toLowerCase().includes('question')))continue;
+    // Must be a question table
+    if(!h0.includes('q.no')&&!h0.includes('q. no')&&!c0.some(c=>c.toLowerCase().includes('question'))) continue;
 
-    const qi_col=c0.findIndex(c=>c.toLowerCase().includes('question'));
-    const mi_col=c0.findIndex(c=>c.toLowerCase().includes('mark'));
-    const lim_col=c0.findIndex(c=>{const cl=c.toLowerCase();return(cl.includes('assign')&&cl.includes('student'))||(cl.includes('no.')&&cl.includes('student'))||(cl.includes('no of student'));});
+    const qi_col  = c0.findIndex(c=>c.toLowerCase().includes('question'));
+    const mi_col  = c0.findIndex(c=>c.toLowerCase().includes('mark'));
+    const lim_col = c0.findIndex(c=>{ const cl=c.toLowerCase(); return(cl.includes('assign')&&cl.includes('student'))||(cl.includes('no.')&&cl.includes('student'))||cl.includes('no of student'); });
 
-    for(let ri=1;ri<rows.length;ri++){
-      const row=rows[ri];
-      const tcs=toA(row.getElementsByTagNameNS(WN,'tc'));
-      if(!tcs.length)continue;
+    for(let ri=1; ri<rows.length; ri++){
+      const row    = rows[ri];
+      const tcs    = directCells(row);
+      if(!tcs.length) continue;
 
-      // Get raw XML of question cell for deep parsing
-      const qci=qi_col>=0?qi_col:1;
-      const mci=mi_col>=0?mi_col:2;
-      const lci=lim_col>=0?lim_col:-1;
+      const qci = qi_col>=0?qi_col:1;
+      const mci = mi_col>=0?mi_col:2;
+      const lci = lim_col>=0?lim_col:-1;
 
-      // Plain text for all cells
-      const cs=tcs.map(tc=>getCellText(tc));
-      const qT=qci<cs.length?cs[qci]:'';
-      const mT=mci<cs.length?cs[mci]:'';
-      const limitRaw=lci>=0&&lci<cs.length?cs[lci].trim():'';
-      const studentLimit=limitRaw&&/^\d+$/.test(limitRaw)?parseInt(limitRaw):null;
+      // Text extraction from non-question columns (marks, limits)
+      const cs = tcs.map(tc=>_cellText(tc));
+      const qT = qci<cs.length?cs[qci]:'';
+      const mT = mci<cs.length?cs[mci]:'';
+      const limitRaw = lci>=0&&lci<cs.length?cs[lci].trim():'';
+      const studentLimit = (limitRaw&&/^\d+$/.test(limitRaw))?parseInt(limitRaw):null;
+      if(!qT.trim()) continue;
 
-      if(!qT.trim())continue;
+      // ── LOSSLESS parse of question cell ──
+      const qCell = qci<tcs.length ? tcs[qci] : null;
+      let paras=[];
+      if(qCell){ try{ paras=parseParasLossless(qCell, G.imageMap); }catch(e){ console.warn('parseParasLossless err',e); } }
+      if(!paras.length) paras=[{text:qT.trim(), images:[], equations:[], tables:[], isMath:false}];
 
-      // Get serialized XML of question cell for equation/image extraction
-      const qCell=qci<tcs.length?tcs[qci]:null;
-      let cellTokens=[];let cellImageRids=[];
-      if(qCell){
-        const cellXmlStr=new XMLSerializer().serializeToString(qCell);
-        // Extract inner content (strip outer <w:tc> tags)
-        const innerMatch=cellXmlStr.match(/<w:tc[^>]*>([\s\S]*)<\/w:tc>/);
-        const innerXml=innerMatch?innerMatch[1]:cellXmlStr;
-        try{
-          const parsed=await parseCellXml(innerXml);
-          cellTokens=parsed.tokens;
-          cellImageRids=parsed.imageRids;
-        }catch(e){console.warn('Cell parse error:',e);}
+      const allImages=[], allEquations=[], allTables=[];
+      for(const p of paras){
+        allImages.push(...(p.images||[]));
+        allEquations.push(...(p.equations||[]));
+        allTables.push(...(p.tables||[]));
       }
 
-      const mArr=mT.split('\n').map(s=>s.trim()).filter(s=>/^\d+$/.test(s));
-      const marks=mArr.length?mArr:['100'];
-
-      // Build subQ groups from tokens — split on (i) (ii) etc
-      let subQsTokens=[[]];
-      for(const tok of cellTokens){
-        if(tok.type==='text'&&/^\s*\([ivxIVX]+\)/i.test(tok.value)){
-          if(subQsTokens[subQsTokens.length-1].some(t=>t.type!=='br'))subQsTokens.push([]);
-        }
-        subQsTokens[subQsTokens.length-1].push(tok);
-      }
-      const subQs=subQsTokens.map(toks=>toks.filter(t=>t.type==='text').map(t=>t.value).join(' ').trim()).filter(Boolean);
+      const mArr = mT.split('\n').map(s=>s.trim()).filter(s=>/^\d+$/.test(s));
+      const marks = mArr.length?mArr:['100'];
 
       G.questions.push({
         idx:G.questions.length,
-        text:qT.trim(),marks,
-        subQs:subQs.length?subQs:[qT.trim()],
-        subQsTokens,
+        text:qT.trim(), marks, paras,
+        images:allImages, equations:allEquations, nestedTables:allTables,
         totalMark:marks.reduce((a,v)=>a+(+v||0),0)||100,
-        imageRids:cellImageRids,
         studentLimit,
-        bloomLevels:[]
+        has_image:allImages.length>0,
+        has_equation:allEquations.length>0,
+        has_nested_table:allTables.length>0,
+        bloomReframes:{}, activeBloom:null
       });
     }
   }
 
   // Auto-fill form
   const fmap={examTitle:'title',examDept:'department',examClass:'courseClass',examSem:'semester',examSubject:'subject',examStaff:'staff'};
-  for(const [id,key] of Object.entries(fmap)){const v=G.examInfo[key]||'';if(v)document.getElementById(id).value=v;}
-  if(G.examInfo.date){const dp=G.examInfo.date.split(/[\s(]+/);if(dp[0])document.getElementById('examDate').value=dp[0];}
+  for(const[id,key]of Object.entries(fmap)){ const v=G.examInfo[key]||''; if(v) document.getElementById(id).value=v; }
+  if(G.examInfo.date){ const dp=G.examInfo.date.split(/[\s(]+/); if(dp[0]) document.getElementById('examDate').value=dp[0]; }
 }
 
-function getCellText(tc){
-  let t='';
-  for(const p of tc.getElementsByTagNameNS(WN,'p')){
-    let pl='';
-    for(const r of p.getElementsByTagNameNS(WN,'r'))for(const tx of r.getElementsByTagNameNS(WN,'t'))pl+=tx.textContent;
-    if(pl.trim())t+=(t?'\n':'')+pl.trim();
-  }
-  return t;
-}
-function getCellsText(row){return toA(row.getElementsByTagNameNS(WN,'tc')).map(getCellText);}
-
-/* ═══ EXCEL ═══ */
-async function handleStu(file){
-  try{
+/* ═══════════════════════════════════════════════════════════════════
+   EXCEL PARSER
+   ═══════════════════════════════════════════════════════════════════ */
+async function handleStu(file) {
+  try {
     await parseXLSX(await file.arrayBuffer());
     document.getElementById('stZ').classList.add('done');
-    document.getElementById('stOk').style.display='block';document.getElementById('stOk').textContent='✓ '+file.name;
+    document.getElementById('stOk').style.display='block';
+    document.getElementById('stOk').textContent='✓ '+file.name;
     document.getElementById('stSz').textContent=fmtB(file.size);
     document.getElementById('stuPill').innerHTML=`<div class="pill-dot"></div>${G.students.length} Students`;
     document.getElementById('stuPill').className='pill active';
-    renderStuTable();setStep(2);chkReady();toast(`${G.students.length} students`,'ok');
-  }catch(ex){toast('Excel: '+ex.message,'err');console.error(ex);}
+    renderStuTable(); setStep(2); chkReady();
+    toast(`${G.students.length} students`,'ok');
+  } catch(ex){ toast('Excel: '+ex.message,'err'); console.error(ex); }
 }
-async function parseXLSX(ab){
-  const zip=await JSZip.loadAsync(ab);G.students=[];
-  const ss2=[];const sf=zip.file('xl/sharedStrings.xml');
-  if(sf){const d=new DOMParser().parseFromString(await sf.async('string'),'application/xml');for(const si of d.getElementsByTagName('si')){let t='';for(const el of si.getElementsByTagName('t'))t+=el.textContent;ss2.push(t);}}
-  const sh=zip.file('xl/worksheets/sheet1.xml');if(!sh)throw new Error('No sheet1');
+async function parseXLSX(ab) {
+  const zip=await JSZip.loadAsync(ab); G.students=[];
+  const ss2=[]; const sf=zip.file('xl/sharedStrings.xml');
+  if(sf){ const d=new DOMParser().parseFromString(await sf.async('string'),'application/xml'); for(const si of d.getElementsByTagName('si')){ let t=''; for(const el of si.getElementsByTagName('t')) t+=el.textContent; ss2.push(t); } }
+  const sh=zip.file('xl/worksheets/sheet1.xml'); if(!sh) throw new Error('No sheet1');
   const sd=new DOMParser().parseFromString(await sh.async('string'),'application/xml');
-  const rows=sd.getElementsByTagName('row');let hdr=[];
+  const rows=sd.getElementsByTagName('row'); let hdr=[];
   for(let ri=0;ri<rows.length;ri++){
     const cells=toA(rows[ri].getElementsByTagName('c'));
-    const rd=cells.map(c=>{const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0]?.textContent||'';return t==='s'?ss2[+v]||'':v;});
-    if(ri===0){hdr=rd;continue;}if(!rd.some(d=>d))continue;
-    const o={};hdr.forEach((h,i)=>{o[h]=rd[i]||'';});
-    G.students.push({sno:o['S.No.']||o['S.No']||String(ri),regNo:o['Register No.']||o['Register No']||o['RegNo']||'',name:o['Students Name']||o['Student Name']||o['Name']||'',dept:o['Department ']||o['Department']||'',year:o['Year']||'',sem:o['Semester']||''});
+    const rd=cells.map(c=>{ const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0]?.textContent||''; return t==='s'?ss2[+v]||'':v; });
+    if(ri===0){ hdr=rd; continue; } if(!rd.some(d=>d)) continue;
+    const o={}; hdr.forEach((h,i)=>{ o[h]=rd[i]||''; });
+    G.students.push({ sno:o['S.No.']||o['S.No']||String(ri), regNo:o['Register No.']||o['Register No']||o['RegNo']||'', name:o['Students Name']||o['Student Name']||o['Name']||'', dept:o['Department ']||o['Department']||'', year:o['Year']||'', sem:o['Semester']||'' });
   }
 }
 
-/* ═══ RENDER META ═══ */
-function renderMeta(){
+/* ═══════════════════════════════════════════════════════════════════
+   META / RUBRIC / GRID
+   ═══════════════════════════════════════════════════════════════════ */
+function renderMeta() {
   document.getElementById('metaP').style.display='block';
-  const imgC=Object.keys(G.imageMap).length;
-  const eqC=Object.keys(G.eqMap||{}).length;
-  document.getElementById('metaG').innerHTML=
-    [['Title',G.examInfo.title||'—'],['Dept',G.examInfo.department||'—'],['Class',G.examInfo.courseClass||'—'],['Sem',G.examInfo.semester||'—'],['Subject',(G.examInfo.subject||'—').substring(0,20)],['Qs',G.questions.length],['Images',imgC],['Equations',eqC]]
-    .map(([k,v])=>`<div class="mp-i"><div class="mp-k">${k}</div><div class="mp-v">${esc(String(v))}</div></div>`).join('');
+  const imgC=Object.keys(G.imageMap).length, eqC=G.questions.reduce((a,q)=>a+q.equations.length,0), tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
+  document.getElementById('metaG').innerHTML=[['Title',G.examInfo.title||'—'],['Dept',G.examInfo.department||'—'],['Class',G.examInfo.courseClass||'—'],['Sem',G.examInfo.semester||'—'],['Subject',(G.examInfo.subject||'—').substring(0,20)],['Qs',G.questions.length],['Images',imgC],['Equations',eqC],['Tables',tblC]].map(([k,v])=>`<div class="mp-i"><div class="mp-k">${k}</div><div class="mp-v">${esc(String(v))}</div></div>`).join('');
 }
-function renderRubric(){
-  if(!G.rubricCols.length)return;
-  const b=document.getElementById('rubricBlk');b.style.display='block';
-  b.innerHTML=`<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r12);padding:12px;margin-top:12px"><div style="font-size:8px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.6px;font-family:var(--fm);margin-bottom:8px">📊 Rubric Columns (${G.rubricCols.length})</div><div style="display:flex;gap:6px;flex-wrap:wrap">${G.rubricCols.map(c=>`<span style="background:#fff;border:1px solid #93c5fd;padding:3px 10px;border-radius:8px;font-size:10px;color:#1e293b">${esc(c)}</span>`).join('')}</div></div>`;
+function renderRubric() {
+  if(!G.rubricCols.length) return;
+  const b=document.getElementById('rubricBlk'); b.style.display='block';
+  b.innerHTML=`<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r12);padding:12px;margin-top:12px"><div style="font-size:8px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.6px;font-family:var(--fm);margin-bottom:8px">📊 Rubric Columns</div><div style="display:flex;gap:6px;flex-wrap:wrap">${G.rubricCols.map(c=>`<span style="background:#fff;border:1px solid #93c5fd;padding:3px 10px;border-radius:8px;font-size:10px">${esc(c)}</span>`).join('')}</div></div>`;
 }
 
-/* ═══ QUESTION GRID ═══ */
-function renderQGrid(){
-  const g=document.getElementById('qGrid');g.innerHTML='';
-  if(!G.questions.length){g.innerHTML='<div style="color:var(--n3);font-size:11px">No questions found.</div>';return;}
+function renderQGrid() {
+  const g=document.getElementById('qGrid'); g.innerHTML='';
+  if(!G.questions.length){ g.innerHTML='<div style="color:var(--n3);font-size:11px">No questions found.</div>'; return; }
   document.getElementById('qbLbl').textContent=`${G.questions.length} questions`;
+
   G.questions.forEach((q,qi)=>{
     const u=Object.values(G.assignments).filter(x=>x===qi).length;
-    const el=document.createElement('div');el.className='qc';el.id=`qcard_${qi}`;
-    // Limit widget — editable
-    const limitWidget=`<div class="qc-limit-wrap">
-      <span class="qc-limit-lbl">Limit:</span>
-      <input class="qc-limit-inp" type="number" min="1" max="999" placeholder="∞"
-        value="${q.studentLimit||''}" 
-        onchange="updateLimit(${qi},this.value)"
-        title="Max students for Q${qi+1} (leave blank = unlimited)"/>
-    </div>`;
-    const hdrHTML=`<div class="qc-hdr">
-      <span class="qc-num">Q${qi+1}</span>
-      <span class="qc-mark">⭐ ${q.totalMark}M</span>
-      ${limitWidget}
-      <span class="qc-usage" id="qu_${qi}">${u}/${q.studentLimit||'∞'}</span>
-    </div>`;
-    // Media previews
-    let mediaHTML='';
-    // Show equation previews + image thumbnails
-    {
-      const eqToks=[];const imgRids=[];
-      for(const tGroup of(q.subQsTokens||[])){for(const t of(tGroup||[])){if(t.type==='eq')eqToks.push(t);else if(t.type==='img')imgRids.push(t.rid);}}
-      if(eqToks.length||imgRids.length){
-        mediaHTML='<div class="qc-media">';
-        // Show eq previews first
-        for(const et of eqToks.slice(0,4)){
-          if(et.previewDataUrl)mediaHTML+=`<img class="qc-thumb" src="${et.previewDataUrl}" title="Equation: ${esc(et.latex||'')}" style="max-height:28px;max-width:100px;object-fit:contain"/>`;
-          else if(et.latex)mediaHTML+=`<span style="font-size:8px;background:#ede9fe;color:#5b21b6;padding:2px 6px;border-radius:4px;font-family:monospace">${esc(et.latex.substring(0,20))}</span>`;
-        }
-        // Show image thumbnails
-        for(const rid of imgRids.slice(0,3)){
-          const img=G.imageMap[rid];
-          if(img)mediaHTML+=`<img class="qc-thumb" src="${img.dataUrl}" title="Image"/>`;
-        }
-        mediaHTML+='</div>';
+    const el=document.createElement('div'); el.className='qc'; el.id=`qcard_${qi}`;
+    const flags=[
+      q.has_equation?'<span class="badge bdg-v">∑ Eq</span>':'',
+      q.has_image   ?'<span class="badge bdg-g">📷 Img</span>':'',
+      q.has_nested_table?'<span class="badge bdg-o">⊞ Tbl</span>':''
+    ].filter(Boolean).join('');
+    const limitW=`<div class="qc-limit-wrap"><span class="qc-limit-lbl">Limit:</span><input class="qc-limit-inp" type="number" min="1" max="999" placeholder="∞" value="${q.studentLimit||''}" onchange="updateLimit(${qi},this.value)"/></div>`;
+
+    // Equation chips
+    let eqHtml='';
+    if(q.equations.length){
+      eqHtml='<div style="margin:4px 0;display:flex;flex-wrap:wrap;gap:3px">';
+      q.equations.slice(0,4).forEach(eq=>{ eqHtml+=`<span class="eq-chip">${esc(eq.text.substring(0,50))}${eq.text.length>50?'…':''}</span>`; });
+      if(q.equations.length>4) eqHtml+=`<span style="font-size:8.5px;color:#6d28d9;font-family:var(--fm)">+${q.equations.length-4} more</span>`;
+      eqHtml+='</div>';
+    }
+
+    // Nested table preview (show actual table structure)
+    let tblHtml='';
+    if(q.nestedTables.length){
+      const tbl=q.nestedTables[0];
+      if(tbl.rows&&tbl.rows.length){
+        tblHtml='<div style="overflow-x:auto;margin:5px 0"><table class="qc-tbl-prev">';
+        tbl.rows.forEach((row,ri)=>{
+          tblHtml+=`<tr>${row.map(cell=>`<${ri===0?'th':'td'}>${esc((cell.text||'').substring(0,30))}</${ri===0?'th':'td'}>`).join('')}</tr>`;
+        });
+        tblHtml+=`</table></div>`;
+        if(q.nestedTables.length>1) tblHtml+=`<div style="font-size:8px;color:#d97706;font-family:var(--fm)">+${q.nestedTables.length-1} more tables</div>`;
       }
     }
-    const partsHTML=q.subQs.map((part,pi)=>{
-      // Show equation thumbnails inline with text preview
-      const partToks=q.subQsTokens&&q.subQsTokens[pi];
-      let partPreview='';
-      if(partToks&&partToks.length){
-        for(const tok of partToks.slice(0,12)){
-          if(tok.type==='text')partPreview+=esc(tok.value.substring(0,60));
-          else if(tok.type==='eq'){
-            if(tok.previewDataUrl)partPreview+=`<img src="${tok.previewDataUrl}" style="display:inline-block;vertical-align:middle;max-height:1.6em;max-width:80px;margin:0 2px" title="Equation"/>`;
-            else if(tok.latex)partPreview+=`<span style="font-size:8px;font-family:monospace;background:#f5f0ff;padding:0 3px;border-radius:2px;color:#5b21b6">${esc(tok.latex.substring(0,15))}</span>`;
-          } else if(tok.type==='img'&&G.imageMap[tok.rid]){
-            partPreview+=`<img src="${G.imageMap[tok.rid].dataUrl}" style="display:inline-block;vertical-align:middle;max-height:1.6em;max-width:60px;margin:0 2px" title="Image"/>`;
-          }
-        }
-      } else partPreview=esc(part.substring(0,100));
-      const lbl=q.subQs.length>1?`<div class="qc-part-lbl">${['(i)','(ii)','(iii)','(iv)'][pi]||'('+(pi+1)+')'}</div>`:'';
-      return`<div class="qc-part">${lbl}<div class="qc-part-txt">${partPreview}${part.length>100?'…':''}</div></div>`;
-    }).join('');
-    el.innerHTML=hdrHTML+mediaHTML+`<div class="qc-parts">${partsHTML}</div>`;
+
+    // Question text preview
+    const prevText=(q.paras.find(p=>p.text)?.text||q.text||'').substring(0,90);
+
+    el.innerHTML=`
+    <div class="qc-hdr">
+      <span class="qc-num">Q${qi+1}</span>
+      <span class="qc-mark">⭐${q.totalMark}M</span>
+      ${flags}
+      ${limitW}
+      <span class="qc-usage" id="qu_${qi}">${u}/${q.studentLimit||'∞'}</span>
+    </div>
+    <div class="qc-media" id="qmedia_${qi}"></div>
+    <div class="qc-parts">
+      ${eqHtml}
+      ${tblHtml}
+      ${prevText?`<div class="qc-part"><div class="qc-part-txt">${esc(prevText)}${prevText.length>=90?'…':''}</div></div>`:''}
+    </div>
+    <!-- BLOOM PANEL -->
+    <div class="bloom-panel" id="bloom_${qi}">
+      <div class="bloom-hdr">
+        <span class="bloom-hdr-title">🧠 Bloom's Taxonomy Reframe</span>
+        <div class="bloom-mode-tabs">
+          <div class="bloom-mode-tab act" id="bmt_offline_${qi}" onclick="setBloomMode(${qi},'offline')">✈️ Offline</div>
+          <div class="bloom-mode-tab" id="bmt_online_${qi}" onclick="setBloomMode(${qi},'online')">🌐 AI Online</div>
+        </div>
+        <button class="btn bg_" style="padding:2px 8px;font-size:9px;margin-left:8px" onclick="hideBloom(${qi})">✕</button>
+      </div>
+      <!-- Offline: 6-level buttons → template reframe -->
+      <div id="boffline_${qi}">
+        <div class="bloom-levels">
+          <button class="bloom-btn bl-R"  onclick="reframeOffline(${qi},'Remember')">📝 Remember</button>
+          <button class="bloom-btn bl-U"  onclick="reframeOffline(${qi},'Understand')">💡 Understand</button>
+          <button class="bloom-btn bl-Ap" onclick="reframeOffline(${qi},'Apply')">⚙️ Apply</button>
+          <button class="bloom-btn bl-An" onclick="reframeOffline(${qi},'Analyze')">🔍 Analyze</button>
+          <button class="bloom-btn bl-E"  onclick="reframeOffline(${qi},'Evaluate')">⚖️ Evaluate</button>
+          <button class="bloom-btn bl-C"  onclick="reframeOffline(${qi},'Create')">🎨 Create</button>
+        </div>
+      </div>
+      <!-- Online: AI API reframe -->
+      <div id="bonline_${qi}" style="display:none">
+        <div class="bloom-levels">
+          <button class="bloom-btn bl-R"  onclick="reframeOnline(${qi},'Remember')">📝 Remember</button>
+          <button class="bloom-btn bl-U"  onclick="reframeOnline(${qi},'Understand')">💡 Understand</button>
+          <button class="bloom-btn bl-Ap" onclick="reframeOnline(${qi},'Apply')">⚙️ Apply</button>
+          <button class="bloom-btn bl-An" onclick="reframeOnline(${qi},'Analyze')">🔍 Analyze</button>
+          <button class="bloom-btn bl-E"  onclick="reframeOnline(${qi},'Evaluate')">⚖️ Evaluate</button>
+          <button class="bloom-btn bl-C"  onclick="reframeOnline(${qi},'Create')">🎨 Create</button>
+        </div>
+      </div>
+      <!-- Custom offline edit -->
+      <div class="bloom-offline-area" id="bcustom_${qi}">
+        <div style="font-size:9px;font-weight:700;color:#5b21b6;margin-bottom:5px;font-family:var(--fm)">✏️ Custom / Edit Reframed Text</div>
+        <textarea class="bloom-custom-ta" id="bcustomta_${qi}" placeholder="Type or edit the reframed question here…" rows="3"></textarea>
+        <div class="bloom-custom-actions">
+          <button class="btn bv" style="padding:4px 12px;font-size:9.5px" onclick="useCustomBloom(${qi})">✅ Use This</button>
+          <button class="btn bg_" style="padding:4px 10px;font-size:9px" onclick="clearBloom(${qi})">↩ Restore Original</button>
+        </div>
+      </div>
+      <div class="bloom-spin" id="bspin_${qi}">Generating reframed question via AI…</div>
+      <div class="bloom-result" id="bresult_${qi}">
+        <div class="bloom-result-text" id="btext_${qi}"></div>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span id="blevel_${qi}" class="bloom-tag"></span>
+          <button class="btn bv" style="padding:3px 10px;font-size:9px" id="buse_${qi}" onclick="useBloomResult(${qi})">✅ Use This</button>
+          <button class="btn bg_" style="padding:3px 10px;font-size:9px" onclick="editBloomResult(${qi})">✏️ Edit</button>
+          <button class="btn bg_" style="padding:3px 10px;font-size:9px" onclick="clearBloom(${qi})">↩ Restore Original</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <button class="btn bv" style="padding:4px 10px;font-size:9px" onclick="toggleBloom(${qi})">🧠 Bloom's Reframe</button>
+      <span id="bloom_active_${qi}"></span>
+    </div>`;
+
     g.appendChild(el);
+
+    // Thumbnails
+    const md=el.querySelector(`#qmedia_${qi}`);
+    if(md) q.images.slice(0,3).forEach(img=>{ const im=document.createElement('img'); im.className='qc-thumb'; im.src=`data:${img.ct};base64,${img.b64}`; im.title='Image'; md.appendChild(im); });
   });
-  // Stats
-  const sb=document.createElement('div');sb.className='stats-bar';sb.style.marginTop='12px';
-  const eqC=Object.keys(G.eqMap||{}).length;
-  const imgC=Object.keys(G.imageMap).length;
-  sb.innerHTML=`<div class="sb"><div class="sbk">Total</div><div class="sbv c-b">${G.questions.length}</div></div><div class="sb"><div class="sbk">With Limits</div><div class="sbv c-o">${G.questions.filter(q=>q.studentLimit).length}</div></div><div class="sb"><div class="sbk">Images</div><div class="sbv c-g">${imgC}</div></div><div class="sb"><div class="sbk">Equations</div><div class="sbv c-v">${eqC}</div></div>`;
+
+  const sb=document.createElement('div'); sb.className='stats-bar'; sb.style.marginTop='12px';
+  sb.innerHTML=`<div class="sb"><div class="sbk">Total Qs</div><div class="sbv c-b">${G.questions.length}</div></div><div class="sb"><div class="sbk">With Limits</div><div class="sbv c-o">${G.questions.filter(q=>q.studentLimit).length}</div></div><div class="sb"><div class="sbk">Images</div><div class="sbv c-g">${Object.keys(G.imageMap).length}</div></div><div class="sb"><div class="sbk">Equations</div><div class="sbv c-v">${G.questions.reduce((a,q)=>a+q.equations.length,0)}</div></div><div class="sb"><div class="sbk">Tables</div><div class="sbv c-o">${G.questions.reduce((a,q)=>a+q.nestedTables.length,0)}</div></div>`;
   document.getElementById('qbCard').querySelector('.card-body').appendChild(sb);
 }
 
-function updateLimit(qi,val){
+function updateLimit(qi,val) {
   const v=parseInt(val);
   G.questions[qi].studentLimit=(!val||isNaN(v)||v<1)?null:v;
-  // Update usage display
   const u=Object.values(G.assignments).filter(x=>x===qi).length;
-  const el=document.getElementById(`qu_${qi}`);
-  if(el)el.textContent=`${u}/${G.questions[qi].studentLimit||'∞'}`;
-  // Re-render student table to update red rows
-  if(Object.keys(G.assignments).length)renderStuTable();
+  const el=document.getElementById(`qu_${qi}`); if(el) el.textContent=`${u}/${G.questions[qi].studentLimit||'∞'}`;
+  if(Object.keys(G.assignments).length) renderStuTable();
+}
+function updateUsage() {
+  G.questions.forEach((_,i)=>{ const c=Object.values(G.assignments).filter(qi=>qi===i).length; const el=document.getElementById(`qu_${i}`); if(el) el.textContent=`${c}/${G.questions[i].studentLimit||'∞'}`; });
+}
+function populateQF() {
+  const s=document.getElementById('fQ'); s.innerHTML='<option value="all">All Qs</option>';
+  G.questions.forEach((_,i)=>{ s.innerHTML+=`<option value="${i}">Q${i+1}</option>`; });
 }
 
-function updateUsage(){
-  G.questions.forEach((_,i)=>{
-    const c=Object.values(G.assignments).filter(qi=>qi===i).length;
-    const el=document.getElementById(`qu_${i}`);
-    const lim=G.questions[i].studentLimit;
-    if(el)el.textContent=`${c}/${lim||'∞'}`;
-  });
-}
-function populateQF(){const s=document.getElementById('fQ');s.innerHTML='<option value="all">All Qs</option>';G.questions.forEach((_,i)=>{s.innerHTML+=`<option value="${i}">Q${i+1}</option>`;});}
+/* ═══════════════════════════════════════════════════════════════════
+   BLOOM'S TAXONOMY — OFFLINE + ONLINE
+   ═══════════════════════════════════════════════════════════════════ */
+const BLOOM_COLORS={ Remember:'bt-R', Understand:'bt-U', Apply:'bt-Ap', Analyze:'bt-An', Evaluate:'bt-E', Create:'bt-C', Custom:'bt-Custom' };
+const BLOOM_ICONS={ Remember:'📝', Understand:'💡', Apply:'⚙️', Analyze:'🔍', Evaluate:'⚖️', Create:'🎨', Custom:'✏️' };
 
-/* ═══ STUDENT TABLE ═══ */
-function renderStuTable(){
+/* Offline template reframing — no API required */
+const BLOOM_OFFLINE_TEMPLATES = {
+  Remember: [
+    (q)=>`List the components and explain the basic working principle of ${_topic(q)}.`,
+    (q)=>`State the steps involved in setting up the ${_topic(q)} experiment and identify the key parameters measured.`,
+    (q)=>`Define the terms and recall the circuit connections required for ${_topic(q)}.`,
+  ],
+  Understand: [
+    (q)=>`Explain how ${_topic(q)} works and describe the relationship between the input and output characteristics.`,
+    (q)=>`Summarize the operating principle of ${_topic(q)} and interpret the expected waveforms/results.`,
+    (q)=>`Describe the significance of each component in ${_topic(q)} and explain the effect of varying key parameters.`,
+  ],
+  Apply: [
+    (q)=>`Construct and test the ${_topic(q)} circuit. Record observations and calculate the required values from your measurements.`,
+    (q)=>`Implement the ${_topic(q)} experiment, measure the output for different input conditions, and tabulate the results.`,
+    (q)=>`Design the ${_topic(q)} circuit for the given specifications, verify its operation, and demonstrate the results.`,
+  ],
+  Analyze: [
+    (q)=>`Examine the output characteristics of ${_topic(q)} and differentiate between ideal and practical behaviour. Identify sources of error.`,
+    (q)=>`Investigate the effect of varying component values on the performance of ${_topic(q)}. Break down the causes of any deviation from theory.`,
+    (q)=>`Compare the theoretical and practical results of ${_topic(q)} and analyze the factors responsible for any discrepancies.`,
+  ],
+  Evaluate: [
+    (q)=>`Assess the performance of ${_topic(q)} against the given specifications. Justify any modifications needed to improve accuracy.`,
+    (q)=>`Critique the design of ${_topic(q)} and recommend improvements. Support your recommendations with measured evidence.`,
+    (q)=>`Judge the suitability of ${_topic(q)} for the specified application based on your experimental observations and theoretical understanding.`,
+  ],
+  Create: [
+    (q)=>`Design a modified version of ${_topic(q)} to meet the additional specification provided. Construct the circuit and verify its performance.`,
+    (q)=>`Propose a novel application of the ${_topic(q)} principle and develop a working implementation. Present a detailed analysis of results.`,
+    (q)=>`Synthesize a system incorporating ${_topic(q)} that satisfies the given constraints. Document the design process and validate experimentally.`,
+  ]
+};
+
+function _topic(q) {
+  // Extract a short topic phrase from question text
+  const t=q.text||'';
+  // Try to find experiment name patterns
+  const m=t.match(/(?:of\s+(?:a\s+)?|using\s+|implement\s+|design\s+|study\s+(?:of\s+)?)([A-Z][A-Za-z0-9\s\-\/]{3,40}?)(?:\s*(?:circuit|experiment|using|with|and|\.|\,|$))/);
+  if(m) return m[1].trim();
+  // Fallback: first 5 meaningful words
+  const words=t.replace(/[^\w\s]/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,5);
+  return words.join(' ') || 'this experiment';
+}
+
+function setBloomMode(qi, mode) {
+  document.getElementById(`boffline_${qi}`).style.display = mode==='offline'?'block':'none';
+  document.getElementById(`bonline_${qi}`).style.display  = mode==='online'?'block':'none';
+  document.getElementById(`bmt_offline_${qi}`).className = 'bloom-mode-tab'+(mode==='offline'?' act':'');
+  document.getElementById(`bmt_online_${qi}`).className  = 'bloom-mode-tab'+(mode==='online'?' act':'');
+  // Hide results when switching
+  document.getElementById(`bresult_${qi}`).classList.remove('show');
+  document.getElementById(`bspin_${qi}`).classList.remove('show');
+  document.getElementById(`bcustom_${qi}`).classList.remove('show');
+}
+
+function toggleBloom(qi){ document.getElementById(`bloom_${qi}`).classList.toggle('show'); }
+function hideBloom(qi)  { document.getElementById(`bloom_${qi}`).classList.remove('show'); }
+
+/* ── Offline reframe ─────────────────────────────────────────────── */
+function reframeOffline(qi, level) {
+  const q=G.questions[qi];
+  const cacheKey=`${qi}_${level}_offline`;
+  let text;
+  if(G.bloomCache[cacheKey]){
+    text=G.bloomCache[cacheKey];
+  } else {
+    const templates=BLOOM_OFFLINE_TEMPLATES[level]||[];
+    const tpl=templates[qi % templates.length] || templates[0];
+    text=tpl?tpl(q):`${level}: ${q.text.substring(0,120)}`;
+    G.bloomCache[cacheKey]=text;
+  }
+  showBloomResult(qi, level, text);
+  // Also pre-fill the custom textarea so user can edit immediately
+  const ta=document.getElementById(`bcustomta_${qi}`);
+  if(ta) ta.value=text;
+  document.getElementById(`bcustom_${qi}`).classList.add('show');
+}
+
+/* ── Online AI reframe ───────────────────────────────────────────── */
+const BLOOM_VERBS={
+  Remember:['List','Define','Recall','Identify','Name','State','Label','Recognize'],
+  Understand:['Explain','Describe','Summarize','Interpret','Classify','Compare','Paraphrase'],
+  Apply:['Demonstrate','Calculate','Implement','Solve','Use','Execute','Construct','Perform'],
+  Analyze:['Differentiate','Examine','Break down','Inspect','Investigate','Distinguish','Deconstruct'],
+  Evaluate:['Assess','Critique','Judge','Justify','Defend','Appraise','Recommend','Validate'],
+  Create:['Design','Construct','Develop','Formulate','Propose','Synthesize','Invent','Devise']
+};
+
+async function reframeOnline(qi, level) {
+  const q=G.questions[qi];
+  const cacheKey=`${qi}_${level}_online`;
+  if(G.bloomCache[cacheKey]){ showBloomResult(qi,level,G.bloomCache[cacheKey]); return; }
+
+  const spinEl=document.getElementById(`bspin_${qi}`);
+  const resEl =document.getElementById(`bresult_${qi}`);
+  spinEl.classList.add('show'); resEl.classList.remove('show');
+  document.getElementById(`bcustom_${qi}`).classList.remove('show');
+
+  const prompt=`You are an expert educational assessment designer for engineering lab/practical exams.
+Reframe this question at Bloom's Taxonomy level: ${level}
+Original question: "${q.text.substring(0,500)}"
+${q.equations.length?`Equations: ${q.equations.map(e=>e.text).join(', ')}`:''}
+Action verbs to use: ${(BLOOM_VERBS[level]||[]).join(', ')}
+Requirements: Keep same lab topic, 1-2 sentences, exam-ready. Return ONLY the reframed question.
+Reframed question:`;
+
+  try {
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message||'API error');
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    if(!text) throw new Error('Empty response');
+    G.bloomCache[cacheKey]=text;
+    showBloomResult(qi,level,text);
+    const ta=document.getElementById(`bcustomta_${qi}`); if(ta) ta.value=text;
+    document.getElementById(`bcustom_${qi}`).classList.add('show');
+  } catch(err){
+    spinEl.classList.remove('show');
+    resEl.classList.add('show');
+    document.getElementById(`btext_${qi}`).innerHTML=`<span style="color:#dc2626">❌ ${err.message.includes('fetch')?'Network error — switch to Offline mode':err.message}</span>`;
+    toast('AI error: '+err.message+' — use Offline mode','err');
+  }
+}
+
+function showBloomResult(qi, level, text) {
+  document.getElementById(`bspin_${qi}`).classList.remove('show');
+  const resEl=document.getElementById(`bresult_${qi}`);
+  resEl.classList.add('show');
+  document.getElementById(`btext_${qi}`).textContent=text;
+  const lvlEl=document.getElementById(`blevel_${qi}`);
+  if(lvlEl){ lvlEl.className='bloom-tag '+(BLOOM_COLORS[level]||'bt-Custom'); lvlEl.textContent=(BLOOM_ICONS[level]||'✏️')+' '+level; }
+  resEl.dataset.currentLevel=level;
+}
+
+function useBloomResult(qi) {
+  const resEl=document.getElementById(`bresult_${qi}`);
+  const level=resEl.dataset.currentLevel||'Custom';
+  const text=document.getElementById(`btext_${qi}`).textContent;
+  _applyBloom(qi, level, text);
+}
+
+function useCustomBloom(qi) {
+  const ta=document.getElementById(`bcustomta_${qi}`);
+  if(!ta||!ta.value.trim()){ toast('Enter a reframed question first','warn'); return; }
+  _applyBloom(qi, 'Custom', ta.value.trim());
+}
+
+function _applyBloom(qi, level, text) {
+  G.questions[qi].bloomReframes[level]=text;
+  G.questions[qi].activeBloom=level;
+  const activeEl=document.getElementById(`bloom_active_${qi}`);
+  if(activeEl) activeEl.innerHTML=`<span class="bloom-tag ${BLOOM_COLORS[level]||'bt-Custom'}">${BLOOM_ICONS[level]||'✏️'} ${level} active</span>`;
+  hideBloom(qi);
+  if(Object.keys(G.assignments).length) renderStuTable();
+  toast(`Q${qi+1}: ${level} version will be used`,'ok');
+}
+
+function editBloomResult(qi) {
+  const resEl=document.getElementById(`bresult_${qi}`);
+  const text=document.getElementById(`btext_${qi}`).textContent;
+  const ta=document.getElementById(`bcustomta_${qi}`);
+  if(ta) ta.value=text;
+  document.getElementById(`bcustom_${qi}`).classList.add('show');
+}
+
+function clearBloom(qi) {
+  G.questions[qi].activeBloom=null;
+  const activeEl=document.getElementById(`bloom_active_${qi}`); if(activeEl) activeEl.innerHTML='';
+  document.getElementById(`bresult_${qi}`).classList.remove('show');
+  document.getElementById(`bcustom_${qi}`).classList.remove('show');
+  if(Object.keys(G.assignments).length) renderStuTable();
+  toast(`Q${qi+1}: Restored to original`,'inf');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STUDENT TABLE
+   ═══════════════════════════════════════════════════════════════════ */
+function renderStuTable() {
   const w=document.getElementById('stuWrap');
   const asn=Object.keys(G.assignments).length;
   document.getElementById('asnStats').style.display='flex';
@@ -1021,497 +1330,415 @@ function renderStuTable(){
   document.getElementById('st2').textContent=G.students.length-asn;
   const uq=new Set(Object.values(G.assignments)).size;
   document.getElementById('st3').textContent=uq+'/'+G.questions.length;
-  // Count over-limit
   let overCount=0;
   const qUsedMap={};
-  Object.values(G.assignments).forEach(qi=>{qUsedMap[qi]=(qUsedMap[qi]||0)+1;});
-  for(const[qi,cnt] of Object.entries(qUsedMap)){const lim=G.questions[qi].studentLimit;if(lim&&cnt>lim)overCount+=cnt-lim;}
+  Object.values(G.assignments).forEach(qi=>{ qUsedMap[qi]=(qUsedMap[qi]||0)+1; });
+  for(const[qi,cnt]of Object.entries(qUsedMap)){ const lim=G.questions[qi].studentLimit; if(lim&&cnt>lim) overCount+=cnt-lim; }
   document.getElementById('st5').textContent=overCount;
-  if(asn>0){document.getElementById('asnPill').style.display='flex';document.getElementById('asnTxt').textContent=asn+'/'+G.students.length;}
-  G.pairedPages=[];for(let i=0;i<G.students.length;i+=2)G.pairedPages.push([i,i+1<G.students.length?i+1:null]);
-  w.innerHTML=`<table class="stbl" id="sTbl"><thead><tr><th>S.No</th><th>Reg. No.</th><th>Name</th><th>Dept</th><th>Page</th><th>Assigned Q</th><th>Status</th><th style="text-align:center">Action</th></tr></thead>
-    <tbody>${G.students.map((s,i)=>{
-      const qi=G.assignments[i];const q=qi!==undefined?G.questions[qi]:null;
-      const pg=Math.floor(i/2)+1;const sl=i%2===0?'Top':'Btm';
-      const qLimit=q?q.studentLimit:null;
-      const qUsed=qi!==undefined?(qUsedMap[qi]||0):0;
-      const isOver=!!(qLimit&&qUsed>qLimit);
-      return`<tr data-si="${i}" class="${isOver?'limit-exceeded':''}">
-        <td><span class="badge bdg-b">${esc(s.sno)}</span></td>
-        <td><code style="font-family:var(--fm);font-size:10px;color:var(--b4);font-weight:600">${esc(s.regNo||'—')}</code></td>
-        <td style="font-weight:600">${esc(s.name||'—')}</td>
-        <td style="font-size:10px;color:var(--n3)">${esc(s.dept||'—')}</td>
-        <td><span class="badge bdg-sky">P${pg} ${sl}</span></td>
-        <td style="max-width:200px">${qi!==undefined?`<span class="badge ${isOver?'bdg-r':'bdg-b'}">Q${qi+1}${isOver?' ⚠️':''}</span> <span style="font-size:10px;color:var(--n3);margin-left:3px">${esc(q.subQs[0].substring(0,40))}${q.subQs[0].length>40?'…':''}</span>`:'<span style="color:var(--n3);font-size:10px">—</span>'}</td>
-        <td>${qi!==undefined?(isOver?'<span class="badge bdg-r">⚠️ Over Limit</span>':'<span class="badge bdg-g">✓ Done</span>'):'<span class="badge bdg-r">Pending</span>'}</td>
-        <td style="text-align:center;white-space:nowrap">
-          <button class="btn bg_" style="padding:3px 8px;font-size:9.5px;margin-right:3px" onclick="openModal(${i})">✏️</button>
-          <button class="btn bg_" style="padding:3px 8px;font-size:9.5px" onclick="reSingle(${i})">🎲</button>
-        </td>
-      </tr>`;
-    }).join('')}</tbody></table>`;
-  if(asn>0){document.getElementById('anCard').style.display='block';renderAn();}
+  if(asn>0){ document.getElementById('asnPill').style.display='flex'; document.getElementById('asnTxt').textContent=asn+'/'+G.students.length; }
+  G.pairedPages=[];
+  for(let i=0;i<G.students.length;i+=2) G.pairedPages.push([i,i+1<G.students.length?i+1:null]);
+  w.innerHTML=`<table class="stbl" id="sTbl">
+  <thead><tr><th>S.No</th><th>Reg. No.</th><th>Name</th><th>Dept</th><th>Page</th><th>Assigned Q</th><th>Bloom</th><th>Status</th><th style="text-align:center">Action</th></tr></thead>
+  <tbody>${G.students.map((s,i)=>{
+    const qi=G.assignments[i]; const q=qi!==undefined?G.questions[qi]:null;
+    const pg=Math.floor(i/2)+1; const sl=i%2===0?'Top':'Btm';
+    const qUsed=qi!==undefined?(qUsedMap[qi]||0):0;
+    const isOver=!!(q&&q.studentLimit&&qUsed>q.studentLimit);
+    const bloomBadge=q&&q.activeBloom?`<span class="bloom-tag ${BLOOM_COLORS[q.activeBloom]||'bt-Custom'}">${BLOOM_ICONS[q.activeBloom]||'✏️'} ${q.activeBloom}</span>`:'<span style="color:var(--n4);font-size:9.5px">—</span>';
+    const qText=(q?.paras.find(p=>p.text)?.text||q?.text||'').substring(0,35);
+    return`<tr data-si="${i}" class="${isOver?'limit-exceeded':''}">
+      <td><span class="badge bdg-b">${esc(s.sno)}</span></td>
+      <td><code style="font-family:var(--fm);font-size:10px;color:var(--b4);font-weight:600">${esc(s.regNo||'—')}</code></td>
+      <td style="font-weight:600">${esc(s.name||'—')}</td>
+      <td style="font-size:10px;color:var(--n3)">${esc(s.dept||'—')}</td>
+      <td><span class="badge bdg-sky">P${pg} ${sl}</span></td>
+      <td style="max-width:200px">${qi!==undefined?`<span class="badge ${isOver?'bdg-r':'bdg-b'}">Q${qi+1}${isOver?' ⚠️':''}</span> <span style="font-size:10px;color:var(--n3);font-family:'Times New Roman',serif">${esc(qText)}…</span>`:'<span style="color:var(--n3);font-size:10px">—</span>'}</td>
+      <td>${bloomBadge}</td>
+      <td>${qi!==undefined?(isOver?'<span class="badge bdg-r">⚠️ Over</span>':'<span class="badge bdg-g">✓ Done</span>'):'<span class="badge bdg-r">Pending</span>'}</td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="btn bg_" style="padding:3px 8px;font-size:9.5px;margin-right:3px" onclick="openModal(${i})">✏️</button>
+        <button class="btn bg_" style="padding:3px 8px;font-size:9.5px" onclick="reSingle(${i})">🎲</button>
+      </td>
+    </tr>`;
+  }).join('')}</tbody></table>`;
+  if(asn>0){ document.getElementById('anCard').style.display='block'; renderAn(); }
 }
-function filterStu(){
+
+function filterStu() {
   const q=(document.getElementById('stuSearch').value||'').toLowerCase();
-  const fa=document.getElementById('fAsn').value;
-  const fq=document.getElementById('fQ').value;
-  const t=document.getElementById('sTbl');if(!t)return;
-  const qUsedMap={};Object.values(G.assignments).forEach(qi=>{qUsedMap[qi]=(qUsedMap[qi]||0)+1;});
+  const fa=document.getElementById('fAsn').value, fq=document.getElementById('fQ').value;
+  const t=document.getElementById('sTbl'); if(!t) return;
+  const qUsedMap={}; Object.values(G.assignments).forEach(qi=>{ qUsedMap[qi]=(qUsedMap[qi]||0)+1; });
   for(const r of t.tBodies[0].rows){
-    const si=+r.dataset.si;const s=G.students[si];
+    const si=+r.dataset.si; const s=G.students[si];
     const txt=(s.regNo+' '+s.name+' '+s.dept).toLowerCase();
-    const a=G.assignments[si]!==undefined;
-    const qi=G.assignments[si];
+    const a=G.assignments[si]!==undefined; const qi=G.assignments[si];
     const isOver=qi!==undefined&&G.questions[qi].studentLimit&&(qUsedMap[qi]||0)>G.questions[qi].studentLimit;
-    const mq=!q||txt.includes(q);
-    const mf=fa==='all'||(fa==='y'&&a)||(fa==='n'&&!a)||(fa==='over'&&isOver);
-    const mfq=fq==='all'||(a&&qi===+fq);
-    r.style.display=(mq&&mf&&mfq)?'':'none';
+    r.style.display=((!q||txt.includes(q))&&(fa==='all'||(fa==='y'&&a)||(fa==='n'&&!a)||(fa==='over'&&isOver))&&(fq==='all'||(a&&qi===+fq)))?'':'none';
   }
 }
 
-/* ═══ ASSIGN ═══ */
-function setMode(m){G.mode=m;['balanced','random','manual'].forEach(n=>{const el=document.getElementById('mode-'+n);if(el)el.className='mo'+(n===m?' act':'');});}
+/* ═══════════════════════════════════════════════════════════════════
+   SMART ASSIGNMENT
+   ═══════════════════════════════════════════════════════════════════ */
+function setMode(m) {
+  G.mode=m;
+  ['smart','balanced','random'].forEach(n=>{ const el=document.getElementById('mode-'+n); if(el) el.className='mo'+(n===m?' act':''); });
+}
 
-function getAssignments(mode){
-  const n=G.students.length,q=G.questions.length;
+function getAssignments(mode) {
+  const n=G.students.length, q=G.questions.length;
   const result=new Array(n).fill(-1);
   const usedCount=new Array(q).fill(0);
-  if(mode==='random'){
-    const order=shuf([...Array(n).keys()]);
-    for(const si of order){
-      const avail=[];
-      for(let qi=0;qi<q;qi++){const lim=G.questions[qi].studentLimit;if(!lim||usedCount[qi]<lim)avail.push(qi);}
-      const picked=avail.length?avail[Math.floor(Math.random()*avail.length)]:usedCount.indexOf(Math.min(...usedCount));
-      result[si]=picked;usedCount[picked]++;
+  const studentOrder=shuf([...Array(n).keys()]);
+
+  if(mode==='smart'){
+    // Phase 1: each question assigned once
+    const qOrder=shuf([...Array(q).keys()]);
+    let p1=0;
+    for(let qi=0;qi<qOrder.length&&p1<n;qi++){ result[studentOrder[p1]]=qOrder[qi]; usedCount[qOrder[qi]]++; p1++; }
+    // Phase 2: fill remaining respecting limits
+    for(const si of shuf(studentOrder.slice(p1))){
+      const avail=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; if(!lim||usedCount[qi]<lim) avail.push(qi); }
+      if(avail.length){ avail.sort((a,b)=>usedCount[a]-usedCount[b]); result[si]=avail[0]; usedCount[avail[0]]++; }
+      else{ const minQ=usedCount.indexOf(Math.min(...usedCount)); result[si]=minQ; usedCount[minQ]++; }
+    }
+  } else if(mode==='random'){
+    for(const si of shuf([...Array(n).keys()])){
+      const avail=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; if(!lim||usedCount[qi]<lim) avail.push(qi); }
+      const picked=avail.length?avail[0|Math.random()*avail.length]:usedCount.indexOf(Math.min(...usedCount));
+      result[si]=picked; usedCount[picked]++;
     }
   } else {
-    // Build pool
-    let pool=[];
-    for(let qi=0;qi<q;qi++){const lim=G.questions[qi].studentLimit;const slots=lim||Math.ceil(n/q);for(let s=0;s<slots;s++)pool.push(qi);}
-    pool=shuf(pool);
-    while(pool.length<n){const minQ=usedCount.indexOf(Math.min(...usedCount));pool.push(minQ);usedCount[minQ]++;}
-    const order=shuf([...Array(n).keys()]);
-    order.forEach((si,rank)=>{result[si]=pool[rank%pool.length];});
+    let pool=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; const slots=lim||Math.ceil(n/q); for(let s=0;s<slots;s++) pool.push(qi); }
+    pool=shuf(pool); while(pool.length<n){ const minQ=usedCount.indexOf(Math.min(...usedCount)); pool.push(minQ); usedCount[minQ]++; }
+    shuf([...Array(n).keys()]).forEach((si,rank)=>{ result[si]=pool[rank%pool.length]; });
   }
   return result;
 }
 
-function doAssign(){
-  if(!G.students.length||!G.questions.length){toast('Upload both files first','warn');return;}
+function doAssign() {
+  if(!G.students.length||!G.questions.length){ toast('Upload both files first','warn'); return; }
   const asgn=getAssignments(G.mode);
-  G.assignments={};asgn.forEach((qi,si)=>{if(qi>=0)G.assignments[si]=qi;});
-  renderStuTable();updateUsage();
-  document.getElementById('clrBtn').disabled=false;document.getElementById('reShBtn').disabled=false;
-  const qUsedMap={};Object.values(G.assignments).forEach(qi=>{qUsedMap[qi]=(qUsedMap[qi]||0)+1;});
-  const viol=G.questions.filter((_,qi)=>{const lim=G.questions[qi].studentLimit;return lim&&(qUsedMap[qi]||0)>lim;}).length;
-  if(viol>0)showAlert('asnAlert','awrn',`⚠️ Assigned — ${viol} question(s) exceeded limits (insufficient questions to satisfy all constraints). <b>Red rows</b> show over-limit assignments.`);
-  else showAlert('asnAlert','aok',`✅ ${G.students.length} students assigned with all limits respected`);
-  toast(`${G.students.length} assigned`,'ok');chkReady();setStep(4);
+  G.assignments={}; asgn.forEach((qi,si)=>{ if(qi>=0) G.assignments[si]=qi; });
+  renderStuTable(); updateUsage();
+  document.getElementById('clrBtn').disabled=false; document.getElementById('reShBtn').disabled=false;
+  const qUsedMap={}; Object.values(G.assignments).forEach(qi=>{ qUsedMap[qi]=(qUsedMap[qi]||0)+1; });
+  const covered=new Set(Object.values(G.assignments)).size;
+  const viol=G.questions.filter((_,qi)=>{ const lim=G.questions[qi].studentLimit; return lim&&(qUsedMap[qi]||0)>lim; }).length;
+  if(viol>0) showAlert('asnAlert','awrn',`⚠️ ${viol} question(s) over limit (red rows). ${G.mode==='smart'?covered+'/'+G.questions.length+' Qs covered.':''}`);
+  else showAlert('asnAlert','aok',`✅ ${G.students.length} students assigned · ${covered}/${G.questions.length} questions covered${G.mode==='smart'?' (each Q ≥1×)':''}`);
+  toast(`${G.students.length} assigned · ${covered}/${G.questions.length} Qs`,'ok'); chkReady(); setStep(4);
 }
-function reshuffleAll(){if(!Object.keys(G.assignments).length){toast('Assign first','warn');return;}doAssign();}
+function reshuffleAll(){ if(!Object.keys(G.assignments).length){ toast('Assign first','warn'); return; } doAssign(); }
 function reSingle(si){
-  const qUsedMap={};Object.entries(G.assignments).forEach(([k,v])=>{if(+k!==si)qUsedMap[v]=(qUsedMap[v]||0)+1;});
-  const avail=G.questions.map((_,qi)=>{const lim=G.questions[qi].studentLimit;return(!lim||(qUsedMap[qi]||0)<lim)?qi:-1;}).filter(qi=>qi>=0);
-  const picked=avail.length?avail[Math.floor(Math.random()*avail.length)]:Math.floor(Math.random()*G.questions.length);
-  G.assignments[si]=picked;renderStuTable();updateUsage();chkReady();toast(`Q${picked+1} → ${G.students[si].name}`,'inf');
+  const qUsedMap={}; Object.entries(G.assignments).forEach(([k,v])=>{ if(+k!==si) qUsedMap[v]=(qUsedMap[v]||0)+1; });
+  const avail=G.questions.map((_,qi)=>{ const lim=G.questions[qi].studentLimit; return(!lim||(qUsedMap[qi]||0)<lim)?qi:-1; }).filter(qi=>qi>=0);
+  const picked=avail.length?avail[0|Math.random()*avail.length]:0|Math.random()*G.questions.length;
+  G.assignments[si]=picked; renderStuTable(); updateUsage(); chkReady();
+  toast(`Q${picked+1} → ${G.students[si].name}`,'inf');
 }
-function clearAssign(){G.assignments={};renderStuTable();updateUsage();document.getElementById('genBtn').disabled=true;document.getElementById('prvBtn').disabled=true;document.getElementById('anCard').style.display='none';document.getElementById('asnPill').style.display='none';toast('Cleared','inf');}
-
+function clearAssign(){
+  G.assignments={}; renderStuTable(); updateUsage();
+  document.getElementById('genBtn').disabled=true; document.getElementById('prvBtn').disabled=true;
+  document.getElementById('anCard').style.display='none'; document.getElementById('asnPill').style.display='none';
+  toast('Cleared','inf');
+}
 function openModal(si){
-  G._mSI=si;G._mSel=G.assignments[si]??-1;const s=G.students[si];
+  G._mSI=si; G._mSel=G.assignments[si]??-1; const s=G.students[si];
   document.getElementById('modTitle').textContent=`Assign — ${s.name||s.regNo}`;
   document.getElementById('modSt').textContent=G._mSel>=0?`Q${G._mSel+1}`:'None';
   document.getElementById('modOk').disabled=G._mSel<0;
-  const excl={};Object.entries(G.assignments).forEach(([k,v])=>{if(+k!==si)excl[v]=(excl[v]||0)+1;});
-  document.getElementById('modBody').innerHTML=`<div style="font-size:9.5px;color:var(--n3);margin-bottom:10px;font-family:var(--fm)">Student: <b style="color:var(--b4)">${esc(s.name||'—')}</b> · ${esc(s.regNo||'—')}</div>`+
-    G.questions.map((q,i)=>{
-      const u=excl[i]||0;const lim=q.studentLimit;const atLim=lim&&u>=lim;
-      const limitBadge=lim?`<span class="badge ${atLim?'bdg-r':'bdg-o'}">${u}/${lim}</span>`:`<span class="badge bdg-g">${u}/∞</span>`;
-      return`<div class="q-opt${G.assignments[si]===i?' sel':''}${atLim?' at-limit':''}" data-qi="${i}" onclick="${atLim?'':('selModalQ('+i+')')}">
-        <div class="qoh"><span class="qon">Q${i+1}</span><span style="font-size:8.5px;color:var(--n3)">⭐${q.totalMark}M</span>${limitBadge}<span class="badge ${atLim?'bdg-r':'bdg-v'}" style="margin-left:auto">${atLim?'FULL':'OK'}</span></div>
-        <div class="qot">${esc(q.subQs[0].substring(0,100))}</div>
-      </div>`;
-    }).join('');
+  const excl={}; Object.entries(G.assignments).forEach(([k,v])=>{ if(+k!==si) excl[v]=(excl[v]||0)+1; });
+  document.getElementById('modBody').innerHTML=G.questions.map((q,i)=>{
+    const u=excl[i]||0,lim=q.studentLimit,atLim=lim&&u>=lim;
+    const lb=lim?`<span class="badge ${atLim?'bdg-r':'bdg-o'}">${u}/${lim}</span>`:`<span class="badge bdg-g">${u}/∞</span>`;
+    const bloomB=q.activeBloom?`<span class="bloom-tag ${BLOOM_COLORS[q.activeBloom]||'bt-Custom'}" style="font-size:7px">${q.activeBloom}</span>`:'';
+    return`<div class="q-opt${G.assignments[si]===i?' sel':''}${atLim?' at-limit':''}" data-qi="${i}" onclick="${atLim?'':('selModalQ('+i+')')}">
+      <div class="qoh"><span class="qon">Q${i+1}</span><span style="font-size:8.5px;color:var(--n3)">⭐${q.totalMark}M</span>${lb}${bloomB}<span class="badge ${atLim?'bdg-r':'bdg-v'}" style="margin-left:auto">${atLim?'FULL':'OK'}</span></div>
+      <div class="qot">${esc((q.paras.find(p=>p.text)?.text||q.text||'').substring(0,100))}</div>
+    </div>`;
+  }).join('');
   document.getElementById('assignModal').classList.add('show');
 }
-function selModalQ(qi){G._mSel=qi;document.querySelectorAll('.q-opt').forEach(el=>el.classList.toggle('sel',+el.dataset.qi===qi));document.getElementById('modOk').disabled=false;document.getElementById('modSt').textContent=`Q${qi+1}`;}
-function confirmAssign(){if(G._mSI<0||G._mSel<0)return;G.assignments[G._mSI]=G._mSel;closeModal();renderStuTable();updateUsage();chkReady();toast(`Q${G._mSel+1} → ${G.students[G._mSI].name}`,'ok');}
-function closeModal(){document.getElementById('assignModal').classList.remove('show');G._mSI=-1;G._mSel=-1;}
+function selModalQ(qi){ G._mSel=qi; document.querySelectorAll('.q-opt').forEach(el=>el.classList.toggle('sel',+el.dataset.qi===qi)); document.getElementById('modOk').disabled=false; document.getElementById('modSt').textContent=`Q${qi+1}`; }
+function confirmAssign(){ if(G._mSI<0||G._mSel<0)return; G.assignments[G._mSI]=G._mSel; closeModal(); renderStuTable(); updateUsage(); chkReady(); toast(`Q${G._mSel+1} → ${G.students[G._mSI].name}`,'ok'); }
+function closeModal(){ document.getElementById('assignModal').classList.remove('show'); G._mSI=-1; G._mSel=-1; }
 
-function renderAn(){
-  const vals=Object.values(G.assignments);if(!vals.length)return;
-  const g=document.getElementById('anGrid');g.innerHTML='';
-  const q=G.questions.length,n=G.students.length;
-  const qC=new Array(q).fill(0);vals.forEach(qi=>qC[qi]++);const mx=Math.max(...qC,1);
+function renderAn() {
+  const vals=Object.values(G.assignments); if(!vals.length) return;
+  const g=document.getElementById('anGrid'); g.innerHTML='';
+  const q=G.questions.length;
+  const qC=new Array(q).fill(0); vals.forEach(qi=>qC[qi]++); const mx=Math.max(...qC,1);
   const cl=['bf1','bf2','bf3','bf4'];
-  const c1=document.createElement('div');c1.className='an-c';
-  c1.innerHTML=`<div class="an-t">📊 Distribution (w/ Limits)</div>`+qC.map((cnt,i)=>{
-    const lim=G.questions[i].studentLimit;const over=lim&&cnt>lim;
-    return`<div class="bar-r"><div class="bar-l">Q${i+1}</div><div class="bar-tr"><div class="bar-f ${over?'bf-red':cl[i%4]}" style="width:${Math.max(Math.round(cnt/mx*100),cnt>0?8:0)}%"><span>${cnt}${lim?'/'+lim:''}</span></div></div></div>`;
-  }).join('');g.appendChild(c1);
-  const uq=new Set(vals).size,pct=Math.round(uq/q*100);const r=33,ci=2*Math.PI*r,da=`${ci*pct/100} ${ci}`;
-  const c2=document.createElement('div');c2.className='an-c';
-  c2.innerHTML=`<div class="an-t">🎯 Coverage</div><svg viewBox="0 0 100 100" width="88" height="88"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#dbeafe" stroke-width="12"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="#2563eb" stroke-width="12" stroke-dasharray="${da}" stroke-dashoffset="${ci*.25}" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="54" text-anchor="middle" font-size="14" font-weight="800" fill="#1d4ed8">${pct}%</text></svg>`;
-  g.appendChild(c2);
-  const c3=document.createElement('div');c3.className='an-c';
-  c3.innerHTML=`<div class="an-t">🌡 Heatmap</div>`+qC.map((cnt,i)=>{const p=cnt/mx;const bg=cnt===0?'#f8fafc':p>=.8?'#1d4ed8':p>=.5?'#3b82f6':p>=.3?'rgba(59,130,246,.5)':'rgba(59,130,246,.2)';const tc=p>=.3?'#fff':'#475569';const lim=G.questions[i].studentLimit;return`<div class="hm-c" style="background:${bg};color:${tc}">Q${i+1}${lim?`(≤${lim})`:''}  <span>${cnt} stu</span></div>`;}).join('');
-  g.appendChild(c3);
+  const c1=document.createElement('div'); c1.className='an-c';
+  c1.innerHTML=`<div class="an-t">📊 Question Distribution</div>`+qC.map((cnt,i)=>{ const lim=G.questions[i].studentLimit,over=lim&&cnt>lim; return`<div class="bar-r"><div class="bar-l">Q${i+1}</div><div class="bar-tr"><div class="bar-f ${over?'bf-red':cl[i%4]}" style="width:${Math.max(Math.round(cnt/mx*100),cnt>0?8:0)}%"><span>${cnt}${lim?'/'+lim:''}</span></div></div></div>`; }).join(''); g.appendChild(c1);
+  const uq=new Set(vals).size,pct=Math.round(uq/q*100),r=33,ci2=2*Math.PI*r,da=`${ci2*pct/100} ${ci2}`;
+  const c2=document.createElement('div'); c2.className='an-c';
+  c2.innerHTML=`<div class="an-t">🎯 Coverage</div><div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 100 100" width="88" height="88"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#dbeafe" stroke-width="12"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="#2563eb" stroke-width="12" stroke-dasharray="${da}" stroke-dashoffset="${ci2*.25}" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="54" text-anchor="middle" font-size="14" font-weight="800" fill="#1d4ed8">${pct}%</text></svg><div>${G.questions.map((q2,i)=>`<div style="font-size:9px;margin-bottom:3px;font-family:var(--fm)"><span class="badge ${qC[i]>0?'bdg-g':'bdg-r'}">Q${i+1}</span> ${qC[i]} students</div>`).join('')}</div></div>`; g.appendChild(c2);
+}
+function chkReady() {
+  const a=Object.keys(G.assignments).length, r=G.students.length>0&&G.questions.length>0&&a>0;
+  document.getElementById('genBtn').disabled=!r; document.getElementById('prvBtn').disabled=!r;
+  document.getElementById('assignBtn').disabled=!(G.students.length>0&&G.questions.length>0);
 }
 
-function chkReady(){const a=Object.keys(G.assignments).length;const r=G.students.length>0&&G.questions.length>0&&a>0;document.getElementById('genBtn').disabled=!r;document.getElementById('prvBtn').disabled=!r;document.getElementById('assignBtn').disabled=!(G.students.length>0&&G.questions.length>0);}
-
-/* ═══════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
    DOCX GENERATION
-   ═══════════════════════════════════════ */
-const gei=(id,fb='')=>{const el=document.getElementById(id);return(el&&el.value.trim())?el.value.trim():fb;};
-const DOCX_HDR=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`;
-const RELS_CT=`${DOCX_HDR}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>{IMGTYPES}</Types>`;
-const RELS_PKG=`${DOCX_HDR}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
-const RELS_DOC_TPL=`${DOCX_HDR}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>{IMGRELS}</Relationships>`;
+   ═══════════════════════════════════════════════════════════════════ */
+const NS_ALL=['xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"','xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"','xmlns:o="urn:schemas-microsoft-com:office:office"','xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"','xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"','xmlns:v="urn:schemas-microsoft-com:vml"','xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"','xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"','xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"','xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"','xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"','xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"'].join(' ');
 const SECPR=`<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="600" w:right="600" w:bottom="600" w:left="600" w:header="300" w:footer="300" w:gutter="0"/>`;
-const NS_DOC=`xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"`;
 
-function buildStyles(){
-  return`${DOCX_HDR}<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/>
-<w:pPr><w:spacing w:before="0" w:after="0" w:line="360" w:lineRule="auto"/></w:pPr>
-<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:style></w:styles>`;
-}
-const mkRpr=(b=false,sz=22,col='')=>`<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${b?'<w:b/><w:bCs/>':''}${col?`<w:color w:val="${col}"/>`:''}></w:rPr>`.replace('></w:rPr>','</w:rPr>');
-const SP=`<w:spacing w:before="40" w:after="40" w:line="360" w:lineRule="auto"/>`; // 1.5x
-const SP1=`<w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="auto"/>`; // 1x
+function buildSectionXml(student, question, rIdRemap) {
+  const cc=gei('examClass',''), sem=gei('examSem',student.sem||''), sub=gei('examSubject','');
+  const dt=gei('examDate',''), ses=gei('examSession',''), dept=gei('examDept',student.dept||'');
+  const HDR_BDR=`<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="333333"/><w:right w:val="nil"/></w:tcBorders>`;
+  const HDR_MAR=`<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+  const hCell=(txt,w2,bold=false)=>`<w:tc><w:tcPr><w:tcW w:w="${w2}" w:type="dxa"/>${HDR_BDR}${HDR_MAR}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr><w:r>${TNRPR(22,bold)}<w:t xml:space="preserve">${xesc(txt)}</w:t></w:r></w:p></w:tc>`;
+  const headerTbl = `
+<w:tbl>
+  <w:tblPr>
+    <w:tblW w:w="10000" w:type="dxa"/>
+    <w:tblBorders>
+      <w:top w:val="nil"/>
+      <w:left w:val="nil"/>
+      <w:bottom w:val="nil"/>
+      <w:right w:val="nil"/>
+      <w:insideH w:val="nil"/>
+      <w:insideV w:val="nil"/>
+    </w:tblBorders>
+    <w:tblLayout w:type="fixed"/>
+  </w:tblPr>
 
-/* Build inline drawing XML for an image (in a run) */
-function inlineDrawing(rid,cxEmu,cyEmu){
-  const id=Math.floor(Math.random()*99000+1000);
-  return`<w:drawing><wp:inline distT="0" distB="0" distL="114400" distR="114400"><wp:extent cx="${cxEmu}" cy="${cyEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${id}" name="img${rid}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="img${rid}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cxEmu}" cy="${cyEmu}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`;
-}
+  <w:tblGrid>
+    <w:gridCol w:w="3000"/>
+    <w:gridCol w:w="1300"/>
+    <w:gridCol w:w="5700"/>
+  </w:tblGrid>
 
-/* Build centred block drawing paragraph */
-function blockDrawingPara(rid,cxEmu,cyEmu){
-  const id=Math.floor(Math.random()*99000+1000);
-  return`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cxEmu}" cy="${cyEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${id}" name="blk${rid}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="blk${rid}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cxEmu}" cy="${cyEmu}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
-}
+  <!-- Row 1 -->
+  <w:tr>
+    <w:trPr>
+      <w:trHeight w:val="280" w:hRule="atLeast"/>
+    </w:trPr>
+    ${hCell('Course & Class: ' + cc, 3000)}
+    ${hCell('Semester: ' + sem, 1300)}
+   ${hCell('Subject: ' + sub, 5700, false, "center")}  <!-- ✅ Center -->
+  </w:tr>
 
-/* Convert token array → OOXML paragraphs.
-   Equations: emit native <m:oMath> XML directly — Word renders it perfectly.
-   Images: use ridMap to embed as drawings.
-*/
-function tokensToOOXML(tokens,ridMap){
-  if(!tokens||!tokens.length)return`<w:p><w:pPr>${SP}</w:pPr></w:p>`;
-  let xml='';
-  const lines=[];let cur=[];
-  for(const t of tokens){if(t.type==='br'){if(cur.length)lines.push(cur);cur=[];}else cur.push(t);}
-  if(cur.length)lines.push(cur);
-  if(!lines.length)return`<w:p><w:pPr>${SP}</w:pPr></w:p>`;
-  for(const line of lines){
-    let para=`<w:p><w:pPr>${SP}</w:pPr>`;
-    for(const tok of line){
-      if(tok.type==='text'){
-        const parts=tok.value.split('\n');
-        parts.forEach((part,pi)=>{
-          if(pi>0)para+=`</w:p><w:p><w:pPr>${SP}</w:pPr>`;
-          if(part)para+=`<w:r>${mkRpr()}<w:t xml:space="preserve">${xe(part)}</w:t></w:r>`;
-        });
-      } else if(tok.type==='eq'){
-        // Native OMML: close current w:p, emit oMath in its own paragraph, reopen
-        // This is exactly how Word stores inline equations
-        const eqData=G.eqMap&&G.eqMap[tok.eqKey];
-        if(eqData&&eqData.ommlXml){
-          // Clean up serialized OMML XML:
-          // 1. Strip xmlns declarations (they're on the document root instead)
-          // 2. Ensure m: prefix is present on oMath element
-          let omxml=eqData.ommlXml;
-          // Remove any xmlns attributes added by XMLSerializer
-          omxml=omxml.replace(/\s+xmlns(?::[a-z0-9]+)?="[^"]*"/g,'');
-          // Make sure the tag uses m: prefix (it should already from the source)
-          if(omxml.includes('<oMath')&&!omxml.includes('<m:oMath')){
-            omxml=omxml.replace(/<oMath/g,'<m:oMath').replace(/<\/oMath>/g,'</m:oMath>');
-          }
-          // Close current para, insert equation para, reopen
-          para+=`</w:p><w:p><w:pPr>${SP}</w:pPr>${omxml}</w:p><w:p><w:pPr>${SP}</w:pPr>`;
-        } else if(tok.latex){
-          para+=`<w:r>${mkRpr(false,18)}<w:t xml:space="preserve">${xe(tok.latex)}</w:t></w:r>`;
-        }
-      } else if(tok.type==='img'){
-        const newRid=ridMap&&ridMap[tok.rid];
-        if(newRid){
-          para+=`</w:p>${blockDrawingPara(newRid,3200000,2000000)}<w:p><w:pPr>${SP}</w:pPr>`;
-        }
-      }
-    }
-    para+=`</w:p>`;
-    xml+=para;
+  <!-- Row 2 -->
+  <w:tr>
+    <w:trPr>
+      <w:trHeight w:val="280" w:hRule="atLeast"/>
+    </w:trPr>
+    ${hCell('Reg No.: ' + (student.regNo || ''), 3000, true)}
+    ${hCell('Session: ' + ses, 1300)}
+    ${hCell('Date: ' + dt, 5700, false, "center")}  <!-- ✅ Center -->
+  </w:tr>
+
+</w:tbl>`;
+  const QW=9200, MW=800;
+  const Q_BDR=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+  const Q_MAR=`<w:tcMar><w:top w:w="55" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="55" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>`;
+  const HDR_SHD=`<w:shd w:val="clear" w:color="auto" w:fill="C8C8C8"/>`;
+  const qContentXml=buildQuestionCellXml(question, rIdRemap);
+  const markVal=question.marks[0]||'100';
+  const bloomNote=question.activeBloom?`<w:p><w:pPr>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:sz w:val="18"/><w:color w:val="5B21B6"/></w:rPr><w:t>[Bloom's: ${xesc(question.activeBloom)}]</w:t></w:r></w:p>`:'';
+  const qTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Question</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Marks</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${qContentXml}${bloomNote}</w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>${xesc(markVal)}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>`;
+  let rubricXml='';
+  if(G.rubricCols.length){
+    const nc=G.rubricCols.length,cw=Math.floor(10000/nc);
+    const RB=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+    const RM=`<w:tcMar><w:top w:w="45" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="45" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
+    const hc=G.rubricCols.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${HDR_SHD}${RB}${RM}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(20,true)}<w:t xml:space="preserve">${xesc(c)}</w:t></w:r></w:p></w:tc>`).join('');
+    const bc=G.rubricCols.map(()=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${RB}${RM}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc>`).join('');
+    rubricXml=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>RUBRICS</w:t></w:r></w:p><w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${G.rubricCols.map(()=>`<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid><w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${hc}</w:tr><w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${bc}</w:tr></w:tbl>`;
   }
-  return xml||`<w:p><w:pPr>${SP}</w:pPr></w:p>`;
+  const sigXml=`<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}<w:tabs><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve">Internal Examiner</w:t></w:r><w:r>${TNRPR(22)}<w:tab/></w:r><w:r>${TNRPR(22)}<w:t>External Examiner</w:t></w:r></w:p>`;
+  return headerTbl+`<w:p><w:pPr>${SP1}</w:pPr></w:p>`+qTbl+rubricXml+sigXml;
 }
 
-function buildHeaderSection(student){
-  const cc=gei('examClass','');const sem=gei('examSem',student.sem||'');
-  const sub=gei('examSubject','');const dt=gei('examDate','');const ses=gei('examSession','');
-  const dept=gei('examDept',student.dept||'');
-  //const staff=gei('examStaff','');const venue=gei('examVenue','');
-  const bdr=`<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="333333"/><w:right w:val="nil"/></w:tcBorders>`;
-  const cell=(txt,w2,b=false)=>`<w:tc><w:tcPr><w:tcW w:w="${w2}" w:type="dxa"/>${bdr}<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar></w:tcPr><w:p><w:pPr>${SP1}</w:pPr><w:r>${mkRpr(b)}<w:t xml:space="preserve">${xe(txt)}</w:t></w:r></w:p></w:tc>`;
-  // Row 1: Course & Class | Semester | Subject
-  const r1=`<w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${cell(`Course & Class: ${cc}`,3400)}${cell(`Semester: ${sem}`,1400)}${cell(`Subject: ${sub}`,5200)}</w:tr>`;
-  // Row 2: Reg No. | Dept | Session & Date
-  const r2=`<w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${cell(`Reg No.: ${student.regNo||''}`,3400,true)}${cell(`Dept: ${student.dept||dept||''}`,1400)}${cell(`Session: ${ses}    Date: ${dt}`,5200)}</w:tr>`;
-  // Row 3: Staff Name | Venue (only if either has a value)
-  //const hasRow3=staff||venue;
-  // tblGrid uses the finest column division: 3400 | 1400 | 5200
-  // Row 3 merges cols 2+3 into one cell of 6600 via gridSpan
-  const cell2span=(txt,w2,b=false)=>`<w:tc><w:tcPr><w:tcW w:w="${w2}" w:type="dxa"/><w:gridSpan w:val="2"/>${bdr}<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar></w:tcPr><w:p><w:pPr>${SP1}</w:pPr><w:r>${mkRpr(b)}<w:t xml:space="preserve">${xe(txt)}</w:t></w:r></w:p></w:tc>`;
-  //const r3fix=hasRow3?`<w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${cell(`Staff: ${staff}`,3400)}${cell2span(`Venue: ${venue}`,6600)}</w:tr>`:'';
-  return`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="3400"/><w:gridCol w:w="1400"/><w:gridCol w:w="5200"/></w:tblGrid>${r1}${r2}</w:tbl>`;
-}
+const CUT_LINE=`<w:p><w:pPr><w:pBdr><w:top w:val="dashed" w:sz="6" w:space="1" w:color="888888"/></w:pBdr><w:jc w:val="center"/><w:spacing w:before="60" w:after="60"/></w:pPr><w:r><w:rPr><w:sz w:val="14"/><w:szCs w:val="14"/><w:color w:val="888888"/></w:rPr><w:t>✂ – – – – – – – – – – – – – – CUT HERE – – – – – – – – – – – – – – ✂</w:t></w:r></w:p>`;
 
-function buildQTable(question,ridMap){
-  const QW=9300,MW=800;
-  const bdr=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
-  const cm=`<w:tcMar><w:top w:w="55" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="55" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>`;
-  const shd=`<w:shd w:val="clear" w:color="auto" w:fill="C8C8C8"/>`;
-  const hdrQ=`<w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${shd}${bdr}${cm}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${mkRpr(true)}<w:t>Question</w:t></w:r></w:p></w:tc>`;
-  const hdrM=`<w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${shd}${bdr}${cm}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${mkRpr(true)}<w:t>Marks</w:t></w:r></w:p></w:tc>`;
-  let rows='';
-  question.subQs.forEach((ln,i)=>{
-    const toks=question.subQsTokens&&question.subQsTokens[i];
-    const qXml=toks&&toks.length?tokensToOOXML(toks,ridMap):String(ln).split('\n').map(l=>`<w:p><w:pPr>${SP}</w:pPr><w:r>${mkRpr()}<w:t xml:space="preserve">${xe(l)}</w:t></w:r></w:p>`).join('');
-    const markVal=question.marks[i%question.marks.length]||'';
-    rows+=`<w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${bdr}${cm}</w:tcPr>${qXml}</w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${bdr}${cm}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${mkRpr(true)}<w:t xml:space="preserve">${xe(markVal)}</w:t></w:r></w:p></w:tc></w:tr>`;
-  });
-  // NOTE: Images are already rendered inline via tokensToOOXML — no standalone row needed
-  return`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr>${hdrQ}${hdrM}</w:tr>${rows}</w:tbl>`;
-}
-
-function buildRubrics(){
-  if(!G.rubricCols.length)return'';
-  const n=G.rubricCols.length,cw=Math.floor(10000/n);
-  const bdr=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
-  const cm=`<w:tcMar><w:top w:w="45" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="45" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
-  const shd=`<w:shd w:val="clear" w:color="auto" w:fill="C8C8C8"/>`;
-  const hc=G.rubricCols.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${shd}${bdr}${cm}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${mkRpr(true,20)}<w:t xml:space="preserve">${xe(c)}</w:t></w:r></w:p></w:tc>`).join('');
-  const bc=G.rubricCols.map(()=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${bdr}${cm}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc>`).join('');
-  const title=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${mkRpr(true)}<w:t>RUBRICS</w:t></w:r></w:p>`;
-  return title+`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${G.rubricCols.map(()=>`<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid><w:tr><w:trPr><w:trHeight w:val="420" w:hRule="atLeast"/></w:trPr>${hc}</w:tr><w:tr><w:trPr><w:trHeight w:val="420" w:hRule="atLeast"/></w:trPr>${bc}</w:tr></w:tbl>`;
-}
-
-const gapP=`<w:p><w:pPr>${SP1}</w:pPr></w:p>`;
-const signatureP=`<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}<w:tabs><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr><w:r>${mkRpr()}<w:t xml:space="preserve">Internal Examiner</w:t></w:r><w:r>${mkRpr()}<w:tab/></w:r><w:r>${mkRpr()}<w:t>External Examiner</w:t></w:r></w:p>`;
-const cutLine=`<w:p><w:pPr><w:pBdr><w:top w:val="dashed" w:sz="6" w:space="1" w:color="888888"/></w:pBdr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr><w:sz w:val="14"/><w:szCs w:val="14"/><w:color w:val="888888"/></w:rPr><w:t>✂ – – – – – – – – – – – – CUT HERE – – – – – – – – – – – – ✂</w:t></w:r></w:p>`;
-
-async function buildDocxZip(ridPairs,bodyXml){
-  const zip=new JSZip();
-  let imgRels='',imgTypes='';
-  const seen=new Set();
-  for(const[origRid,newRid] of Object.entries(ridPairs)){
-    if(seen.has(newRid))continue;seen.add(newRid);
-    const d=G.imageMap[origRid];if(!d)continue;
-    const ext=d.ext;
-    const mime=d.mime;
-    const fname=`img_${newRid}.${ext}`;
-    let blobData=d.blob;
-    if(!blobData&&d.dataUrl){const r2=await fetch(d.dataUrl);blobData=await r2.blob();}
-    zip.file(`word/media/${fname}`,blobData);
-    imgRels+=`<Relationship Id="${newRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${fname}"/>`;
-    const typeTag=`<Default Extension="${ext}" ContentType="${mime}"/>`;
-    if(!imgTypes.includes(`Extension="${ext}"`))imgTypes+=typeTag;
+async function buildDocxZip(bodyXml, rIdRemap) {
+  const zip=new JSZip(); let imgRels='',imgTypes=''; const seen=new Set();
+  for(const[orig,newR]of Object.entries(rIdRemap)){
+    if(seen.has(newR)) continue; seen.add(newR);
+    const d=G.imageMap[orig]; if(!d) continue;
+    const fname=`img_${newR}.${d.ext}`;
+    zip.file(`word/media/${fname}`,d.b64,{base64:true});
+    imgRels+=`<Relationship Id="${newR}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${fname}"/>`;
+    if(!imgTypes.includes(`Extension="${d.ext}"`)) imgTypes+=`<Default Extension="${d.ext}" ContentType="${d.ct}"/>`;
   }
-  zip.file('[Content_Types].xml',RELS_CT.replace('{IMGTYPES}',imgTypes));
-  zip.file('_rels/.rels',RELS_PKG);
-  zip.file('word/document.xml',`${DOCX_HDR}<w:document ${NS_DOC}><w:body>${bodyXml}<w:sectPr>${SECPR}</w:sectPr></w:body></w:document>`);
-  zip.file('word/styles.xml',buildStyles());
-  zip.file('word/_rels/document.xml.rels',RELS_DOC_TPL.replace('{IMGRELS}',imgRels));
+  const CT=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>${imgTypes}</Types>`;
+  const PKG_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+  const DOC_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>${imgRels}</Relationships>`;
+  const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="0" w:line="360" w:lineRule="auto"/></w:pPr><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:style></w:styles>`;
+  const DOC=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${NS_ALL}><w:body>${bodyXml}<w:sectPr>${SECPR}</w:sectPr></w:body></w:document>`;
+  zip.file('[Content_Types].xml',CT); zip.file('_rels/.rels',PKG_RELS); zip.file('word/styles.xml',STYLES); zip.file('word/_rels/document.xml.rels',DOC_RELS); zip.file('word/document.xml',DOC);
   return zip;
 }
-
-function allocRids(question){
-  const ridMap={};let n=2;
-  // Collect image rIds only from tokens (not imageRids array — avoids double counting)
-  for(const tGroup of(question.subQsTokens||[])){
-    for(const tok of(tGroup||[])){
-      if(tok.type==='img'&&tok.rid&&G.imageMap[tok.rid]&&!ridMap[tok.rid]){
-        ridMap[tok.rid]=`rId${n++}`;
-      }
-    }
-  }
-  return ridMap;
-}
-
-function buildSection(student,question,ridMap){
-  return buildHeaderSection(student)+gapP+buildQTable(question,ridMap)+buildRubrics()+signatureP;
-}
-
-async function buildStudentDocx(student,question){
-  const ridMap=allocRids(question);
-  const sec=buildSection(student,question,ridMap);
-  const body=sec+cutLine+sec;
-  const zip=await buildDocxZip(ridMap,body);
+async function buildStudentDocx(student, question) {
+  const rIdRemap=collectRIds(question);
+  const sec=buildSectionXml(student, question, rIdRemap);
+  const zip=await buildDocxZip(sec+CUT_LINE+sec, rIdRemap);
   return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE',compressionOptions:{level:6}});
 }
-
-async function buildMergedDocx(){
-  // Collect all image rIds from tokens across all used questions (not imageRids array)
-  const allRidMap={};let n=2;
-  for(const qi of new Set(Object.values(G.assignments))){
-    for(const tGroup of(G.questions[qi].subQsTokens||[])){
-      for(const tok of(tGroup||[])){
-        if(tok.type==='img'&&tok.rid&&G.imageMap[tok.rid]&&!allRidMap[tok.rid]){
-          allRidMap[tok.rid]=`rId${n++}`;
-        }
-      }
-    }
-  }
+async function buildMergedDocx() {
+  const allRidMap=collectAllRIds(G.assignments, G.questions);
   const pgBrk=`<w:p><w:pPr><w:sectPr>${SECPR}</w:sectPr></w:pPr></w:p>`;
   let body='';
   for(let pi=0;pi<G.pairedPages.length;pi++){
     const[s1i,s2i]=G.pairedPages[pi];
-    body+=buildSection(G.students[s1i],G.questions[G.assignments[s1i]],allRidMap);
-    if(s2i!==null)body+=cutLine+buildSection(G.students[s2i],G.questions[G.assignments[s2i]],allRidMap);
-    if(pi<G.pairedPages.length-1)body+=pgBrk;
+    body+=buildSectionXml(G.students[s1i],G.questions[G.assignments[s1i]],allRidMap);
+    if(s2i!==null){ body+=CUT_LINE; body+=buildSectionXml(G.students[s2i],G.questions[G.assignments[s2i]],allRidMap); }
+    if(pi<G.pairedPages.length-1) body+=pgBrk;
   }
-  const zip=await buildDocxZip(allRidMap,body);
+  const zip=await buildDocxZip(body, allRidMap);
   return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE',compressionOptions:{level:6}});
 }
 
-/* ═══ GENERATE ═══ */
-async function doGenerate(){
-  if(!G.students.length||!G.questions.length){toast('Upload files first','warn');return;}
-  showSpin('Generating Papers…','Building papers with equations & images',0);await delay(30);
-  try{
-    G.docxBlobs=[];G.pairedPages=[];
+/* ═══════════════════════════════════════════════════════════════════
+   GENERATE
+   ═══════════════════════════════════════════════════════════════════ */
+async function doGenerate() {
+  if(!G.students.length||!G.questions.length){ toast('Upload files first','warn'); return; }
+  showSpin('Generating Papers…','Lossless equations · Tables · Images',0); await delay(30);
+  try {
+    G.docxBlobs=[]; G.pairedPages=[];
     const tot=G.students.length;
-    for(let i=0;i<tot;i++){if(G.assignments[i]===undefined)G.assignments[i]=Math.floor(Math.random()*G.questions.length);}
-    for(let i=0;i<tot;i+=2)G.pairedPages.push([i,i+1<tot?i+1:null]);
+    for(let i=0;i<tot;i++) if(G.assignments[i]===undefined) G.assignments[i]=Math.floor(Math.random()*G.questions.length);
+    for(let i=0;i<tot;i+=2) G.pairedPages.push([i,i+1<tot?i+1:null]);
     for(let i=0;i<tot;i++){
       setSP(Math.round(i/tot*70));
       document.getElementById('spinS').textContent=`Paper ${i+1}/${tot}: ${G.students[i].name||G.students[i].regNo}`;
-      await delay(2);
+      await delay(1);
       const blob=await buildStudentDocx(G.students[i],G.questions[G.assignments[i]]);
       G.docxBlobs.push({blob,student:G.students[i],qi:G.assignments[i]});
     }
-    setSP(80);document.getElementById('spinS').textContent='Building merged DOCX…';await delay(20);
+    setSP(80); document.getElementById('spinS').textContent='Merging…'; await delay(10);
     G.mergedBlob=await buildMergedDocx();
-    setSP(100);await delay(200);hideSpin();
-    renderPreview();chkReady();
-    const eqC=Object.keys(G.eqMap||{}).length;
-    const imgC2=Object.keys(G.imageMap).length;
-    showAlert('genAlert','aok',`✅ ${tot} papers · ${G.pairedPages.length} pages · ${imgC2} images · ${eqC} equations (native OMML)`);
+    setSP(100); await delay(200); hideSpin();
+    renderPreview(); chkReady();
+    const eqC=G.questions.reduce((a,q)=>a+q.equations.length,0);
+    const imgC=Object.keys(G.imageMap).length;
+    const tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
+    showAlert('genAlert','aok',`✅ ${tot} papers · ${G.pairedPages.length} pages · ${imgC} images · ${eqC} equations (lossless) · ${tblC} tables`);
     document.getElementById('dlPanel').classList.add('show');
     document.getElementById('prvSec').style.display='block';
     document.getElementById('prvBtn').disabled=false;
-    document.getElementById('dlDesc').textContent=`${tot} papers · ${G.pairedPages.length} pages · 11pt Times New Roman · 1.5 spacing`;
+    document.getElementById('dlDesc').textContent=`${tot} papers · ${G.pairedPages.length} pages · 11pt Times New Roman`;
     document.getElementById('dlPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
-    setStep(5);toast(`✅ ${tot} papers ready!`,'ok');
-  }catch(err){hideSpin();showAlert('genAlert','aerr','❌ '+err.message);toast(err.message,'err');console.error(err);}
+    setStep(5); toast(`✅ ${tot} papers ready!`,'ok');
+  } catch(err){ hideSpin(); showAlert('genAlert','aerr','❌ '+err.message); toast(err.message,'err'); console.error(err); }
 }
 
-/* ═══ PREVIEW ═══ */
-function renderPreview(){G.prevPage=0;showPreviewPg(0);document.getElementById('pTot').textContent=`${G.pairedPages.length} pages · ${G.docxBlobs.length} students`;}
+/* ═══════════════════════════════════════════════════════════════════
+   PREVIEW
+   ═══════════════════════════════════════════════════════════════════ */
+function renderPreview(){ G.prevPage=0; showPreviewPg(0); document.getElementById('pTot').textContent=`${G.pairedPages.length} pages · ${G.docxBlobs.length} students`; }
 
-function tokensToHTMLPreview(tokens){
-  if(!tokens||!tokens.length)return'';
-  let h='';
-  for(const tok of tokens){
-    if(tok.type==='text')h+=`<span>${esc(tok.value)}</span>`;
-    else if(tok.type==='br')h+='<br/>';
-    else if(tok.type==='eq'){
-      // Equation: use previewDataUrl (MathJax rendered) or LaTeX text
-      if(tok.previewDataUrl){
-        h+=`<img src="${tok.previewDataUrl}" style="display:inline-block;vertical-align:middle;max-height:2.2em;max-width:260px;border:none;margin:0 2px" alt="eq"/>`;
-      } else if(tok.latex){
-        // Fallback: render LaTeX inline via MathJax in the preview div
-        h+=`<span class="mjax-eq" data-latex="${esc(tok.latex)}" style="font-family:monospace;font-size:10pt;background:#f5f0ff;padding:1px 5px;border-radius:3px;color:#5b21b6">${esc(tok.latex)}</span>`;
-      }
-    } else if(tok.type==='img'){
-      const d=G.imageMap[tok.rid];
-      if(d)h+=`<img src="${d.dataUrl}" style="display:block;max-height:200px;max-width:90%;object-fit:contain;border:1px solid #eee;border-radius:3px;margin:6px auto" alt="img"/>`;
-    }
-  }
-  return h;
-}
-
-function showPreviewPg(idx){
-  if(!G.pairedPages.length)return;
-  idx=Math.max(0,Math.min(idx,G.pairedPages.length-1));G.prevPage=idx;
-  const[s1i,s2i]=G.pairedPages[idx];const s1=G.students[s1i];const q1=G.questions[G.assignments[s1i]];
+function showPreviewPg(idx) {
+  if(!G.pairedPages.length) return;
+  idx=Math.max(0,Math.min(idx,G.pairedPages.length-1)); G.prevPage=idx;
+  const[s1i,s2i]=G.pairedPages[idx];
+  const s1=G.students[s1i], q1=G.questions[G.assignments[s1i]];
   document.getElementById('pLbl').textContent=`${idx+1}/${G.pairedPages.length} — ${s1.name||s1.regNo}${s2i!==null?' + '+(G.students[s2i].name||G.students[s2i].regNo):''}`;
-  const cc=gei('examClass','');const sem=gei('examSem','');const sub=gei('examSubject','');
-  const dt=gei('examDate','');const ses=gei('examSession','');const dept=gei('examDept','');
-  const staff=gei('examStaff','');const venue=gei('examVenue','');
+  const cc=gei('examClass',''),sem=gei('examSem',''),sub=gei('examSubject','');
+  const dt=gei('examDate',''),ses=gei('examSession',''),dept=gei('examDept','');
 
-  function secHTML(student,question){
-    const qRows=question.subQs.map((s,i)=>{
-      const toks=question.subQsTokens&&question.subQsTokens[i];
-      const cell=toks&&toks.length?tokensToHTMLPreview(toks):esc(s);
-      return`<tr><td style="padding:6px 8px;border:1px solid #ccc;line-height:1.5;font-size:11pt">${cell}</td><td style="padding:4px 6px;border:1px solid #ccc;text-align:center;font-weight:700;width:50px;font-size:11pt">${esc(question.marks[i%question.marks.length]||'')}</td></tr>`;
-    }).join('');
-    // Images are already rendered inline via tokensToHTMLPreview — no standalone row needed
-    const imgRow='';
-    const rub=G.rubricCols.length?`<p style="text-align:center;font-weight:700;font-size:11pt;text-decoration:underline;margin:5px 0 3px">RUBRICS</p><table style="width:100%;border-collapse:collapse"><thead><tr>${G.rubricCols.map(c=>`<th style="padding:4px 6px;border:1px solid #ccc;background:#e4e4e4;text-align:center;font-size:10pt">${esc(c)}</th>`).join('')}</tr></thead><tbody><tr>${G.rubricCols.map(()=>'<td style="border:1px solid #ccc;height:32px"></td>').join('')}</tr></tbody></table>`:'';
+  function buildPrev(student, question) {
+    let paras=question.paras;
+    let bloomActive=false;
+    if(question.activeBloom&&question.bloomReframes?.[question.activeBloom]){
+      bloomActive=true;
+      paras=[{text:question.bloomReframes[question.activeBloom],images:question.images,equations:question.equations,tables:question.nestedTables.length?[{rows:question.nestedTables[0]?.rows||[]}]:[]}];
+    }
+    let qContent='';
+    for(const para of paras){
+      // Tables — shown as actual HTML tables in preview
+      for(const tbl of(para.tables||[])){
+        if(!tbl.rows||!tbl.rows.length) continue;
+        qContent+=`<table style="border-collapse:collapse;margin:6px 0;font-size:10pt;max-width:100%;width:auto;border:1.5px solid black;text-align:center">`;
+        
+        tbl.rows.forEach((row,ri)=>{
+          qContent+=`<tr>${row.map(c=>`<${ri===0?'th':'td'} style="border:1px solid #888;padding:4px 9px;text-align:center${ri===0?';background:#d8d8d8;font-weight:700':''}">${esc(c.text||'')}</${ri===0?'th':'td'}>`).join('')}</tr>`;
+        });
+        qContent+=`</table>`;
+      }
+      // Images
+      for(const img of(para.images||[]))
+        qContent+=`<div style="text-align:center;margin:6px 0"><img src="data:${img.ct};base64,${img.b64}" style="max-width:100%;max-height:180px;object-fit:contain;border:1px solid #eee;border-radius:3px"/></div>`;
+      // Equations
+      for(const eq of(para.equations||[]))
+        if(eq.text) qContent+=`<span style="font-family:'Times New Roman',serif;font-style:italic;color:#4c1d95;background:#faf5ff;border:1px solid #ddd6fe;border-radius:3px;padding:1px 8px;font-size:12pt;display:inline-block;margin:2px">${esc(eq.text)}</span>`;
+      // Text
+      if(para.text&&para.text.trim())
+        qContent+=`<div style="line-height:1.75;margin:3px 0">${esc(para.text)}</div>`;
+    }
+    if(!qContent) qContent=esc(question.text||'—');
+    const markVal=question.marks[0]||'100';
+    const bloomNote=bloomActive?`<div style="font-size:9px;font-style:italic;color:#5b21b6;margin-top:5px;font-family:sans-serif">[Bloom's: ${question.activeBloom}]</div>`:'';
     return`<div style="font-family:'Times New Roman',Times,serif;font-size:11pt;line-height:1.5">
-      <table style="width:100%;border-collapse:collapse;margin-bottom:4px">
-        <tr><td style="padding:3px 4px;border-bottom:1px solid #888;font-size:10.5pt">Course &amp; Class: <b>${esc(cc)}</b></td><td style="padding:3px 4px;border-bottom:1px solid #888;font-size:10.5pt;white-space:nowrap">Semester: <b>${esc(sem)}</b></td><td style="padding:3px 4px;border-bottom:1px solid #888;font-size:10.5pt">Subject: <b>${esc(sub)}</b></td></tr>
-        <tr><td style="padding:3px 4px;border-bottom:1.5px solid #333;font-size:10.5pt"><b>Reg No.: ${esc(student.regNo||'—')}</b></td><td style="padding:3px 4px;border-bottom:1.5px solid #333;font-size:10.5pt;white-space:nowrap">Dept: ${esc(student.dept||dept||'')}</td><td style="padding:3px 4px;border-bottom:1.5px solid #333;font-size:10.5pt">Session: <b>${esc(ses)}</b> &nbsp; Date: <b>${esc(dt)}</b></td></tr>
-        ${(staff||venue)?`<tr><td style="padding:3px 4px;border-bottom:1px solid #888;font-size:10.5pt">Staff: <b>${esc(staff)}</b></td><td colspan="2" style="padding:3px 4px;border-bottom:1px solid #888;font-size:10.5pt">Venue: <b>${esc(venue)}</b></td></tr>`:''}
+      <table style="width:100%;border-collapse:collapse;margin-bottom:5px;font-size:10.5pt">
+        <tr><td style="padding:3px 5px;border-bottom:1px solid #999">Course &amp; Class: <b>${esc(cc)}</b></td><td style="padding:3px 5px;border-bottom:1px solid #999">Semester: <b>${esc(sem)}</b></td><td style="padding:3px 5px;border-bottom:1px solid #999">Subject: <b>${esc(sub)}</b></td></tr>
+        <tr><td style="padding:3px 5px;border-bottom:2px solid #333"><b>Reg No.: ${esc(student.regNo||'—')}</b></td><td style="padding:3px 5px;border-bottom:2px solid #333">Dept: ${esc(student.dept||dept||'')}</td><td style="padding:3px 5px;border-bottom:2px solid #333">Session: <b>${esc(ses)}</b> &nbsp; Date: <b>${esc(dt)}</b></td></tr>
       </table>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:3px">
-        <thead><tr><th style="padding:4px 8px;border:1px solid #ccc;background:#e0e0e0;text-align:center;font-size:10pt">Question</th><th style="padding:4px 6px;border:1px solid #ccc;background:#e0e0e0;text-align:center;width:50px">Marks</th></tr></thead>
-        <tbody>${qRows}${imgRow}</tbody>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:5px">
+        <thead><tr><th style="padding:5px 8px;border:1px solid #ccc;background:#e0e0e0;text-align:center">Question</th><th style="padding:5px 6px;border:1px solid #ccc;background:#e0e0e0;text-align:center;width:52px">Marks</th></tr></thead>
+        <tbody><tr>
+          <td style="padding:7px 9px;border:1px solid #ccc;line-height:1.75">${qContent}${bloomNote}</td>
+          <td style="padding:5px 6px;border:1px solid #ccc;text-align:center;font-weight:700">${esc(markVal)}</td>
+        </tr></tbody>
       </table>
-      ${rub}
-      <div style="margin-top:28px;padding-top:4px;border-top:0.5px solid #ddd;display:flex;justify-content:space-between;font-size:11pt"><span>Internal Examiner</span><span>External Examiner</span></div>
+      ${G.rubricCols.length?`<p style="text-align:center;font-weight:700;text-decoration:underline;margin:5px 0 3px">RUBRICS</p><table style="width:100%;border-collapse:collapse"><thead><tr>${G.rubricCols.map(c=>`<th style="padding:4px 6px;border:1px solid #ccc;background:#e4e4e4;text-align:center;font-size:10pt">${esc(c)}</th>`).join('')}</tr></thead><tbody><tr>${G.rubricCols.map(()=>'<td style="border:1px solid #ccc;height:32px"></td>').join('')}</tr></tbody></table>`:''}
+      <div style="margin-top:26px;display:flex;justify-content:space-between"><span>Internal Examiner</span><span>External Examiner</span></div>
     </div>`;
   }
-  let html=`<div class="pp">${secHTML(s1,q1)}`;
-  if(s2i!==null){const s2=G.students[s2i];const q2=G.questions[G.assignments[s2i]];html+=`<div class="pcut">✂ – – – – – – – – – – – – – – CUT HERE – – – – – – – – – – – – – – ✂</div>${secHTML(s2,q2)}`;}
+  let html=`<div class="pp">${buildPrev(s1,q1)}`;
+  if(s2i!==null){ const s2=G.students[s2i],q2=G.questions[G.assignments[s2i]]; html+=`<div class="pcut">✂ – – – – – – – – – – – – – – CUT HERE – – – – – – – – – – – – – – ✂</div>${buildPrev(s2,q2)}`; }
   html+='</div>';
   document.getElementById('previewPaper').innerHTML=html;
-  // Ask MathJax to typeset any fallback LaTeX spans in preview
-  if(window.MathJax&&window.MathJax.typesetPromise){
-    window.MathJax.typesetPromise([document.getElementById('previewPaper')]).catch(e=>console.warn('MJ typeset:',e));
-  }
 }
-function pNav(d){showPreviewPg(G.prevPage+d);}
-function togPreview(){const s=document.getElementById('prvSec');const show=s.style.display==='none';s.style.display=show?'block':'none';if(show&&G.pairedPages.length)showPreviewPg(G.prevPage);}
+function pNav(d){ showPreviewPg(G.prevPage+d); }
+function togPreview(){ const s=document.getElementById('prvSec'); const show=s.style.display==='none'; s.style.display=show?'block':'none'; if(show&&G.pairedPages.length) showPreviewPg(G.prevPage); }
 
-/* ═══ DOWNLOADS ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   DOWNLOADS
+   ═══════════════════════════════════════════════════════════════════ */
 function dlDocx(){
-  if(!G.mergedBlob)return;
-  const url=URL.createObjectURL(G.mergedBlob);const a=document.createElement('a');a.href=url;
+  if(!G.mergedBlob) return;
+  const url=URL.createObjectURL(G.mergedBlob),a=document.createElement('a'); a.href=url;
   const sub=gei('examSubject','QP').split(/[-–]/)[0].trim().replace(/[^a-zA-Z0-9]/g,'_');
-  a.download=`LabQP_v9_${sub}_${G.pairedPages.length}Pages.docx`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  toast('DOCX downloaded (equations + images embedded)','ok');
+  a.download=`LabQP_v6_${sub}_${G.pairedPages.length}Pages.docx`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast('DOCX downloaded','ok');
 }
 async function dlZip(){
-  if(!G.docxBlobs.length)return;
-  showSpin('Packaging…','Creating individual files',0);await delay(20);
+  if(!G.docxBlobs.length) return;
+  showSpin('Packaging…','Creating individual files',0); await delay(20);
   const zip=new JSZip();
   for(let i=0;i<G.docxBlobs.length;i++){
     const{blob,student}=G.docxBlobs[i];
     const fname=`${String(i+1).padStart(3,'0')}_${(student.regNo||'s'+i).replace(/[^a-zA-Z0-9]/g,'_')}_${(student.name||'').replace(/[^a-zA-Z0-9]/g,'_').substring(0,18)}.docx`;
-    zip.file(fname,await blob.arrayBuffer());
-    setSP(Math.round(i/G.docxBlobs.length*90));
+    zip.file(fname,await blob.arrayBuffer()); setSP(Math.round(i/G.docxBlobs.length*90));
   }
-  const zb=await zip.generateAsync({type:'blob',compression:'DEFLATE'});hideSpin();
-  const url=URL.createObjectURL(zb);const a=document.createElement('a');a.href=url;
-  a.download=`LabQP_v9_${G.docxBlobs.length}Students.zip`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  toast('ZIP downloaded','ok');
+  const zb=await zip.generateAsync({type:'blob',compression:'DEFLATE'}); hideSpin();
+  const url=URL.createObjectURL(zb),a=document.createElement('a'); a.href=url;
+  a.download=`LabQP_v6_${G.docxBlobs.length}Students.zip`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast('ZIP downloaded','ok');
 }
 
-/* ═══ UI HELPERS ═══ */
-function setStep(n){for(let i=1;i<=5;i++){const el=document.getElementById('sn'+i);if(!el)continue;const sn=el.querySelector('.sn-n');if(i<n){el.className='sn done';sn.textContent='✓';}else if(i===n){el.className='sn act';sn.textContent=i;}else{el.className='sn';sn.textContent=i;}}}
-function showSpin(t,s,p){document.getElementById('spinT').textContent=t;document.getElementById('spinS').textContent=s;document.getElementById('pf').style.width=p+'%';document.getElementById('spinOv').classList.add('show');}
-function setSP(p){document.getElementById('pf').style.width=p+'%';}
-function hideSpin(){document.getElementById('spinOv').classList.remove('show');}
-function showAlert(id,cls,msg){const el=document.getElementById(id);el.style.display='flex';el.className='alert '+cls;el.innerHTML=`<span>${{ainf:'ℹ️',aok:'✅',aerr:'❌',awrn:'⚠️'}[cls]||'ℹ️'}</span><span style="line-height:1.6">${msg}</span>`;}
-
-document.getElementById('assignModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+/* ═══════════════════════════════════════════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function setStep(n){ for(let i=1;i<=5;i++){ const el=document.getElementById('sn'+i); if(!el) continue; const sn=el.querySelector('.sn-n'); if(i<n){el.className='sn done';sn.textContent='✓';}else if(i===n){el.className='sn act';sn.textContent=i;}else{el.className='sn';sn.textContent=i;} } }
+function showSpin(t,s,p){ document.getElementById('spinT').textContent=t; document.getElementById('spinS').textContent=s; document.getElementById('pf').style.width=p+'%'; document.getElementById('spinOv').classList.add('show'); }
+function setSP(p){ document.getElementById('pf').style.width=p+'%'; }
+function hideSpin(){ document.getElementById('spinOv').classList.remove('show'); }
+function showAlert(id,cls,msg){ const el=document.getElementById(id); el.style.display='flex'; el.className='alert '+cls; el.innerHTML=`<span>${{ainf:'ℹ️',aok:'✅',aerr:'❌',awrn:'⚠️'}[cls]||'ℹ️'}</span><span style="line-height:1.6">${msg}</span>`; }
+document.getElementById('assignModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 </script>
 </body>
 </html>
