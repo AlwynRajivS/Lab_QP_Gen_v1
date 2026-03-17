@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="banner.png" alt="Lab QP Generator Banner" width="100%" />
+  <img src="banner1.png" alt="Lab QP Generator Banner" width="100%" />
 </p>
 # 🧪 Lab QP Generator v7 · AI-Powered Practical Examination System
 
