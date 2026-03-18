@@ -265,6 +265,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
   <div class="pill" id="bankPill"><div class="pill-dot"></div>No bank</div>
   <div class="pill" id="stuPill"><div class="pill-dot"></div>No students</div>
   <div class="pill" id="asnPill" style="display:none"><div class="pill-dot"></div><span id="asnTxt">0 assigned</span></div>
+  <button class="btn bg_" style="padding:4px 12px;font-size:10px;border-radius:20px;gap:5px" onclick="toggleApiPanel()" title="Set Anthropic API Key for AI Online Bloom's">🔑 API Key</button>
 </div>
 <div class="snav">
   <div class="snav-r">
@@ -321,6 +322,27 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
     </div>
     <div id="rubricBlk" style="display:none"></div>
   </div>
+</div>
+<!-- API KEY PANEL -->
+<div id="apiKeyPanel" style="background:#fdf4ff;border:1px solid #e9d5ff;border-left:4px solid #7c3aed;border-radius:16px;padding:16px 20px;margin-bottom:12px;display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <span style="font-size:18px">🔑</span>
+    <span style="font-size:13px;font-weight:800;color:#4c1d95">Anthropic API Key — for 🌐 AI Online Bloom's Reframe</span>
+    <button class="btn bg_" style="margin-left:auto;padding:3px 10px;font-size:9px" onclick="document.getElementById('apiKeyPanel').style.display='none'">✕ Close</button>
+  </div>
+  <div style="font-size:10.5px;color:#5b21b6;line-height:1.7;margin-bottom:10px">
+    <b>How to get a free API key:</b><br>
+    1. Go to <b>console.anthropic.com</b> → Sign up / Log in<br>
+    2. Click <b>API Keys</b> in the left sidebar → <b>Create Key</b><br>
+    3. Copy the key (starts with <code style="background:#ede9fe;padding:1px 5px;border-radius:4px">sk-ant-…</code>) and paste below<br>
+    <span style="color:#7c3aed;font-size:9.5px">⚠️ New accounts get free credits. Key is saved in your browser only — never sent anywhere except Anthropic's API.</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input id="apiKeyInp" type="password" placeholder="sk-ant-api03-…" style="flex:1;min-width:260px;border:1.5px solid #c4b5fd;background:#fff;color:#1e1b4b;padding:8px 12px;border-radius:8px;font-family:monospace;font-size:12px;outline:none" oninput="this.style.borderColor=this.value.startsWith('sk-ant')?'#7c3aed':'#c4b5fd'"/>
+    <button class="btn bv" style="padding:7px 18px" onclick="saveApiKey()">💾 Save Key</button>
+    <button class="btn bg_" style="padding:7px 14px;font-size:10px" onclick="document.getElementById('apiKeyInp').type=document.getElementById('apiKeyInp').type==='password'?'text':'password'">👁 Show/Hide</button>
+  </div>
+  <div style="margin-top:8px;font-size:9px;color:#7c3aed;font-family:var(--fm)" id="apiKeyStatus"></div>
 </div>
 <!-- §3 -->
 <div class="sh"><div class="sh-icon si-b">3</div><h2>Question Bank</h2><span class="sh-tag tag-b">Lossless Eq · Images · Tables</span><span class="sh-tag tag-v" style="margin-left:4px">🧠 Bloom's</span><span class="sh-tag tag-g" style="margin-left:4px">✈️ Offline</span></div>
@@ -688,6 +710,43 @@ const SP1  = `<w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="aut
 const TNRPR= (sz=22,bold=false)=>`<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${bold?'<w:b/><w:bCs/>':''}</w:rPr>`;
 const IMG_XML=(nRId)=>{ const uid=Math.floor(Math.random()*89000+10000); return `<w:drawing><wp:inline distT="0" distB="0" distL="114400" distR="114400"><wp:extent cx="3429000" cy="2286000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${uid}" name="Img${nRId}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Img${nRId}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${nRId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3429000" cy="2286000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`; };
 
+/* ── _forceTblBorders — inject solid single borders into serialized w:tbl XML ── */
+const FORCED_TBL_BDRS = `<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders>`;
+const FORCED_TC_BDRS  = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
+
+function _forceTblBorders(xmlSeg) {
+  // 1. Replace existing tblBorders (nil or absent) with solid borders
+  xmlSeg = xmlSeg.replace(/<w:tblBorders\b[^>]*>[\s\S]*?<\/w:tblBorders>/g, FORCED_TBL_BDRS);
+  // 2. If no tblBorders existed, inject after <w:tblPr>
+  if(!xmlSeg.includes('<w:tblBorders')) {
+    xmlSeg = xmlSeg.replace(/(<w:tblPr\b[^>]*>)([\s\S]*?)(<\/w:tblPr>)/,
+      (m,open,inner,close)=>`${open}${inner}${FORCED_TBL_BDRS}${close}`);
+  }
+  // 3. Replace existing tcBorders with solid borders
+  xmlSeg = xmlSeg.replace(/<w:tcBorders\b[^>]*>[\s\S]*?<\/w:tcBorders>/g, FORCED_TC_BDRS);
+  // 4. Inject tcBorders into any tcPr that lacks them
+  xmlSeg = xmlSeg.replace(/(<w:tcPr\b[^>]*>)([\s\S]*?)(<\/w:tcPr>)/g, (m,open,inner,close)=>{
+    if(inner.includes('w:tcBorders')) return m;
+    return `${open}${inner}${FORCED_TC_BDRS}${close}`;
+  });
+  // 5. Force center alignment on ALL <w:p> inside table cells
+  //    Match each <w:p> and ensure its <w:pPr> contains <w:jc w:val="center"/>
+  xmlSeg = xmlSeg.replace(/(<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/g, (m, pOpen, pInner, pClose)=>{
+    // Only act on paragraphs inside table cells — detected by context being inside w:tc
+    // We inject into pPr; if pPr absent, add it
+    if(pInner.includes('w:jc')) {
+      // Replace any existing jc with center
+      return pOpen + pInner.replace(/<w:jc\b[^\/]*\/>/g,'<w:jc w:val="center"/>') + pClose;
+    }
+    if(pInner.includes('<w:pPr>') || pInner.includes('<w:pPr ')) {
+      return pOpen + pInner.replace(/(<w:pPr\b[^>]*>)/,'$1<w:jc w:val="center"/>') + pClose;
+    }
+    // No pPr at all — insert one
+    return pOpen + '<w:pPr><w:jc w:val="center"/></w:pPr>' + pInner + pClose;
+  });
+  return xmlSeg;
+}
+
 function buildQuestionCellXml(question, rIdRemap) {
   if(question.activeBloom && question.bloomReframes?.[question.activeBloom])
     return _buildBloomXml(question.bloomReframes[question.activeBloom], question, rIdRemap);
@@ -704,7 +763,13 @@ function buildQuestionCellXml(question, rIdRemap) {
       try {
         const cloned=safeImp(G.scratchDoc, para.rawNode);
         remapRIds(cloned, rIdRemap);
-        xml+=new XMLSerializer().serializeToString(cloned);
+        let seg=new XMLSerializer().serializeToString(cloned);
+        // ── FORCE BORDERS on any w:tbl inside the cloned XML ──
+        // Replaces or injects <w:tblBorders> so nested tables always have visible lines
+        if(para.rawNode.localName==='tbl') {
+          seg = _forceTblBorders(seg);
+        }
+        xml+=seg;
         continue;
       } catch(e){ console.warn('safeImp fallback:', e.message); }
     }
@@ -939,14 +1004,15 @@ function renderQGrid() {
       eqHtml+='</div>';
     }
 
-    /* ── NESTED TABLE PREVIEW: uses .qc-tbl-prev with explicit borders ── */
+    /* ── NESTED TABLE PREVIEW: uses .qc-tbl-prev with explicit borders + center ── */
     let tblHtml='';
     if(q.nestedTables.length){
       const tbl=q.nestedTables[0];
       if(tbl.rows&&tbl.rows.length){
         tblHtml='<div style="overflow-x:auto;margin:5px 0"><table class="qc-tbl-prev">';
         tbl.rows.forEach((row,ri)=>{
-          tblHtml+=`<tr>${row.map(cell=>`<${ri===0?'th':'td'}>${esc((cell.text||'').substring(0,30))}</${ri===0?'th':'td'}>`).join('')}</tr>`;
+          const isH=ri===0;
+          tblHtml+=`<tr>${row.map(cell=>`<${isH?'th':'td'} style="text-align:center;vertical-align:middle">${esc((cell.text||'').substring(0,30))}</${isH?'th':'td'}>`).join('')}</tr>`;
         });
         tblHtml+=`</table></div>`;
         if(q.nestedTables.length>1) tblHtml+=`<div style="font-size:8px;color:#d97706;font-family:var(--fm)">+${q.nestedTables.length-1} more tables</div>`;
@@ -987,6 +1053,7 @@ function renderQGrid() {
           <button class="bloom-btn bl-E"  onclick="reframeOffline(${qi},'Evaluate')">⚖️ Evaluate</button>
           <button class="bloom-btn bl-C"  onclick="reframeOffline(${qi},'Create')">🎨 Create</button>
         </div>
+        <div style="padding:0 10px 6px;font-size:8px;color:#7c3aed;font-family:var(--fm)">💡 Click the same level again to cycle through 5 different variants</div>
       </div>
       <div id="bonline_${qi}" style="display:none">
         <div class="bloom-levels">
@@ -1011,6 +1078,7 @@ function renderQGrid() {
         <div class="bloom-result-text" id="btext_${qi}"></div>
         <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span id="blevel_${qi}" class="bloom-tag"></span>
+          <span id="bvariant_${qi}" style="font-size:8px;color:#94a3b8;font-family:var(--fm)"></span>
           <button class="btn bv" style="padding:3px 10px;font-size:9px" id="buse_${qi}" onclick="useBloomResult(${qi})">✅ Use This</button>
           <button class="btn bg_" style="padding:3px 10px;font-size:9px" onclick="editBloomResult(${qi})">✏️ Edit</button>
           <button class="btn bg_" style="padding:3px 10px;font-size:9px" onclick="clearBloom(${qi})">↩ Restore Original</button>
@@ -1055,92 +1123,94 @@ const BLOOM_COLORS={ Remember:'bt-R', Understand:'bt-U', Apply:'bt-Ap', Analyze:
 const BLOOM_ICONS={ Remember:'📝', Understand:'💡', Apply:'⚙️', Analyze:'🔍', Evaluate:'⚖️', Create:'🎨', Custom:'✏️' };
 
 /* ══════════════════════════════════════════════════════════════════
-   HIGH-STANDARD OFFLINE BLOOM'S TEMPLATES
-   Each level has 3 variants → selected by (qi % 3)
-   All phrasing follows University/Anna University practical exam style
+   HIGH-STANDARD OFFLINE BLOOM'S TEMPLATES — 5 variants per level
+   • Single complete question (no (i)/(ii) sub-parts)
+   • Embeds numeric values extracted from original question
+   • Anna University / university practical exam style
    ══════════════════════════════════════════════════════════════════ */
 const BLOOM_OFFLINE_TEMPLATES = {
 
   Remember: [
-    (q,t)=>`(i) List the components required to set up the ${t} experiment and state the function of each component.
-(ii) State the standard procedure for assembling the ${t} circuit and identify the safety precautions to be observed during the experiment.`,
-
-    (q,t)=>`(i) Define the key parameters associated with ${t} and recall the relevant formulae used to compute the expected output.
-(ii) Label the pin configuration and identify the essential connections required for the ${t} circuit as per the standard circuit diagram.`,
-
-    (q,t)=>`(i) Enumerate the steps involved in conducting the ${t} experiment from initial setup to final measurement recording.
-(ii) State the theoretical values of the characteristic quantities of ${t} and specify the instruments required for their measurement.`,
+    (q,t,n)=>`List the components required for the ${t} experiment${n?', given ('+n+')':''}, state the function of each component, and draw the standard circuit diagram with all terminal connections labelled.`,
+    (q,t,n)=>`State the working principle of ${t}${n?' for the given data ('+n+')':''} and write the formula used to compute the expected output, defining all symbols.`,
+    (q,t,n)=>`Enumerate the step-by-step procedure to conduct the ${t} experiment${n?', using the specified values ('+n+')':''}, and identify the instruments used with their ranges.`,
+    (q,t,n)=>`Recall the characteristic equation of ${t}${n?' corresponding to ('+n+')':''} and reproduce the standard observation table with all column headings and SI units.`,
+    (q,t,n)=>`Identify the operating modes of ${t}${n?' for the given conditions ('+n+')':''} and state the boundary condition that defines each mode on the characteristic curve.`,
   ],
 
   Understand: [
-    (q,t)=>`(i) Explain the operating principle of ${t} with the aid of relevant circuit diagrams and expected input–output waveforms.
-(ii) Describe how variations in the key parameters (supply voltage, component values) affect the output characteristics of ${t}.`,
-
-    (q,t)=>`(i) Summarize the working of ${t}, clearly distinguishing between the ideal and practical behaviour of the circuit.
-(ii) Interpret the observed waveforms / characteristics obtained from the ${t} experiment and correlate them with the underlying theory.`,
-
-    (q,t)=>`(i) Classify the different operating regions of ${t} and describe the physical significance of each region with reference to the characteristic curves.
-(ii) Compare the theoretical derivation and practical outcome for ${t}, and explain any discrepancies in terms of component non-idealities.`,
+    (q,t,n)=>`Explain the operating principle of ${t}${n?' for ('+n+')':''} with a neat circuit diagram, and describe how the output changes when the key parameters are varied.`,
+    (q,t,n)=>`Describe the input–output relationship of ${t}${n?' using the given data ('+n+')':''} and interpret the shape of the expected characteristic curve in terms of the underlying physics.`,
+    (q,t,n)=>`Summarize the working of ${t}${n?' with reference to ('+n+')':''}, distinguish between its ideal and practical behaviour, and explain the non-ideality observed.`,
+    (q,t,n)=>`Explain the role of each component in the ${t} circuit${n?' operating at ('+n+')':''} and describe the effect on the output if any one element is removed or replaced.`,
+    (q,t,n)=>`Compare the theoretical and practical behaviour of ${t}${n?' using the parameters ('+n+')':''} and describe the factors responsible for any discrepancy.`,
   ],
 
   Apply: [
-    (q,t)=>`(i) Set up the ${t} circuit as per the given specifications. Apply the appropriate input signal and record the output measurements in a tabular form.
-(ii) Using the tabulated observations, calculate the required performance parameters of ${t} and verify against the theoretical values.`,
-
-    (q,t)=>`(i) Construct the ${t} circuit for the given component values. Demonstrate its operation by applying varying input conditions and measuring the corresponding outputs.
-(ii) Implement the measurement procedure for ${t}, apply error analysis to the readings, and present the results graphically.`,
-
-    (q,t)=>`(i) Execute the ${t} experiment by connecting the circuit as prescribed. Measure the output for at least five input levels and record all observations systematically.
-(ii) Apply the relevant formula to the measured data of ${t} and demonstrate that the results are consistent with theoretical predictions within acceptable tolerance.`,
+    (q,t,n)=>`Set up the ${t} circuit${n?', using the given values ('+n+')':''}, apply the appropriate input, record the output at a minimum of five readings, and tabulate the results with calculated values.`,
+    (q,t,n)=>`Construct and test the ${t} circuit${n?' for ('+n+')':''}, compute the required performance parameters from your measurements, and verify against theoretical predictions.`,
+    (q,t,n)=>`Implement the ${t} experiment${n?' with ('+n+')':''}, record all observations systematically, and present the results as a graph with properly labelled axes and units.`,
+    (q,t,n)=>`Perform the ${t} experiment${n?' using the values ('+n+')':''}, apply the relevant formula to your measured data, and demonstrate consistency with theory within acceptable tolerance.`,
+    (q,t,n)=>`Demonstrate the operation of ${t}${n?' for ('+n+')':''} by measuring the output at all key test points and calculate the figures of merit from the observations.`,
   ],
 
   Analyze: [
-    (q,t)=>`(i) Examine the output characteristics of ${t} and differentiate between the ideal theoretical response and the practically observed behaviour. Identify and account for all sources of deviation.
-(ii) Break down the circuit of ${t} into functional sub-blocks and trace the signal path, analyzing the contribution of each stage to the overall performance.`,
-
-    (q,t)=>`(i) Investigate the effect of varying each critical component parameter on the performance of ${t}. Present a comparative analysis of the results in tabular and graphical form.
-(ii) Distinguish between the different modes of operation of ${t} using the observed data, and correlate each mode with the corresponding region of the characteristic curve.`,
-
-    (q,t)=>`(i) Deconstruct the ${t} circuit and analyze the role of each passive and active element in shaping the output response. Support your analysis with experimental evidence.
-(ii) Compare the performance of ${t} under two different operating conditions (e.g., different load values / frequencies / supply voltages) and analyze the factors responsible for the observed differences.`,
+    (q,t,n)=>`Examine the output characteristics of ${t}${n?' obtained with ('+n+')':''}, differentiate between ideal and practical behaviour, and identify all sources of deviation with their causes.`,
+    (q,t,n)=>`Investigate the effect of varying the critical parameters of ${t}${n?' around the given values ('+n+')':''} and present a comparative analysis of performance in tabular and graphical form.`,
+    (q,t,n)=>`Deconstruct the ${t} circuit${n?' operating at ('+n+')':''} and analyze the contribution of each element to the overall output, supporting the analysis with experimental evidence.`,
+    (q,t,n)=>`Distinguish the operating regions of ${t}${n?' using the data ('+n+')':''}, correlate each region with the characteristic curve, and explain the physical mechanism in each region.`,
+    (q,t,n)=>`Analyze the frequency or load response of ${t}${n?' for ('+n+')':''}, determine the bandwidth or regulation from the plotted characteristic, and account for any non-linearity observed.`,
   ],
 
   Evaluate: [
-    (q,t)=>`(i) Assess the performance of the ${t} circuit against the specified design parameters. Justify whether the experimental results meet the required standards, citing measured evidence.
-(ii) Critique the limitations of ${t} in real-world applications and recommend specific modifications to improve its accuracy, efficiency, or reliability.`,
-
-    (q,t)=>`(i) Evaluate the accuracy of the ${t} experiment by computing the percentage error between theoretical and practical values. Judge whether the observed discrepancies are acceptable and propose corrective measures.
-(ii) Appraise the suitability of ${t} for the given application requirements based on your experimental findings, and justify your conclusion with quantitative data.`,
-
-    (q,t)=>`(i) Validate the design of ${t} by comparing experimental results with datasheet/theoretical specifications. Defend your conclusion regarding its compliance with performance criteria.
-(ii) Recommend an improved design strategy for ${t} to overcome the observed practical limitations, and support your recommendation with calculations or simulation evidence.`,
+    (q,t,n)=>`Assess the performance of ${t}${n?' against the specifications ('+n+')':''} using experimental data, justify whether the results meet the design criteria, and recommend specific improvements.`,
+    (q,t,n)=>`Evaluate the accuracy of the ${t} experiment${n?' for ('+n+')':''} by computing the percentage error between theoretical and practical results, and judge whether the discrepancy is acceptable.`,
+    (q,t,n)=>`Critique the design of ${t}${n?' with reference to ('+n+')':''}, identify its practical limitations, and recommend an improved configuration with supporting calculations.`,
+    (q,t,n)=>`Validate the ${t} circuit${n?' at ('+n+')':''} by comparing experimental results with theoretical specifications, and defend your conclusion regarding compliance with performance criteria.`,
+    (q,t,n)=>`Appraise the impact of component tolerances on ${t}${n?' for the given values ('+n+')':''}, evaluate which parameter most influences performance, and suggest a procedure to minimise uncertainty.`,
   ],
 
   Create: [
-    (q,t)=>`(i) Design a modified version of the ${t} circuit to satisfy the additional specification provided. Derive the component values analytically and verify the design through experimental measurements.
-(ii) Propose a novel application that leverages the principle of ${t}. Develop a working prototype, present the complete design procedure, and validate its performance experimentally.`,
-
-    (q,t)=>`(i) Synthesize a multi-stage system incorporating ${t} that meets the given performance constraints. Document the complete design methodology, component selection rationale, and experimental verification.
-(ii) Formulate a test plan for ${t} that comprehensively evaluates all key performance parameters. Execute the plan, record results, and compile a structured technical report with conclusions.`,
-
-    (q,t)=>`(i) Develop an improved circuit for ${t} that addresses the identified practical limitations. Justify every design decision with supporting calculations and verify the improvement through comparative measurements.
-(ii) Invent a measurement technique to characterize the non-ideal behaviour of ${t}. Devise the experimental procedure, carry it out, and present a detailed analysis of the results obtained.`,
+    (q,t,n)=>`Design a ${t} circuit${n?' to satisfy ('+n+')':''}, derive the component values analytically, construct the circuit, and verify all specifications through experimental measurements.`,
+    (q,t,n)=>`Develop an improved version of ${t}${n?' beyond ('+n+')':''} that overcomes its identified limitations, justify every design decision with calculations, and validate experimentally.`,
+    (q,t,n)=>`Propose a novel application of the ${t} principle${n?' incorporating ('+n+')':''}, implement the circuit, and present the complete design procedure with experimental performance verification.`,
+    (q,t,n)=>`Synthesize a multi-stage system incorporating ${t}${n?' with ('+n+')':''}, document the design methodology, component selection rationale, and provide experimental verification results.`,
+    (q,t,n)=>`Devise an experiment to characterize the non-ideal behaviour of ${t}${n?' beyond the range ('+n+')':''}, formulate the measurement procedure, execute it, and present a detailed analysis of results.`,
   ]
 };
+
+/* variant cycle counter — allows "Next Variant" cycling per (qi, level) */
+const _bloomVariantIdx = {};
+
+/* ── Extract numeric/variable values from question text and table cells ── */
+function _nums(q) {
+  const t = q.text || '';
+  // Collect table cell values first (most reliable for probability/truth tables)
+  const tableCells = [];
+  for(const nt of (q.nestedTables||[])) {
+    for(const row of (nt.rows||[])) {
+      for(const cell of row) {
+        const v = (cell.text||'').trim();
+        if(v && v.length < 20 && v !== '') tableCells.push(v);
+      }
+    }
+  }
+  // Also extract inline numbers/symbolic values from text
+  const inlineNums = t.match(/(?:[-+]?\d+(?:\.\d+)?\s*(?:[kKmMΩµnpF]|kHz|MHz|kΩ|mA|µA|nF|µF|Hz|V\b|mV|dB)?|\bk\b|2k|3k|nk|\bk\b)/g) || [];
+  const combined = [...new Set([...tableCells.slice(0,10), ...inlineNums.slice(0,6)])].filter(v=>v.trim().length>0);
+  if(!combined.length) return null;
+  return combined.slice(0,8).join(', ');
+}
 
 /* ── Extract a meaningful topic phrase from question text ─────────── */
 function _topic(q) {
   const t = q.text || '';
-  // Pattern 1: "… of a/an/the <Noun Phrase>"
   const m1 = t.match(/\bof\s+(?:a\s+|an\s+|the\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|using|with|and|experiment|characteristics|amplifier|oscillator|filter|rectifier|regulator|modulator|demodulator|converter|meter|bridge|network|system|response|curve|plot|graph|table|via|by|to|\.|\,|$))/i);
   if(m1) return m1[1].trim();
-  // Pattern 2: "design/implement/construct/study/verify <Noun Phrase>"
   const m2 = t.match(/\b(?:design|implement|construct|study|verify|demonstrate|test|measure|determine|calculate|plot|draw|obtain)\s+(?:the\s+|a\s+|an\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|characteristics|using|and|experiment|with|for|to|\.|\,|$))/i);
   if(m2) return m2[1].trim();
-  // Pattern 3: ALL-CAPS experiment names common in lab QPs
   const m3 = t.match(/\b([A-Z]{2,}(?:\s+[A-Z]{2,}){0,3})\b/);
   if(m3 && m3[1].length > 3) return m3[1];
-  // Fallback: first 6 meaningful words
   const words = t.replace(/[^\w\s\-]/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,6);
   return words.join(' ') || 'this experiment';
 }
@@ -1158,27 +1228,28 @@ function setBloomMode(qi, mode) {
 function toggleBloom(qi){ document.getElementById(`bloom_${qi}`).classList.toggle('show'); }
 function hideBloom(qi)  { document.getElementById(`bloom_${qi}`).classList.remove('show'); }
 
-/* ── Offline reframe ─────────────────────────────────────────────── */
+/* ── Offline reframe — cycles through 5 variants on repeated clicks ─── */
 function reframeOffline(qi, level) {
   const q = G.questions[qi];
+  const templates = BLOOM_OFFLINE_TEMPLATES[level] || [];
+  const cycleKey = `${qi}_${level}_cycle`;
+  _bloomVariantIdx[cycleKey] = ((_bloomVariantIdx[cycleKey] ?? (qi % templates.length)) + 1) % templates.length;
+  const idx = _bloomVariantIdx[cycleKey];
+  const topic = _topic(q);
+  const nums  = _nums(q);
+  const tpl = templates[idx] || templates[0];
+  const text = tpl ? tpl(q, topic, nums) : `${level}: ${q.text.substring(0,200)}`;
   const cacheKey = `${qi}_${level}_offline`;
-  let text;
-  if(G.bloomCache[cacheKey]){
-    text = G.bloomCache[cacheKey];
-  } else {
-    const topic = _topic(q);
-    const templates = BLOOM_OFFLINE_TEMPLATES[level] || [];
-    const tpl = templates[qi % templates.length] || templates[0];
-    text = tpl ? tpl(q, topic) : `${level}: ${q.text.substring(0,200)}`;
-    G.bloomCache[cacheKey] = text;
-  }
+  G.bloomCache[cacheKey] = text;
   showBloomResult(qi, level, text);
   const ta = document.getElementById(`bcustomta_${qi}`);
   if(ta) ta.value = text;
   document.getElementById(`bcustom_${qi}`).classList.add('show');
+  const lvlEl = document.getElementById(`blevel_${qi}`);
+  if(lvlEl) lvlEl.title = `Variant ${idx+1} of ${templates.length} — click again to cycle`;
 }
 
-/* ── Online AI reframe ───────────────────────────────────────────── */
+/* ── Online AI reframe — uses API key from settings panel ─────────── */
 const BLOOM_VERBS={
   Remember:['List','Define','Recall','Identify','Name','State','Label','Enumerate'],
   Understand:['Explain','Describe','Summarize','Interpret','Classify','Compare','Illustrate'],
@@ -1188,7 +1259,31 @@ const BLOOM_VERBS={
   Create:['Design','Develop','Formulate','Propose','Synthesize','Invent','Devise','Construct']
 };
 
+function getApiKey() {
+  return (document.getElementById('apiKeyInp')?.value||'').trim() ||
+         (typeof localStorage!=='undefined'?localStorage.getItem('labqp_apikey')||'':'');
+}
+function saveApiKey() {
+  const k=(document.getElementById('apiKeyInp')?.value||'').trim();
+  if(typeof localStorage!=='undefined') localStorage.setItem('labqp_apikey',k);
+  const st=document.getElementById('apiKeyStatus');
+  if(st) st.textContent=k?`✓ Key saved (${k.substring(0,12)}…)`:'Key cleared.';
+  const btn=document.querySelector('.topbar button[onclick="toggleApiPanel()"]');
+  if(btn){
+    if(k){ btn.style.background='#d1fae5'; btn.style.borderColor='#6ee7b7'; btn.style.color='#065f46'; btn.textContent='🔑 API ✓'; }
+    else { btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; btn.textContent='🔑 API Key'; }
+  }
+  toast(k?'API key saved — AI Online ready ✓':'API key cleared','ok');
+}
+
 async function reframeOnline(qi, level) {
+  const apiKey = getApiKey();
+  if(!apiKey){
+    toast('Enter your Anthropic API key in the ⚙️ API Key panel above first','warn',5000);
+    document.getElementById('apiKeyPanel').style.display='block';
+    document.getElementById('apiKeyInp').focus();
+    return;
+  }
   const q=G.questions[qi];
   const cacheKey=`${qi}_${level}_online`;
   if(G.bloomCache[cacheKey]){ showBloomResult(qi,level,G.bloomCache[cacheKey]); return; }
@@ -1212,7 +1307,20 @@ Requirements:
 Reframed question:`;
 
   try {
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message||`HTTP ${resp.status}`);
+    }
     const data=await resp.json();
     if(data.error) throw new Error(data.error.message||'API error');
     const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
@@ -1224,8 +1332,8 @@ Reframed question:`;
   } catch(err){
     spinEl.classList.remove('show');
     resEl.classList.add('show');
-    document.getElementById(`btext_${qi}`).innerHTML=`<span style="color:#dc2626">❌ ${err.message.includes('fetch')?'Network error — switch to Offline mode':err.message}</span>`;
-    toast('AI error: '+err.message+' — use Offline mode','err');
+    document.getElementById(`btext_${qi}`).innerHTML=`<span style="color:#dc2626">❌ ${esc(err.message)}<br><small style="color:#64748b">Check your API key or switch to ✈️ Offline mode.</small></span>`;
+    toast('AI error: '+err.message,'err');
   }
 }
 
@@ -1233,11 +1341,19 @@ function showBloomResult(qi, level, text) {
   document.getElementById(`bspin_${qi}`).classList.remove('show');
   const resEl=document.getElementById(`bresult_${qi}`);
   resEl.classList.add('show');
-  // Render (i)/(ii) with line breaks for readability
   document.getElementById(`btext_${qi}`).innerHTML = text.replace(/\n/g,'<br>');
   const lvlEl=document.getElementById(`blevel_${qi}`);
   if(lvlEl){ lvlEl.className='bloom-tag '+(BLOOM_COLORS[level]||'bt-Custom'); lvlEl.textContent=(BLOOM_ICONS[level]||'✏️')+' '+level; }
   resEl.dataset.currentLevel=level;
+  // Show variant number for offline
+  const varEl=document.getElementById(`bvariant_${qi}`);
+  if(varEl){
+    const cycleKey=`${qi}_${level}_cycle`;
+    const idx=_bloomVariantIdx[cycleKey];
+    const total=(BLOOM_OFFLINE_TEMPLATES[level]||[]).length;
+    if(idx!==undefined && total>1) varEl.textContent=`Variant ${idx+1}/${total}`;
+    else varEl.textContent='';
+  }
 }
 
 function useBloomResult(qi) {
@@ -1573,12 +1689,13 @@ function showPreviewPg(idx) {
     }
     let qContent='';
     for(const para of paras){
-      /* ── NESTED TABLE in paper preview: use .pp-tbl-nested class for full visible borders ── */
+      /* ── NESTED TABLE in paper preview: force visible borders + center align on every cell ── */
       for(const tbl of(para.tables||[])){
         if(!tbl.rows||!tbl.rows.length) continue;
-        qContent+=`<div style="overflow-x:auto;margin:6px 0"><table class="pp-tbl-nested">`;
+        qContent+=`<div style="overflow-x:auto;margin:6px 0"><table style="border-collapse:collapse;width:auto;min-width:60%;font-family:'Times New Roman',serif;font-size:10.5pt;border:2px solid #111">`;
         tbl.rows.forEach((row,ri)=>{
-          qContent+=`<tr>${row.map(c=>`<${ri===0?'th':'td'}>${esc(c.text||'')}</${ri===0?'th':'td'}>`).join('')}</tr>`;
+          const isH=ri===0;
+          qContent+=`<tr>${row.map(c=>`<${isH?'th':'td'} style="border:1.5px solid #111;padding:5px 14px;text-align:center;vertical-align:middle${isH?';background:#d0d0d0;font-weight:700;font-size:10pt':';background:#fff'}">${esc(c.text||'')}</${isH?'th':'td'}>`).join('')}</tr>`;
         });
         qContent+=`</table></div>`;
       }
@@ -1651,6 +1768,28 @@ function showSpin(t,s,p){ document.getElementById('spinT').textContent=t; docume
 function setSP(p){ document.getElementById('pf').style.width=p+'%'; }
 function hideSpin(){ document.getElementById('spinOv').classList.remove('show'); }
 function showAlert(id,cls,msg){ const el=document.getElementById(id); el.style.display='flex'; el.className='alert '+cls; el.innerHTML=`<span>${{ainf:'ℹ️',aok:'✅',aerr:'❌',awrn:'⚠️'}[cls]||'ℹ️'}</span><span style="line-height:1.6">${msg}</span>`; }
+
+function toggleApiPanel(){
+  const p=document.getElementById('apiKeyPanel');
+  p.style.display=p.style.display==='none'?'block':'none';
+  if(p.style.display==='block') document.getElementById('apiKeyInp').focus();
+}
+
+/* ── Startup: restore saved API key, update status ─────────────── */
+(function initApp(){
+  try {
+    const saved=localStorage.getItem('labqp_apikey')||'';
+    if(saved){
+      document.getElementById('apiKeyInp').value=saved;
+      const st=document.getElementById('apiKeyStatus');
+      if(st) st.textContent=`✓ Saved key loaded (${saved.substring(0,12)}…)`;
+      // mark topbar button green
+      const btn=document.querySelector('.topbar button[onclick="toggleApiPanel()"]');
+      if(btn){ btn.style.background='#d1fae5'; btn.style.borderColor='#6ee7b7'; btn.style.color='#065f46'; btn.textContent='🔑 API ✓'; }
+    }
+  } catch(e){}
+})();
+
 document.getElementById('assignModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 </script>
