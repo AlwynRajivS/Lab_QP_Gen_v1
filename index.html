@@ -103,9 +103,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .qc-parts{display:flex;flex-direction:column;gap:5px;margin-top:6px}
 .qc-part{background:#f8faff;border:1px solid #e2eaf4;border-radius:var(--r8);padding:8px 10px}
 .qc-part-txt{font-size:10.5px;color:#1e293b;line-height:1.55;font-family:'Times New Roman',serif}
-.qc-tbl-prev{font-size:10px;font-family:'Times New Roman',serif;border-collapse:collapse;margin:4px 0;width:100%}
-.qc-tbl-prev th{background:#e8edf5;font-weight:700;font-size:9px;padding:3px 7px;border:1px solid #c8d5e8;text-align:center}
-.qc-tbl-prev td{padding:3px 7px;border:1px solid #d8e2f0;font-size:9.5px;text-align:center}
+/* ─── TABLE PREVIEW in question card: full visible borders ─── */
+.qc-tbl-prev{font-size:10px;font-family:'Times New Roman',serif;border-collapse:collapse;margin:4px 0;width:100%;border:1.5px solid #333}
+.qc-tbl-prev th{background:#e8edf5;font-weight:700;font-size:9px;padding:3px 7px;border:1.5px solid #333;text-align:center}
+.qc-tbl-prev td{padding:3px 7px;border:1.5px solid #555;font-size:9.5px;text-align:center}
 .qc-media{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .qc-thumb{height:44px;max-width:100px;object-fit:contain;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafc}
 .eq-chip{font-family:'Times New Roman',Times,serif;font-style:italic;background:#faf5ff;border:1px solid #ddd6fe;border-radius:4px;padding:2px 9px;font-size:11px;color:#4c1d95;display:inline-block;margin:2px 2px}
@@ -229,6 +230,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,86,219,.4)}50%{box-shadow:0 0 0 10px rgba(26,86,219,0)}}
 @media(max-width:900px){.up-grid,.fr2,.fr3,.fr4,.an-grid,.q-grid{grid-template-columns:1fr}.dl-btns{flex-direction:column}}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#93c5fd;border-radius:3px}
+
+/* ─── PAPER PREVIEW: nested table with full borders ─── */
+.pp-tbl-nested{border-collapse:collapse;margin:6px 0;font-size:10.5pt;max-width:100%;width:auto}
+.pp-tbl-nested th{border:1.5px solid #222;padding:4px 9px;text-align:center;background:#d4d4d4;font-weight:700}
+.pp-tbl-nested td{border:1.5px solid #444;padding:4px 9px;text-align:center}
 </style>
 </head>
 <body>
@@ -440,10 +446,6 @@ function dr(e,id){
   else handleStu(f);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DIRECT CHILD HELPERS — avoids getElementsByTagNameNS picking up
-   nested table rows / cells when scanning the outer question table
-   ═══════════════════════════════════════════════════════════════════ */
 function directChildren(node, localName, ns) {
   const res=[];
   for(let i=0;i<node.childNodes.length;i++){
@@ -452,28 +454,21 @@ function directChildren(node, localName, ns) {
   }
   return res;
 }
-// Get direct <w:tr> children of a <w:tbl> (NOT nested table rows)
 function directRows(tblNode){
-  // tbl → tbody (some parsers insert implicit tbody) → tr, OR direct tr
   const res=[];
   for(let i=0;i<tblNode.childNodes.length;i++){
     const c=tblNode.childNodes[i];
     if(c.nodeType!==1) continue;
     if(c.localName==='tr') res.push(c);
     else if(c.localName==='tblPr'||c.localName==='tblGrid') continue;
-    // some parsers wrap in tbody-like element — check children
     else { for(let j=0;j<c.childNodes.length;j++){ const cc=c.childNodes[j]; if(cc.nodeType===1&&cc.localName==='tr') res.push(cc); } }
   }
   return res;
 }
-// Get direct <w:tc> children of a <w:tr>
 function directCells(trNode){
   return directChildren(trNode,'tc',WN);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   safeImp — cross-document importNode with NS fallback
-   ═══════════════════════════════════════════════════════════════════ */
 function safeImp(targetDoc, srcNode) {
   try { return targetDoc.importNode(srcNode, true); } catch(e) {}
   const s = new XMLSerializer().serializeToString(srcNode);
@@ -486,10 +481,6 @@ function safeImp(targetDoc, srcNode) {
     'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"',
     'xmlns:v="urn:schemas-microsoft-com:vml"',
     'xmlns:o="urn:schemas-microsoft-com:office:office"',
-    'xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"',
-    'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"',
-    'xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"',
-    'xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"',
   ].join(' ');
   const parsed = new DOMParser().parseFromString(`<root ${nsD}>${s}</root>`,'application/xml');
   const inner = parsed.documentElement.firstElementChild;
@@ -497,9 +488,6 @@ function safeImp(targetDoc, srcNode) {
   try { return targetDoc.importNode(inner, true); } catch(e2) { return inner; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   remapRIds — rewrite r:embed / r:id in cloned subtree
-   ═══════════════════════════════════════════════════════════════════ */
 function remapRIds(node, rIdMap) {
   if(!node || node.nodeType!==1) return;
   const ln=node.localName;
@@ -515,19 +503,10 @@ function remapRIds(node, rIdMap) {
       if(a.localName==='id' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
     }
   }
-  if(ln==='hyperlink'){
-    for(let i=0;i<node.attributes.length;i++){
-      const a=node.attributes[i];
-      if(a.localName==='id' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
-    }
-  }
   for(let i=0;i<node.childNodes.length;i++)
     if(node.childNodes[i].nodeType===1) remapRIds(node.childNodes[i], rIdMap);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   IMAGE MAP
-   ═══════════════════════════════════════════════════════════════════ */
 async function buildImageMap(zip) {
   G.imageMap={};
   const rF=zip.file('word/_rels/document.xml.rels'); if(!rF) return;
@@ -549,11 +528,6 @@ async function buildImageMap(zip) {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   _cellText — extract plain text from a w:tc node
-   (used for header detection and marks/limit columns only —
-   NOT used for the question cell which uses parseParasLossless)
-   ═══════════════════════════════════════════════════════════════════ */
 function _cellText(cell) {
   const lines=[];
   for(const p of cell.getElementsByTagNameNS(WN,'p')){
@@ -566,59 +540,42 @@ function _cellText(cell) {
   return lines.join('\n');
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   _getBlipRId helper
-   ═══════════════════════════════════════════════════════════════════ */
 function _getBlipRId(blipEl) {
   for(let i=0;i<blipEl.attributes.length;i++)
     if(blipEl.attributes[i].localName==='embed') return blipEl.attributes[i].value;
   return null;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   parseParasLossless — parse a w:tc keeping rawNode for lossless clone
-   Fixed: uses direct child iteration so nested table rows/cells inside
-   the question cell are treated as part of that question, NOT as
-   separate table rows triggering new questions.
-   ═══════════════════════════════════════════════════════════════════ */
 function parseParasLossless(tcNode, imageMap) {
   const res=[];
   for(let i=0;i<tcNode.childNodes.length;i++){
     const child=tcNode.childNodes[i];
     if(child.nodeType!==1) continue;
     const ln=child.localName||'';
-
     if(ln==='p'){
       const para=_parseParagraph(child, imageMap);
       para.rawNode=child;
       res.push(para);
-
     } else if(ln==='tbl'){
-      // ── NESTED TABLE inside question cell ──
-      // Parsed for preview rendering; rawNode kept for lossless DOCX clone.
       const tblData=_parseNestedTableDeep(child, imageMap);
       tblData.rawNode=child;
       res.push(tblData);
-
     } else if(ln==='oMath'||ln==='oMathPara'){
       const eqText=ommlToText(child);
       res.push({ rawNode:child, text:eqText, images:[], equations:[{text:eqText}], tables:[], isMath:true });
     }
   }
-  // Deduplicate consecutive empty paras
   return res.filter((p,i)=>{
     if(!p.rawNode) return true;
     const ln=p.rawNode.localName;
     if(ln!=='p') return true;
     if(p.text||p.images.length||p.equations.length) return true;
-    // keep if previous is not also empty para
     const prev=res[i-1];
     if(!prev) return false;
     return !!(prev.text||prev.images.length||prev.equations.length||(prev.rawNode&&prev.rawNode.localName!=='p'));
   });
 }
 
-/* ── _parseParagraph ─────────────────────────────────────────────── */
 function _parseParagraph(pNode, imageMap) {
   let text='';
   const images=[], equations=[];
@@ -657,16 +614,13 @@ function _parseParagraph(pNode, imageMap) {
   return { text:text.trim(), images, equations, tables:[], isMath:false };
 }
 
-/* ── _parseNestedTableDeep — full recursive cell content extraction ── */
 function _parseNestedTableDeep(tblNode, imageMap) {
-  // Uses direct row access to avoid double-counting nested rows
   const gridRows=[];
   const rows=directRows(tblNode);
   for(const tblRow of rows){
     const gRow=[];
     const cells=directCells(tblRow);
     for(const gc of cells){
-      // For each cell: extract text, equations, and note any sub-tables
       let ct=_cellTextDeep(gc);
       gRow.push({ text:ct.trim() });
     }
@@ -675,7 +629,6 @@ function _parseNestedTableDeep(tblNode, imageMap) {
   return { text:'', images:[], equations:[], tables:[{rows:gridRows, rawNode:tblNode}], isMath:false };
 }
 
-/* ── _cellTextDeep — extract text from cell including nested tables ── */
 function _cellTextDeep(cellNode) {
   const lines=[];
   for(const p of cellNode.getElementsByTagNameNS(WN,'p')){
@@ -688,9 +641,6 @@ function _cellTextDeep(cellNode) {
   return lines.join('\n');
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ommlToText — PREVIEW / BLOOM text only (DOCX uses lossless clone)
-   ═══════════════════════════════════════════════════════════════════ */
 function ommlToText(node) {
   if(!node) return '';
   const ln=node.localName||'';
@@ -717,9 +667,6 @@ function ommlToText(node) {
 }
 function _omC(n){ let r=''; for(let i=0;i<n.childNodes.length;i++){ const c=n.childNodes[i]; if(c.nodeType===3) r+=c.textContent; else if(c.nodeType===1) r+=ommlToText(c); } return r; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   collectRIds / collectAllRIds
-   ═══════════════════════════════════════════════════════════════════ */
 function collectRIds(question, startN=2) {
   const map={};let n=startN;
   for(const para of(question.paras||[]))
@@ -736,15 +683,11 @@ function collectAllRIds(assignments, questions) {
   return map;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DOCX HELPERS
-   ═══════════════════════════════════════════════════════════════════ */
 const SP   = `<w:spacing w:before="40" w:after="40" w:line="360" w:lineRule="auto"/>`;
 const SP1  = `<w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="auto"/>`;
 const TNRPR= (sz=22,bold=false)=>`<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${bold?'<w:b/><w:bCs/>':''}</w:rPr>`;
 const IMG_XML=(nRId)=>{ const uid=Math.floor(Math.random()*89000+10000); return `<w:drawing><wp:inline distT="0" distB="0" distL="114400" distR="114400"><wp:extent cx="3429000" cy="2286000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${uid}" name="Img${nRId}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Img${nRId}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${nRId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3429000" cy="2286000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`; };
 
-/* ── buildQuestionCellXml — lossless OMML clone ───────────────────── */
 function buildQuestionCellXml(question, rIdRemap) {
   if(question.activeBloom && question.bloomReframes?.[question.activeBloom])
     return _buildBloomXml(question.bloomReframes[question.activeBloom], question, rIdRemap);
@@ -771,7 +714,6 @@ function buildQuestionCellXml(question, rIdRemap) {
   return xml;
 }
 
-/* ── _buildParaFallback ───────────────────────────────────────────── */
 function _buildParaFallback(para, rIdRemap) {
   let xml='';
   for(const tbl of(para.tables||[])){
@@ -804,7 +746,6 @@ function _buildParaFallback(para, rIdRemap) {
   return xml;
 }
 
-/* ── _buildBloomXml ───────────────────────────────────────────────── */
 function _buildBloomXml(text, question, rIdRemap) {
   let xml=''; const seen=new Set();
   for(const para of(question.paras||[]))
@@ -820,11 +761,6 @@ function _buildBloomXml(text, question, rIdRemap) {
   return xml;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   QUESTION BANK PARSER
-   KEY FIX: Use directRows() so nested table rows inside a question
-   cell don't get picked up as additional question rows.
-   ═══════════════════════════════════════════════════════════════════ */
 async function handleQB(file) {
   showAlert('upAlert','ainf','⏳ Parsing '+file.name+'…');
   try {
@@ -853,7 +789,6 @@ async function parseQB(zip) {
   const xd=new DOMParser().parseFromString(xmlStr,'application/xml');
   G.questions=[]; G.rubricCols=[]; G.examInfo={};
 
-  // Header info from paragraphs
   const lines=[];
   for(const p of xd.getElementsByTagNameNS(WN,'p')){
     let t='';
@@ -869,30 +804,22 @@ async function parseQB(zip) {
     const m4=l.match(/Date.*?[:]\s*(.+?)$/i);     if(m4) G.examInfo.date=m4[1].trim();
   }
 
-  // ── OUTER TABLES: use only direct child nodes of document body ──
-  // This ensures we only see top-level tables, not tables nested inside
-  // question cells (which would otherwise be picked up by getElementsByTagNameNS)
   const bodyNode = xd.getElementsByTagNameNS(WN,'body')[0];
   if(!bodyNode){ console.warn('No w:body found'); return; }
 
-  // Get direct child tables of body
   const topLevelTbls = directChildren(bodyNode, 'tbl', WN);
 
   for(const tbl of topLevelTbls){
-    // Get only DIRECT rows of this top-level table
     const rows = directRows(tbl);
     if(!rows.length) continue;
 
-    // Read header row using direct cells
     const headerCells = directCells(rows[0]);
     const c0 = headerCells.map(tc=>_cellText(tc));
     const h0 = (c0[0]||'').toLowerCase();
 
-    // Rubric / aim table detection
     if(h0.includes('aim')||h0.includes('rubric')||h0.includes('apparatus')){
       G.rubricCols=c0.filter(c=>c.trim()); continue;
     }
-    // Must be a question table
     if(!h0.includes('q.no')&&!h0.includes('q. no')&&!c0.some(c=>c.toLowerCase().includes('question'))) continue;
 
     const qi_col  = c0.findIndex(c=>c.toLowerCase().includes('question'));
@@ -908,7 +835,6 @@ async function parseQB(zip) {
       const mci = mi_col>=0?mi_col:2;
       const lci = lim_col>=0?lim_col:-1;
 
-      // Text extraction from non-question columns (marks, limits)
       const cs = tcs.map(tc=>_cellText(tc));
       const qT = qci<cs.length?cs[qci]:'';
       const mT = mci<cs.length?cs[mci]:'';
@@ -916,7 +842,6 @@ async function parseQB(zip) {
       const studentLimit = (limitRaw&&/^\d+$/.test(limitRaw))?parseInt(limitRaw):null;
       if(!qT.trim()) continue;
 
-      // ── LOSSLESS parse of question cell ──
       const qCell = qci<tcs.length ? tcs[qci] : null;
       let paras=[];
       if(qCell){ try{ paras=parseParasLossless(qCell, G.imageMap); }catch(e){ console.warn('parseParasLossless err',e); } }
@@ -946,15 +871,11 @@ async function parseQB(zip) {
     }
   }
 
-  // Auto-fill form
   const fmap={examTitle:'title',examDept:'department',examClass:'courseClass',examSem:'semester',examSubject:'subject',examStaff:'staff'};
   for(const[id,key]of Object.entries(fmap)){ const v=G.examInfo[key]||''; if(v) document.getElementById(id).value=v; }
   if(G.examInfo.date){ const dp=G.examInfo.date.split(/[\s(]+/); if(dp[0]) document.getElementById('examDate').value=dp[0]; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   EXCEL PARSER
-   ═══════════════════════════════════════════════════════════════════ */
 async function handleStu(file) {
   try {
     await parseXLSX(await file.arrayBuffer());
@@ -984,9 +905,6 @@ async function parseXLSX(ab) {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   META / RUBRIC / GRID
-   ═══════════════════════════════════════════════════════════════════ */
 function renderMeta() {
   document.getElementById('metaP').style.display='block';
   const imgC=Object.keys(G.imageMap).length, eqC=G.questions.reduce((a,q)=>a+q.equations.length,0), tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
@@ -1013,7 +931,6 @@ function renderQGrid() {
     ].filter(Boolean).join('');
     const limitW=`<div class="qc-limit-wrap"><span class="qc-limit-lbl">Limit:</span><input class="qc-limit-inp" type="number" min="1" max="999" placeholder="∞" value="${q.studentLimit||''}" onchange="updateLimit(${qi},this.value)"/></div>`;
 
-    // Equation chips
     let eqHtml='';
     if(q.equations.length){
       eqHtml='<div style="margin:4px 0;display:flex;flex-wrap:wrap;gap:3px">';
@@ -1022,7 +939,7 @@ function renderQGrid() {
       eqHtml+='</div>';
     }
 
-    // Nested table preview (show actual table structure)
+    /* ── NESTED TABLE PREVIEW: uses .qc-tbl-prev with explicit borders ── */
     let tblHtml='';
     if(q.nestedTables.length){
       const tbl=q.nestedTables[0];
@@ -1036,7 +953,6 @@ function renderQGrid() {
       }
     }
 
-    // Question text preview
     const prevText=(q.paras.find(p=>p.text)?.text||q.text||'').substring(0,90);
 
     el.innerHTML=`
@@ -1053,7 +969,6 @@ function renderQGrid() {
       ${tblHtml}
       ${prevText?`<div class="qc-part"><div class="qc-part-txt">${esc(prevText)}${prevText.length>=90?'…':''}</div></div>`:''}
     </div>
-    <!-- BLOOM PANEL -->
     <div class="bloom-panel" id="bloom_${qi}">
       <div class="bloom-hdr">
         <span class="bloom-hdr-title">🧠 Bloom's Taxonomy Reframe</span>
@@ -1063,7 +978,6 @@ function renderQGrid() {
         </div>
         <button class="btn bg_" style="padding:2px 8px;font-size:9px;margin-left:8px" onclick="hideBloom(${qi})">✕</button>
       </div>
-      <!-- Offline: 6-level buttons → template reframe -->
       <div id="boffline_${qi}">
         <div class="bloom-levels">
           <button class="bloom-btn bl-R"  onclick="reframeOffline(${qi},'Remember')">📝 Remember</button>
@@ -1074,7 +988,6 @@ function renderQGrid() {
           <button class="bloom-btn bl-C"  onclick="reframeOffline(${qi},'Create')">🎨 Create</button>
         </div>
       </div>
-      <!-- Online: AI API reframe -->
       <div id="bonline_${qi}" style="display:none">
         <div class="bloom-levels">
           <button class="bloom-btn bl-R"  onclick="reframeOnline(${qi},'Remember')">📝 Remember</button>
@@ -1085,7 +998,6 @@ function renderQGrid() {
           <button class="bloom-btn bl-C"  onclick="reframeOnline(${qi},'Create')">🎨 Create</button>
         </div>
       </div>
-      <!-- Custom offline edit -->
       <div class="bloom-offline-area" id="bcustom_${qi}">
         <div style="font-size:9px;font-weight:700;color:#5b21b6;margin-bottom:5px;font-family:var(--fm)">✏️ Custom / Edit Reframed Text</div>
         <textarea class="bloom-custom-ta" id="bcustomta_${qi}" placeholder="Type or edit the reframed question here…" rows="3"></textarea>
@@ -1112,7 +1024,6 @@ function renderQGrid() {
 
     g.appendChild(el);
 
-    // Thumbnails
     const md=el.querySelector(`#qmedia_${qi}`);
     if(md) q.images.slice(0,3).forEach(img=>{ const im=document.createElement('img'); im.className='qc-thumb'; im.src=`data:${img.ct};base64,${img.b64}`; im.title='Image'; md.appendChild(im); });
   });
@@ -1138,53 +1049,99 @@ function populateQF() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BLOOM'S TAXONOMY — OFFLINE + ONLINE
+   BLOOM'S TAXONOMY — OFFLINE (HIGH STANDARD) + ONLINE
    ═══════════════════════════════════════════════════════════════════ */
 const BLOOM_COLORS={ Remember:'bt-R', Understand:'bt-U', Apply:'bt-Ap', Analyze:'bt-An', Evaluate:'bt-E', Create:'bt-C', Custom:'bt-Custom' };
 const BLOOM_ICONS={ Remember:'📝', Understand:'💡', Apply:'⚙️', Analyze:'🔍', Evaluate:'⚖️', Create:'🎨', Custom:'✏️' };
 
-/* Offline template reframing — no API required */
+/* ══════════════════════════════════════════════════════════════════
+   HIGH-STANDARD OFFLINE BLOOM'S TEMPLATES
+   Each level has 3 variants → selected by (qi % 3)
+   All phrasing follows University/Anna University practical exam style
+   ══════════════════════════════════════════════════════════════════ */
 const BLOOM_OFFLINE_TEMPLATES = {
+
   Remember: [
-    (q)=>`List the components and explain the basic working principle of ${_topic(q)}.`,
-    (q)=>`State the steps involved in setting up the ${_topic(q)} experiment and identify the key parameters measured.`,
-    (q)=>`Define the terms and recall the circuit connections required for ${_topic(q)}.`,
+    (q,t)=>`(i) List the components required to set up the ${t} experiment and state the function of each component.
+(ii) State the standard procedure for assembling the ${t} circuit and identify the safety precautions to be observed during the experiment.`,
+
+    (q,t)=>`(i) Define the key parameters associated with ${t} and recall the relevant formulae used to compute the expected output.
+(ii) Label the pin configuration and identify the essential connections required for the ${t} circuit as per the standard circuit diagram.`,
+
+    (q,t)=>`(i) Enumerate the steps involved in conducting the ${t} experiment from initial setup to final measurement recording.
+(ii) State the theoretical values of the characteristic quantities of ${t} and specify the instruments required for their measurement.`,
   ],
+
   Understand: [
-    (q)=>`Explain how ${_topic(q)} works and describe the relationship between the input and output characteristics.`,
-    (q)=>`Summarize the operating principle of ${_topic(q)} and interpret the expected waveforms/results.`,
-    (q)=>`Describe the significance of each component in ${_topic(q)} and explain the effect of varying key parameters.`,
+    (q,t)=>`(i) Explain the operating principle of ${t} with the aid of relevant circuit diagrams and expected input–output waveforms.
+(ii) Describe how variations in the key parameters (supply voltage, component values) affect the output characteristics of ${t}.`,
+
+    (q,t)=>`(i) Summarize the working of ${t}, clearly distinguishing between the ideal and practical behaviour of the circuit.
+(ii) Interpret the observed waveforms / characteristics obtained from the ${t} experiment and correlate them with the underlying theory.`,
+
+    (q,t)=>`(i) Classify the different operating regions of ${t} and describe the physical significance of each region with reference to the characteristic curves.
+(ii) Compare the theoretical derivation and practical outcome for ${t}, and explain any discrepancies in terms of component non-idealities.`,
   ],
+
   Apply: [
-    (q)=>`Construct and test the ${_topic(q)} circuit. Record observations and calculate the required values from your measurements.`,
-    (q)=>`Implement the ${_topic(q)} experiment, measure the output for different input conditions, and tabulate the results.`,
-    (q)=>`Design the ${_topic(q)} circuit for the given specifications, verify its operation, and demonstrate the results.`,
+    (q,t)=>`(i) Set up the ${t} circuit as per the given specifications. Apply the appropriate input signal and record the output measurements in a tabular form.
+(ii) Using the tabulated observations, calculate the required performance parameters of ${t} and verify against the theoretical values.`,
+
+    (q,t)=>`(i) Construct the ${t} circuit for the given component values. Demonstrate its operation by applying varying input conditions and measuring the corresponding outputs.
+(ii) Implement the measurement procedure for ${t}, apply error analysis to the readings, and present the results graphically.`,
+
+    (q,t)=>`(i) Execute the ${t} experiment by connecting the circuit as prescribed. Measure the output for at least five input levels and record all observations systematically.
+(ii) Apply the relevant formula to the measured data of ${t} and demonstrate that the results are consistent with theoretical predictions within acceptable tolerance.`,
   ],
+
   Analyze: [
-    (q)=>`Examine the output characteristics of ${_topic(q)} and differentiate between ideal and practical behaviour. Identify sources of error.`,
-    (q)=>`Investigate the effect of varying component values on the performance of ${_topic(q)}. Break down the causes of any deviation from theory.`,
-    (q)=>`Compare the theoretical and practical results of ${_topic(q)} and analyze the factors responsible for any discrepancies.`,
+    (q,t)=>`(i) Examine the output characteristics of ${t} and differentiate between the ideal theoretical response and the practically observed behaviour. Identify and account for all sources of deviation.
+(ii) Break down the circuit of ${t} into functional sub-blocks and trace the signal path, analyzing the contribution of each stage to the overall performance.`,
+
+    (q,t)=>`(i) Investigate the effect of varying each critical component parameter on the performance of ${t}. Present a comparative analysis of the results in tabular and graphical form.
+(ii) Distinguish between the different modes of operation of ${t} using the observed data, and correlate each mode with the corresponding region of the characteristic curve.`,
+
+    (q,t)=>`(i) Deconstruct the ${t} circuit and analyze the role of each passive and active element in shaping the output response. Support your analysis with experimental evidence.
+(ii) Compare the performance of ${t} under two different operating conditions (e.g., different load values / frequencies / supply voltages) and analyze the factors responsible for the observed differences.`,
   ],
+
   Evaluate: [
-    (q)=>`Assess the performance of ${_topic(q)} against the given specifications. Justify any modifications needed to improve accuracy.`,
-    (q)=>`Critique the design of ${_topic(q)} and recommend improvements. Support your recommendations with measured evidence.`,
-    (q)=>`Judge the suitability of ${_topic(q)} for the specified application based on your experimental observations and theoretical understanding.`,
+    (q,t)=>`(i) Assess the performance of the ${t} circuit against the specified design parameters. Justify whether the experimental results meet the required standards, citing measured evidence.
+(ii) Critique the limitations of ${t} in real-world applications and recommend specific modifications to improve its accuracy, efficiency, or reliability.`,
+
+    (q,t)=>`(i) Evaluate the accuracy of the ${t} experiment by computing the percentage error between theoretical and practical values. Judge whether the observed discrepancies are acceptable and propose corrective measures.
+(ii) Appraise the suitability of ${t} for the given application requirements based on your experimental findings, and justify your conclusion with quantitative data.`,
+
+    (q,t)=>`(i) Validate the design of ${t} by comparing experimental results with datasheet/theoretical specifications. Defend your conclusion regarding its compliance with performance criteria.
+(ii) Recommend an improved design strategy for ${t} to overcome the observed practical limitations, and support your recommendation with calculations or simulation evidence.`,
   ],
+
   Create: [
-    (q)=>`Design a modified version of ${_topic(q)} to meet the additional specification provided. Construct the circuit and verify its performance.`,
-    (q)=>`Propose a novel application of the ${_topic(q)} principle and develop a working implementation. Present a detailed analysis of results.`,
-    (q)=>`Synthesize a system incorporating ${_topic(q)} that satisfies the given constraints. Document the design process and validate experimentally.`,
+    (q,t)=>`(i) Design a modified version of the ${t} circuit to satisfy the additional specification provided. Derive the component values analytically and verify the design through experimental measurements.
+(ii) Propose a novel application that leverages the principle of ${t}. Develop a working prototype, present the complete design procedure, and validate its performance experimentally.`,
+
+    (q,t)=>`(i) Synthesize a multi-stage system incorporating ${t} that meets the given performance constraints. Document the complete design methodology, component selection rationale, and experimental verification.
+(ii) Formulate a test plan for ${t} that comprehensively evaluates all key performance parameters. Execute the plan, record results, and compile a structured technical report with conclusions.`,
+
+    (q,t)=>`(i) Develop an improved circuit for ${t} that addresses the identified practical limitations. Justify every design decision with supporting calculations and verify the improvement through comparative measurements.
+(ii) Invent a measurement technique to characterize the non-ideal behaviour of ${t}. Devise the experimental procedure, carry it out, and present a detailed analysis of the results obtained.`,
   ]
 };
 
+/* ── Extract a meaningful topic phrase from question text ─────────── */
 function _topic(q) {
-  // Extract a short topic phrase from question text
-  const t=q.text||'';
-  // Try to find experiment name patterns
-  const m=t.match(/(?:of\s+(?:a\s+)?|using\s+|implement\s+|design\s+|study\s+(?:of\s+)?)([A-Z][A-Za-z0-9\s\-\/]{3,40}?)(?:\s*(?:circuit|experiment|using|with|and|\.|\,|$))/);
-  if(m) return m[1].trim();
-  // Fallback: first 5 meaningful words
-  const words=t.replace(/[^\w\s]/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,5);
+  const t = q.text || '';
+  // Pattern 1: "… of a/an/the <Noun Phrase>"
+  const m1 = t.match(/\bof\s+(?:a\s+|an\s+|the\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|using|with|and|experiment|characteristics|amplifier|oscillator|filter|rectifier|regulator|modulator|demodulator|converter|meter|bridge|network|system|response|curve|plot|graph|table|via|by|to|\.|\,|$))/i);
+  if(m1) return m1[1].trim();
+  // Pattern 2: "design/implement/construct/study/verify <Noun Phrase>"
+  const m2 = t.match(/\b(?:design|implement|construct|study|verify|demonstrate|test|measure|determine|calculate|plot|draw|obtain)\s+(?:the\s+|a\s+|an\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|characteristics|using|and|experiment|with|for|to|\.|\,|$))/i);
+  if(m2) return m2[1].trim();
+  // Pattern 3: ALL-CAPS experiment names common in lab QPs
+  const m3 = t.match(/\b([A-Z]{2,}(?:\s+[A-Z]{2,}){0,3})\b/);
+  if(m3 && m3[1].length > 3) return m3[1];
+  // Fallback: first 6 meaningful words
+  const words = t.replace(/[^\w\s\-]/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,6);
   return words.join(' ') || 'this experiment';
 }
 
@@ -1193,7 +1150,6 @@ function setBloomMode(qi, mode) {
   document.getElementById(`bonline_${qi}`).style.display  = mode==='online'?'block':'none';
   document.getElementById(`bmt_offline_${qi}`).className = 'bloom-mode-tab'+(mode==='offline'?' act':'');
   document.getElementById(`bmt_online_${qi}`).className  = 'bloom-mode-tab'+(mode==='online'?' act':'');
-  // Hide results when switching
   document.getElementById(`bresult_${qi}`).classList.remove('show');
   document.getElementById(`bspin_${qi}`).classList.remove('show');
   document.getElementById(`bcustom_${qi}`).classList.remove('show');
@@ -1204,32 +1160,32 @@ function hideBloom(qi)  { document.getElementById(`bloom_${qi}`).classList.remov
 
 /* ── Offline reframe ─────────────────────────────────────────────── */
 function reframeOffline(qi, level) {
-  const q=G.questions[qi];
-  const cacheKey=`${qi}_${level}_offline`;
+  const q = G.questions[qi];
+  const cacheKey = `${qi}_${level}_offline`;
   let text;
   if(G.bloomCache[cacheKey]){
-    text=G.bloomCache[cacheKey];
+    text = G.bloomCache[cacheKey];
   } else {
-    const templates=BLOOM_OFFLINE_TEMPLATES[level]||[];
-    const tpl=templates[qi % templates.length] || templates[0];
-    text=tpl?tpl(q):`${level}: ${q.text.substring(0,120)}`;
-    G.bloomCache[cacheKey]=text;
+    const topic = _topic(q);
+    const templates = BLOOM_OFFLINE_TEMPLATES[level] || [];
+    const tpl = templates[qi % templates.length] || templates[0];
+    text = tpl ? tpl(q, topic) : `${level}: ${q.text.substring(0,200)}`;
+    G.bloomCache[cacheKey] = text;
   }
   showBloomResult(qi, level, text);
-  // Also pre-fill the custom textarea so user can edit immediately
-  const ta=document.getElementById(`bcustomta_${qi}`);
-  if(ta) ta.value=text;
+  const ta = document.getElementById(`bcustomta_${qi}`);
+  if(ta) ta.value = text;
   document.getElementById(`bcustom_${qi}`).classList.add('show');
 }
 
 /* ── Online AI reframe ───────────────────────────────────────────── */
 const BLOOM_VERBS={
-  Remember:['List','Define','Recall','Identify','Name','State','Label','Recognize'],
-  Understand:['Explain','Describe','Summarize','Interpret','Classify','Compare','Paraphrase'],
-  Apply:['Demonstrate','Calculate','Implement','Solve','Use','Execute','Construct','Perform'],
-  Analyze:['Differentiate','Examine','Break down','Inspect','Investigate','Distinguish','Deconstruct'],
-  Evaluate:['Assess','Critique','Judge','Justify','Defend','Appraise','Recommend','Validate'],
-  Create:['Design','Construct','Develop','Formulate','Propose','Synthesize','Invent','Devise']
+  Remember:['List','Define','Recall','Identify','Name','State','Label','Enumerate'],
+  Understand:['Explain','Describe','Summarize','Interpret','Classify','Compare','Illustrate'],
+  Apply:['Demonstrate','Calculate','Implement','Solve','Execute','Construct','Perform','Verify'],
+  Analyze:['Differentiate','Examine','Deconstruct','Investigate','Distinguish','Trace','Compare'],
+  Evaluate:['Assess','Critique','Justify','Defend','Appraise','Recommend','Validate','Judge'],
+  Create:['Design','Develop','Formulate','Propose','Synthesize','Invent','Devise','Construct']
 };
 
 async function reframeOnline(qi, level) {
@@ -1242,12 +1198,17 @@ async function reframeOnline(qi, level) {
   spinEl.classList.add('show'); resEl.classList.remove('show');
   document.getElementById(`bcustom_${qi}`).classList.remove('show');
 
-  const prompt=`You are an expert educational assessment designer for engineering lab/practical exams.
-Reframe this question at Bloom's Taxonomy level: ${level}
-Original question: "${q.text.substring(0,500)}"
-${q.equations.length?`Equations: ${q.equations.map(e=>e.text).join(', ')}`:''}
+  const prompt=`You are an expert educational assessment designer for engineering practical/laboratory examinations (Anna University / Indian engineering college style).
+Reframe the following lab question at Bloom's Taxonomy level: ${level}
+Original question: "${q.text.substring(0,600)}"
+${q.equations.length?`Equations present: ${q.equations.map(e=>e.text).join(', ')}`:''}
 Action verbs to use: ${(BLOOM_VERBS[level]||[]).join(', ')}
-Requirements: Keep same lab topic, 1-2 sentences, exam-ready. Return ONLY the reframed question.
+Requirements:
+- Write exactly 2 sub-parts labelled (i) and (ii) as is standard in Anna University practical exams
+- Each sub-part should be a complete, exam-ready sentence of 1–2 lines
+- Use formal academic language appropriate for undergraduate engineering level
+- Preserve the original experiment/topic name exactly
+- Do NOT add any preamble, explanation, or notes — return ONLY the two-part question
 Reframed question:`;
 
   try {
@@ -1272,7 +1233,8 @@ function showBloomResult(qi, level, text) {
   document.getElementById(`bspin_${qi}`).classList.remove('show');
   const resEl=document.getElementById(`bresult_${qi}`);
   resEl.classList.add('show');
-  document.getElementById(`btext_${qi}`).textContent=text;
+  // Render (i)/(ii) with line breaks for readability
+  document.getElementById(`btext_${qi}`).innerHTML = text.replace(/\n/g,'<br>');
   const lvlEl=document.getElementById(`blevel_${qi}`);
   if(lvlEl){ lvlEl.className='bloom-tag '+(BLOOM_COLORS[level]||'bt-Custom'); lvlEl.textContent=(BLOOM_ICONS[level]||'✏️')+' '+level; }
   resEl.dataset.currentLevel=level;
@@ -1281,7 +1243,10 @@ function showBloomResult(qi, level, text) {
 function useBloomResult(qi) {
   const resEl=document.getElementById(`bresult_${qi}`);
   const level=resEl.dataset.currentLevel||'Custom';
-  const text=document.getElementById(`btext_${qi}`).textContent;
+  // Get plain text (strip HTML from innerHTML)
+  const tmp=document.createElement('div');
+  tmp.innerHTML=document.getElementById(`btext_${qi}`).innerHTML;
+  const text=tmp.innerText||tmp.textContent;
   _applyBloom(qi, level, text);
 }
 
@@ -1302,8 +1267,9 @@ function _applyBloom(qi, level, text) {
 }
 
 function editBloomResult(qi) {
-  const resEl=document.getElementById(`bresult_${qi}`);
-  const text=document.getElementById(`btext_${qi}`).textContent;
+  const tmp=document.createElement('div');
+  tmp.innerHTML=document.getElementById(`btext_${qi}`).innerHTML;
+  const text=tmp.innerText||tmp.textContent;
   const ta=document.getElementById(`bcustomta_${qi}`);
   if(ta) ta.value=text;
   document.getElementById(`bcustom_${qi}`).classList.add('show');
@@ -1379,9 +1345,6 @@ function filterStu() {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SMART ASSIGNMENT
-   ═══════════════════════════════════════════════════════════════════ */
 function setMode(m) {
   G.mode=m;
   ['smart','balanced','random'].forEach(n=>{ const el=document.getElementById('mode-'+n); if(el) el.className='mo'+(n===m?' act':''); });
@@ -1394,11 +1357,9 @@ function getAssignments(mode) {
   const studentOrder=shuf([...Array(n).keys()]);
 
   if(mode==='smart'){
-    // Phase 1: each question assigned once
     const qOrder=shuf([...Array(q).keys()]);
     let p1=0;
     for(let qi=0;qi<qOrder.length&&p1<n;qi++){ result[studentOrder[p1]]=qOrder[qi]; usedCount[qOrder[qi]]++; p1++; }
-    // Phase 2: fill remaining respecting limits
     for(const si of shuf(studentOrder.slice(p1))){
       const avail=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; if(!lim||usedCount[qi]<lim) avail.push(qi); }
       if(avail.length){ avail.sort((a,b)=>usedCount[a]-usedCount[b]); result[si]=avail[0]; usedCount[avail[0]]++; }
@@ -1496,48 +1457,7 @@ function buildSectionXml(student, question, rIdRemap) {
   const HDR_BDR=`<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="333333"/><w:right w:val="nil"/></w:tcBorders>`;
   const HDR_MAR=`<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
   const hCell=(txt,w2,bold=false)=>`<w:tc><w:tcPr><w:tcW w:w="${w2}" w:type="dxa"/>${HDR_BDR}${HDR_MAR}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr><w:r>${TNRPR(22,bold)}<w:t xml:space="preserve">${xesc(txt)}</w:t></w:r></w:p></w:tc>`;
-  const headerTbl = `
-<w:tbl>
-  <w:tblPr>
-    <w:tblW w:w="10000" w:type="dxa"/>
-    <w:tblBorders>
-      <w:top w:val="nil"/>
-      <w:left w:val="nil"/>
-      <w:bottom w:val="nil"/>
-      <w:right w:val="nil"/>
-      <w:insideH w:val="nil"/>
-      <w:insideV w:val="nil"/>
-    </w:tblBorders>
-    <w:tblLayout w:type="fixed"/>
-  </w:tblPr>
-
-  <w:tblGrid>
-    <w:gridCol w:w="3000"/>
-    <w:gridCol w:w="1300"/>
-    <w:gridCol w:w="5700"/>
-  </w:tblGrid>
-
-  <!-- Row 1 -->
-  <w:tr>
-    <w:trPr>
-      <w:trHeight w:val="280" w:hRule="atLeast"/>
-    </w:trPr>
-    ${hCell('Course & Class: ' + cc, 3000)}
-    ${hCell('Semester: ' + sem, 1300)}
-   ${hCell('Subject: ' + sub, 5700, false, "center")}  <!-- ✅ Center -->
-  </w:tr>
-
-  <!-- Row 2 -->
-  <w:tr>
-    <w:trPr>
-      <w:trHeight w:val="280" w:hRule="atLeast"/>
-    </w:trPr>
-    ${hCell('Reg No.: ' + (student.regNo || ''), 3000, true)}
-    ${hCell('Session: ' + ses, 1300)}
-    ${hCell('Date: ' + dt, 5700, false, "center")}  <!-- ✅ Center -->
-  </w:tr>
-
-</w:tbl>`;
+  const headerTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="3000"/><w:gridCol w:w="1300"/><w:gridCol w:w="5700"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${hCell('Course & Class: '+cc,3000)}${hCell('Semester: '+sem,1300)}${hCell('Subject: '+sub,5700)}</w:tr><w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${hCell('Reg No.: '+(student.regNo||''),3000,true)}${hCell('Session: '+ses,1300)}${hCell('Date: '+dt,5700)}</w:tr></w:tbl>`;
   const QW=9200, MW=800;
   const Q_BDR=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
   const Q_MAR=`<w:tcMar><w:top w:w="55" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="55" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>`;
@@ -1599,9 +1519,6 @@ async function buildMergedDocx() {
   return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE',compressionOptions:{level:6}});
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   GENERATE
-   ═══════════════════════════════════════════════════════════════════ */
 async function doGenerate() {
   if(!G.students.length||!G.questions.length){ toast('Upload files first','warn'); return; }
   showSpin('Generating Papers…','Lossless equations · Tables · Images',0); await delay(30);
@@ -1634,9 +1551,6 @@ async function doGenerate() {
   } catch(err){ hideSpin(); showAlert('genAlert','aerr','❌ '+err.message); toast(err.message,'err'); console.error(err); }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   PREVIEW
-   ═══════════════════════════════════════════════════════════════════ */
 function renderPreview(){ G.prevPage=0; showPreviewPg(0); document.getElementById('pTot').textContent=`${G.pairedPages.length} pages · ${G.docxBlobs.length} students`; }
 
 function showPreviewPg(idx) {
@@ -1653,19 +1567,20 @@ function showPreviewPg(idx) {
     let bloomActive=false;
     if(question.activeBloom&&question.bloomReframes?.[question.activeBloom]){
       bloomActive=true;
-      paras=[{text:question.bloomReframes[question.activeBloom],images:question.images,equations:question.equations,tables:question.nestedTables.length?[{rows:question.nestedTables[0]?.rows||[]}]:[]}];
+      // Reconstruct paras for bloomed version
+      const bloomText = question.bloomReframes[question.activeBloom];
+      paras=[{text:bloomText,images:question.images,equations:question.equations,tables:question.nestedTables.length?[{rows:question.nestedTables[0]?.rows||[]}]:[]}];
     }
     let qContent='';
     for(const para of paras){
-      // Tables — shown as actual HTML tables in preview
+      /* ── NESTED TABLE in paper preview: use .pp-tbl-nested class for full visible borders ── */
       for(const tbl of(para.tables||[])){
         if(!tbl.rows||!tbl.rows.length) continue;
-        qContent+=`<table style="border-collapse:collapse;margin:6px 0;font-size:10pt;max-width:100%;width:auto;border:1.5px solid black;text-align:center">`;
-        
+        qContent+=`<div style="overflow-x:auto;margin:6px 0"><table class="pp-tbl-nested">`;
         tbl.rows.forEach((row,ri)=>{
-          qContent+=`<tr>${row.map(c=>`<${ri===0?'th':'td'} style="border:1px solid #888;padding:4px 9px;text-align:center${ri===0?';background:#d8d8d8;font-weight:700':''}">${esc(c.text||'')}</${ri===0?'th':'td'}>`).join('')}</tr>`;
+          qContent+=`<tr>${row.map(c=>`<${ri===0?'th':'td'}>${esc(c.text||'')}</${ri===0?'th':'td'}>`).join('')}</tr>`;
         });
-        qContent+=`</table>`;
+        qContent+=`</table></div>`;
       }
       // Images
       for(const img of(para.images||[]))
@@ -1673,9 +1588,14 @@ function showPreviewPg(idx) {
       // Equations
       for(const eq of(para.equations||[]))
         if(eq.text) qContent+=`<span style="font-family:'Times New Roman',serif;font-style:italic;color:#4c1d95;background:#faf5ff;border:1px solid #ddd6fe;border-radius:3px;padding:1px 8px;font-size:12pt;display:inline-block;margin:2px">${esc(eq.text)}</span>`;
-      // Text
-      if(para.text&&para.text.trim())
-        qContent+=`<div style="line-height:1.75;margin:3px 0">${esc(para.text)}</div>`;
+      // Text — preserve (i)/(ii) sub-parts line breaks
+      if(para.text&&para.text.trim()){
+        const lines = para.text.split('\n');
+        lines.forEach(line=>{
+          if(line.trim())
+            qContent+=`<div style="line-height:1.85;margin:3px 0">${esc(line)}</div>`;
+        });
+      }
     }
     if(!qContent) qContent=esc(question.text||'—');
     const markVal=question.marks[0]||'100';
@@ -1686,13 +1606,13 @@ function showPreviewPg(idx) {
         <tr><td style="padding:3px 5px;border-bottom:2px solid #333"><b>Reg No.: ${esc(student.regNo||'—')}</b></td><td style="padding:3px 5px;border-bottom:2px solid #333">Dept: ${esc(student.dept||dept||'')}</td><td style="padding:3px 5px;border-bottom:2px solid #333">Session: <b>${esc(ses)}</b> &nbsp; Date: <b>${esc(dt)}</b></td></tr>
       </table>
       <table style="width:100%;border-collapse:collapse;margin-bottom:5px">
-        <thead><tr><th style="padding:5px 8px;border:1px solid #ccc;background:#e0e0e0;text-align:center">Question</th><th style="padding:5px 6px;border:1px solid #ccc;background:#e0e0e0;text-align:center;width:52px">Marks</th></tr></thead>
+        <thead><tr><th style="padding:5px 8px;border:1.5px solid #333;background:#e0e0e0;text-align:center">Question</th><th style="padding:5px 6px;border:1.5px solid #333;background:#e0e0e0;text-align:center;width:52px">Marks</th></tr></thead>
         <tbody><tr>
-          <td style="padding:7px 9px;border:1px solid #ccc;line-height:1.75">${qContent}${bloomNote}</td>
-          <td style="padding:5px 6px;border:1px solid #ccc;text-align:center;font-weight:700">${esc(markVal)}</td>
+          <td style="padding:7px 9px;border:1.5px solid #333;line-height:1.85">${qContent}${bloomNote}</td>
+          <td style="padding:5px 6px;border:1.5px solid #333;text-align:center;font-weight:700">${esc(markVal)}</td>
         </tr></tbody>
       </table>
-      ${G.rubricCols.length?`<p style="text-align:center;font-weight:700;text-decoration:underline;margin:5px 0 3px">RUBRICS</p><table style="width:100%;border-collapse:collapse"><thead><tr>${G.rubricCols.map(c=>`<th style="padding:4px 6px;border:1px solid #ccc;background:#e4e4e4;text-align:center;font-size:10pt">${esc(c)}</th>`).join('')}</tr></thead><tbody><tr>${G.rubricCols.map(()=>'<td style="border:1px solid #ccc;height:32px"></td>').join('')}</tr></tbody></table>`:''}
+      ${G.rubricCols.length?`<p style="text-align:center;font-weight:700;text-decoration:underline;margin:5px 0 3px">RUBRICS</p><table style="width:100%;border-collapse:collapse"><thead><tr>${G.rubricCols.map(c=>`<th style="padding:4px 6px;border:1.5px solid #333;background:#e4e4e4;text-align:center;font-size:10pt">${esc(c)}</th>`).join('')}</tr></thead><tbody><tr>${G.rubricCols.map(()=>'<td style="border:1.5px solid #555;height:32px"></td>').join('')}</tr></tbody></table>`:''}
       <div style="margin-top:26px;display:flex;justify-content:space-between"><span>Internal Examiner</span><span>External Examiner</span></div>
     </div>`;
   }
@@ -1704,9 +1624,6 @@ function showPreviewPg(idx) {
 function pNav(d){ showPreviewPg(G.prevPage+d); }
 function togPreview(){ const s=document.getElementById('prvSec'); const show=s.style.display==='none'; s.style.display=show?'block':'none'; if(show&&G.pairedPages.length) showPreviewPg(G.prevPage); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DOWNLOADS
-   ═══════════════════════════════════════════════════════════════════ */
 function dlDocx(){
   if(!G.mergedBlob) return;
   const url=URL.createObjectURL(G.mergedBlob),a=document.createElement('a'); a.href=url;
@@ -1729,9 +1646,6 @@ async function dlZip(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast('ZIP downloaded','ok');
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   UI HELPERS
-   ═══════════════════════════════════════════════════════════════════ */
 function setStep(n){ for(let i=1;i<=5;i++){ const el=document.getElementById('sn'+i); if(!el) continue; const sn=el.querySelector('.sn-n'); if(i<n){el.className='sn done';sn.textContent='✓';}else if(i===n){el.className='sn act';sn.textContent=i;}else{el.className='sn';sn.textContent=i;} } }
 function showSpin(t,s,p){ document.getElementById('spinT').textContent=t; document.getElementById('spinS').textContent=s; document.getElementById('pf').style.width=p+'%'; document.getElementById('spinOv').classList.add('show'); }
 function setSP(p){ document.getElementById('pf').style.width=p+'%'; }
