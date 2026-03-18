@@ -103,7 +103,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .qc-parts{display:flex;flex-direction:column;gap:5px;margin-top:6px}
 .qc-part{background:#f8faff;border:1px solid #e2eaf4;border-radius:var(--r8);padding:8px 10px}
 .qc-part-txt{font-size:10.5px;color:#1e293b;line-height:1.55;font-family:'Times New Roman',serif}
-/* ─── TABLE PREVIEW in question card: full visible borders ─── */
 .qc-tbl-prev{font-size:10px;font-family:'Times New Roman',serif;border-collapse:collapse;margin:4px 0;width:100%;border:1.5px solid #333}
 .qc-tbl-prev th{background:#e8edf5;font-weight:700;font-size:9px;padding:3px 7px;border:1.5px solid #333;text-align:center}
 .qc-tbl-prev td{padding:3px 7px;border:1.5px solid #555;font-size:9.5px;text-align:center}
@@ -117,7 +116,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .bdg-sky{background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1}
 .bdg-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
 .bdg-o{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
-/* Bloom */
 .bloom-panel{margin-top:10px;border:1px solid #ddd6fe;border-radius:var(--r8);overflow:hidden;display:none}
 .bloom-panel.show{display:block}
 .bloom-hdr{background:linear-gradient(90deg,#ede9fe,#f5f3ff);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ddd6fe;flex-wrap:wrap}
@@ -134,7 +132,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .bl-An{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6}
 .bl-E{background:#fce7f3;border-color:#f9a8d4;color:#9d174d}
 .bl-C{background:#ffedd5;border-color:#fdba74;color:#9a3412}
-/* Offline reframe textarea */
 .bloom-offline-area{padding:10px 12px;display:none}
 .bloom-offline-area.show{display:block}
 .bloom-custom-ta{width:100%;border:1px solid #ddd6fe;border-radius:var(--r8);padding:9px 11px;font-family:'Times New Roman',serif;font-size:11.5px;color:#1e1b4b;min-height:80px;resize:vertical;outline:none;background:#faf5ff;line-height:1.7}
@@ -154,7 +151,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .bt-E{background:#fce7f3;color:#831843;border:1px solid #f0abfc}
 .bt-C{background:#ffedd5;color:#7c2d12;border:1px solid #fb923c}
 .bt-Custom{background:#f0fdf4;color:#065f46;border:1px solid #6ee7b7}
-/* Student table */
 .stbl{width:100%;border-collapse:collapse;font-size:11.5px}
 .stbl th{background:#f1f5f9;color:#475569;padding:9px 12px;text-align:left;font-size:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;font-family:var(--fm);white-space:nowrap}
 .stbl td{padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle}
@@ -230,8 +226,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,86,219,.4)}50%{box-shadow:0 0 0 10px rgba(26,86,219,0)}}
 @media(max-width:900px){.up-grid,.fr2,.fr3,.fr4,.an-grid,.q-grid{grid-template-columns:1fr}.dl-btns{flex-direction:column}}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#93c5fd;border-radius:3px}
-
-/* ─── PAPER PREVIEW: nested table with full borders ─── */
 .pp-tbl-nested{border-collapse:collapse;margin:6px 0;font-size:10.5pt;max-width:100%;width:auto}
 .pp-tbl-nested th{border:1.5px solid #222;padding:4px 9px;text-align:center;background:#d4d4d4;font-weight:700}
 .pp-tbl-nested td{border:1.5px solid #444;padding:4px 9px;text-align:center}
@@ -245,7 +239,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
   <div class="spin-s" id="spinS">Please wait</div>
   <div class="pt"><div class="pf" id="pf"></div></div>
 </div>
-<!-- ASSIGN MODAL -->
 <div class="mod-ov" id="assignModal">
   <div class="mod-box">
     <div class="mod-hdr"><span>✏️</span><h3 id="modTitle">Assign Question</h3><button class="mod-cl" onclick="closeModal()">✕</button></div>
@@ -257,7 +250,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
     </div>
   </div>
 </div>
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">🧪</div>
   <div><div style="display:flex;align-items:center;gap:4px"><span class="tb-name">Lab QP Generator</span><span class="tb-ver">v6.0</span></div></div>
@@ -277,7 +269,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
   </div>
 </div>
 <div class="main">
-<!-- §1 -->
 <div class="sh"><div class="sh-icon si-b">1</div><h2>Upload Source Files</h2><span class="sh-tag tag-b">Step 1</span></div>
 <div class="card">
   <div class="card-hdr"><span>📁</span><h3>Question Bank &amp; Student Database</h3></div>
@@ -300,7 +291,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
     <div class="meta-p" id="metaP"><div class="mp-t">📜 Detected Exam Info</div><div class="mp-g" id="metaG"></div></div>
   </div>
 </div>
-<!-- §2 -->
 <div class="sh"><div class="sh-icon si-t">2</div><h2>Exam Header Details</h2></div>
 <div class="card">
   <div class="card-hdr"><span>🎓</span><h3>Examination Information</h3></div>
@@ -323,7 +313,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
     <div id="rubricBlk" style="display:none"></div>
   </div>
 </div>
-<!-- API KEY PANEL -->
 <div id="apiKeyPanel" style="background:#f0fdf4;border:1px solid #6ee7b7;border-left:4px solid #059669;border-radius:16px;padding:16px 20px;margin-bottom:12px;display:none">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
     <span style="font-size:18px">🆓</span>
@@ -345,7 +334,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
   </div>
   <div style="margin-top:8px;font-size:9px;color:#059669;font-family:var(--fm)" id="apiKeyStatus"></div>
 </div>
-<!-- §3 -->
 <div class="sh"><div class="sh-icon si-b">3</div><h2>Question Bank</h2><span class="sh-tag tag-b">Lossless Eq · Images · Tables</span><span class="sh-tag tag-v" style="margin-left:4px">🧠 Bloom's</span><span class="sh-tag tag-g" style="margin-left:4px">✈️ Offline</span></div>
 <div class="card" id="qbCard">
   <div class="card-hdr"><span>📚</span><h3>Parsed Questions</h3><span id="qbLbl" style="margin-left:auto;font-size:9px;color:var(--n3);font-family:var(--fm)"></span></div>
@@ -354,7 +342,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
     <div class="q-grid" id="qGrid"><div style="color:var(--n3);font-size:11px;padding:8px">Upload question bank to view…</div></div>
   </div>
 </div>
-<!-- §4 -->
 <div class="sh"><div class="sh-icon si-t">4</div><h2>Assign Questions</h2></div>
 <div class="card">
   <div class="card-hdr"><span>🎲</span><h3>Question Assignment</h3></div>
@@ -391,7 +378,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
   <div class="card-hdr"><span>📊</span><h3>Analytics</h3></div>
   <div class="card-body"><div class="an-grid" id="anGrid"></div></div>
 </div>
-<!-- §5 -->
 <div class="sh"><div class="sh-icon si-g">5</div><h2>Generate &amp; Export</h2></div>
 <div class="card">
   <div class="card-body">
@@ -429,7 +415,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 
 <script>
 'use strict';
-/* ═══ NAMESPACES ═══ */
 const WN  = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const MN  = 'http://schemas.openxmlformats.org/officeDocument/2006/math';
 const RN  = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
@@ -437,7 +422,6 @@ const AN  = 'http://schemas.openxmlformats.org/drawingml/2006/main';
 const PICN= 'http://schemas.openxmlformats.org/drawingml/2006/picture';
 const WPN = 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing';
 
-/* ═══ STATE ═══ */
 let G = {
   questions:[], rubricCols:[], students:[],
   assignments:{}, examInfo:{},
@@ -446,7 +430,6 @@ let G = {
   imageMap:{}, rawZip:null, bloomCache:{}, scratchDoc:null
 };
 
-/* ═══ UTILS ═══ */
 const toA  = nl => Array.from(nl);
 const esc  = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const xesc = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -711,38 +694,27 @@ const SP1  = `<w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="aut
 const TNRPR= (sz=22,bold=false)=>`<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${bold?'<w:b/><w:bCs/>':''}</w:rPr>`;
 const IMG_XML=(nRId)=>{ const uid=Math.floor(Math.random()*89000+10000); return `<w:drawing><wp:inline distT="0" distB="0" distL="114400" distR="114400"><wp:extent cx="3429000" cy="2286000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${uid}" name="Img${nRId}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Img${nRId}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${nRId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3429000" cy="2286000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`; };
 
-/* ── _forceTblBorders — inject solid single borders into serialized w:tbl XML ── */
 const FORCED_TBL_BDRS = `<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders>`;
 const FORCED_TC_BDRS  = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
 
 function _forceTblBorders(xmlSeg) {
-  // 1. Replace existing tblBorders (nil or absent) with solid borders
   xmlSeg = xmlSeg.replace(/<w:tblBorders\b[^>]*>[\s\S]*?<\/w:tblBorders>/g, FORCED_TBL_BDRS);
-  // 2. If no tblBorders existed, inject after <w:tblPr>
   if(!xmlSeg.includes('<w:tblBorders')) {
     xmlSeg = xmlSeg.replace(/(<w:tblPr\b[^>]*>)([\s\S]*?)(<\/w:tblPr>)/,
       (m,open,inner,close)=>`${open}${inner}${FORCED_TBL_BDRS}${close}`);
   }
-  // 3. Replace existing tcBorders with solid borders
   xmlSeg = xmlSeg.replace(/<w:tcBorders\b[^>]*>[\s\S]*?<\/w:tcBorders>/g, FORCED_TC_BDRS);
-  // 4. Inject tcBorders into any tcPr that lacks them
   xmlSeg = xmlSeg.replace(/(<w:tcPr\b[^>]*>)([\s\S]*?)(<\/w:tcPr>)/g, (m,open,inner,close)=>{
     if(inner.includes('w:tcBorders')) return m;
     return `${open}${inner}${FORCED_TC_BDRS}${close}`;
   });
-  // 5. Force center alignment on ALL <w:p> inside table cells
-  //    Match each <w:p> and ensure its <w:pPr> contains <w:jc w:val="center"/>
   xmlSeg = xmlSeg.replace(/(<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/g, (m, pOpen, pInner, pClose)=>{
-    // Only act on paragraphs inside table cells — detected by context being inside w:tc
-    // We inject into pPr; if pPr absent, add it
     if(pInner.includes('w:jc')) {
-      // Replace any existing jc with center
       return pOpen + pInner.replace(/<w:jc\b[^\/]*\/>/g,'<w:jc w:val="center"/>') + pClose;
     }
     if(pInner.includes('<w:pPr>') || pInner.includes('<w:pPr ')) {
       return pOpen + pInner.replace(/(<w:pPr\b[^>]*>)/,'$1<w:jc w:val="center"/>') + pClose;
     }
-    // No pPr at all — insert one
     return pOpen + '<w:pPr><w:jc w:val="center"/></w:pPr>' + pInner + pClose;
   });
   return xmlSeg;
@@ -765,8 +737,6 @@ function buildQuestionCellXml(question, rIdRemap) {
         const cloned=safeImp(G.scratchDoc, para.rawNode);
         remapRIds(cloned, rIdRemap);
         let seg=new XMLSerializer().serializeToString(cloned);
-        // ── FORCE BORDERS on any w:tbl inside the cloned XML ──
-        // Replaces or injects <w:tblBorders> so nested tables always have visible lines
         if(para.rawNode.localName==='tbl') {
           seg = _forceTblBorders(seg);
         }
@@ -920,8 +890,25 @@ async function parseQB(zip) {
         allTables.push(...(p.tables||[]));
       }
 
-      const mArr = mT.split('\n').map(s=>s.trim()).filter(s=>/^\d+$/.test(s));
-      const marks = mArr.length?mArr:['100'];
+      // ── FIXED: Parse ALL mark values from the marks cell (one per line) ──
+      const mCell = mci<tcs.length ? tcs[mci] : null;
+      let marks = ['100'];
+      if(mCell) {
+        // Each paragraph in the marks cell = one mark value
+        const mParas = [];
+        for(const p of mCell.getElementsByTagNameNS(WN,'p')){
+          let l='';
+          for(const r of p.getElementsByTagNameNS(WN,'r'))
+            for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
+          if(l.trim()) mParas.push(l.trim());
+        }
+        const mArr = mParas.length ? mParas : mT.split('\n').map(s=>s.trim()).filter(Boolean);
+        const numArr = mArr.filter(s=>/^\d+$/.test(s));
+        marks = numArr.length ? numArr : (mT.trim() ? [mT.trim()] : ['100']);
+      } else {
+        const mArr = mT.split('\n').map(s=>s.trim()).filter(s=>/^\d+$/.test(s));
+        marks = mArr.length ? mArr : ['100'];
+      }
 
       G.questions.push({
         idx:G.questions.length,
@@ -1005,7 +992,6 @@ function renderQGrid() {
       eqHtml+='</div>';
     }
 
-    /* ── NESTED TABLE PREVIEW: uses .qc-tbl-prev with explicit borders + center ── */
     let tblHtml='';
     if(q.nestedTables.length){
       const tbl=q.nestedTables[0];
@@ -1020,12 +1006,17 @@ function renderQGrid() {
       }
     }
 
+    // Show all marks in card header (e.g. "50+50=100M")
+    const marksDisplay = q.marks.length > 1
+      ? q.marks.join('+') + '=' + q.totalMark + 'M'
+      : q.totalMark + 'M';
+
     const prevText=(q.paras.find(p=>p.text)?.text||q.text||'').substring(0,90);
 
     el.innerHTML=`
     <div class="qc-hdr">
       <span class="qc-num">Q${qi+1}</span>
-      <span class="qc-mark">⭐${q.totalMark}M</span>
+      <span class="qc-mark">⭐${marksDisplay}</span>
       ${flags}
       ${limitW}
       <span class="qc-usage" id="qu_${qi}">${u}/${q.studentLimit||'∞'}</span>
@@ -1117,20 +1108,10 @@ function populateQF() {
   G.questions.forEach((_,i)=>{ s.innerHTML+=`<option value="${i}">Q${i+1}</option>`; });
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   BLOOM'S TAXONOMY — OFFLINE (HIGH STANDARD) + ONLINE
-   ═══════════════════════════════════════════════════════════════════ */
 const BLOOM_COLORS={ Remember:'bt-R', Understand:'bt-U', Apply:'bt-Ap', Analyze:'bt-An', Evaluate:'bt-E', Create:'bt-C', Custom:'bt-Custom' };
 const BLOOM_ICONS={ Remember:'📝', Understand:'💡', Apply:'⚙️', Analyze:'🔍', Evaluate:'⚖️', Create:'🎨', Custom:'✏️' };
 
-/* ══════════════════════════════════════════════════════════════════
-   HIGH-STANDARD OFFLINE BLOOM'S TEMPLATES — 5 variants per level
-   • Single complete question (no (i)/(ii) sub-parts)
-   • Embeds numeric values extracted from original question
-   • Anna University / university practical exam style
-   ══════════════════════════════════════════════════════════════════ */
 const BLOOM_OFFLINE_TEMPLATES = {
-
   Remember: [
     (q,t,n)=>`List the components required for the ${t} experiment${n?', given ('+n+')':''}, state the function of each component, and draw the standard circuit diagram with all terminal connections labelled.`,
     (q,t,n)=>`State the working principle of ${t}${n?' for the given data ('+n+')':''} and write the formula used to compute the expected output, defining all symbols.`,
@@ -1138,7 +1119,6 @@ const BLOOM_OFFLINE_TEMPLATES = {
     (q,t,n)=>`Recall the characteristic equation of ${t}${n?' corresponding to ('+n+')':''} and reproduce the standard observation table with all column headings and SI units.`,
     (q,t,n)=>`Identify the operating modes of ${t}${n?' for the given conditions ('+n+')':''} and state the boundary condition that defines each mode on the characteristic curve.`,
   ],
-
   Understand: [
     (q,t,n)=>`Explain the operating principle of ${t}${n?' for ('+n+')':''} with a neat circuit diagram, and describe how the output changes when the key parameters are varied.`,
     (q,t,n)=>`Describe the input–output relationship of ${t}${n?' using the given data ('+n+')':''} and interpret the shape of the expected characteristic curve in terms of the underlying physics.`,
@@ -1146,7 +1126,6 @@ const BLOOM_OFFLINE_TEMPLATES = {
     (q,t,n)=>`Explain the role of each component in the ${t} circuit${n?' operating at ('+n+')':''} and describe the effect on the output if any one element is removed or replaced.`,
     (q,t,n)=>`Compare the theoretical and practical behaviour of ${t}${n?' using the parameters ('+n+')':''} and describe the factors responsible for any discrepancy.`,
   ],
-
   Apply: [
     (q,t,n)=>`Set up the ${t} circuit${n?', using the given values ('+n+')':''}, apply the appropriate input, record the output at a minimum of five readings, and tabulate the results with calculated values.`,
     (q,t,n)=>`Construct and test the ${t} circuit${n?' for ('+n+')':''}, compute the required performance parameters from your measurements, and verify against theoretical predictions.`,
@@ -1154,7 +1133,6 @@ const BLOOM_OFFLINE_TEMPLATES = {
     (q,t,n)=>`Perform the ${t} experiment${n?' using the values ('+n+')':''}, apply the relevant formula to your measured data, and demonstrate consistency with theory within acceptable tolerance.`,
     (q,t,n)=>`Demonstrate the operation of ${t}${n?' for ('+n+')':''} by measuring the output at all key test points and calculate the figures of merit from the observations.`,
   ],
-
   Analyze: [
     (q,t,n)=>`Examine the output characteristics of ${t}${n?' obtained with ('+n+')':''}, differentiate between ideal and practical behaviour, and identify all sources of deviation with their causes.`,
     (q,t,n)=>`Investigate the effect of varying the critical parameters of ${t}${n?' around the given values ('+n+')':''} and present a comparative analysis of performance in tabular and graphical form.`,
@@ -1162,7 +1140,6 @@ const BLOOM_OFFLINE_TEMPLATES = {
     (q,t,n)=>`Distinguish the operating regions of ${t}${n?' using the data ('+n+')':''}, correlate each region with the characteristic curve, and explain the physical mechanism in each region.`,
     (q,t,n)=>`Analyze the frequency or load response of ${t}${n?' for ('+n+')':''}, determine the bandwidth or regulation from the plotted characteristic, and account for any non-linearity observed.`,
   ],
-
   Evaluate: [
     (q,t,n)=>`Assess the performance of ${t}${n?' against the specifications ('+n+')':''} using experimental data, justify whether the results meet the design criteria, and recommend specific improvements.`,
     (q,t,n)=>`Evaluate the accuracy of the ${t} experiment${n?' for ('+n+')':''} by computing the percentage error between theoretical and practical results, and judge whether the discrepancy is acceptable.`,
@@ -1170,7 +1147,6 @@ const BLOOM_OFFLINE_TEMPLATES = {
     (q,t,n)=>`Validate the ${t} circuit${n?' at ('+n+')':''} by comparing experimental results with theoretical specifications, and defend your conclusion regarding compliance with performance criteria.`,
     (q,t,n)=>`Appraise the impact of component tolerances on ${t}${n?' for the given values ('+n+')':''}, evaluate which parameter most influences performance, and suggest a procedure to minimise uncertainty.`,
   ],
-
   Create: [
     (q,t,n)=>`Design a ${t} circuit${n?' to satisfy ('+n+')':''}, derive the component values analytically, construct the circuit, and verify all specifications through experimental measurements.`,
     (q,t,n)=>`Develop an improved version of ${t}${n?' beyond ('+n+')':''} that overcomes its identified limitations, justify every design decision with calculations, and validate experimentally.`,
@@ -1180,13 +1156,10 @@ const BLOOM_OFFLINE_TEMPLATES = {
   ]
 };
 
-/* variant cycle counter — allows "Next Variant" cycling per (qi, level) */
 const _bloomVariantIdx = {};
 
-/* ── Extract numeric/variable values from question text and table cells ── */
 function _nums(q) {
   const t = q.text || '';
-  // Collect table cell values first (most reliable for probability/truth tables)
   const tableCells = [];
   for(const nt of (q.nestedTables||[])) {
     for(const row of (nt.rows||[])) {
@@ -1196,14 +1169,12 @@ function _nums(q) {
       }
     }
   }
-  // Also extract inline numbers/symbolic values from text
   const inlineNums = t.match(/(?:[-+]?\d+(?:\.\d+)?\s*(?:[kKmMΩµnpF]|kHz|MHz|kΩ|mA|µA|nF|µF|Hz|V\b|mV|dB)?|\bk\b|2k|3k|nk|\bk\b)/g) || [];
   const combined = [...new Set([...tableCells.slice(0,10), ...inlineNums.slice(0,6)])].filter(v=>v.trim().length>0);
   if(!combined.length) return null;
   return combined.slice(0,8).join(', ');
 }
 
-/* ── Extract a meaningful topic phrase from question text ─────────── */
 function _topic(q) {
   const t = q.text || '';
   const m1 = t.match(/\bof\s+(?:a\s+|an\s+|the\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|using|with|and|experiment|characteristics|amplifier|oscillator|filter|rectifier|regulator|modulator|demodulator|converter|meter|bridge|network|system|response|curve|plot|graph|table|via|by|to|\.|\,|$))/i);
@@ -1229,7 +1200,6 @@ function setBloomMode(qi, mode) {
 function toggleBloom(qi){ document.getElementById(`bloom_${qi}`).classList.toggle('show'); }
 function hideBloom(qi)  { document.getElementById(`bloom_${qi}`).classList.remove('show'); }
 
-/* ── Offline reframe — cycles through 5 variants on repeated clicks ─── */
 function reframeOffline(qi, level) {
   const q = G.questions[qi];
   const templates = BLOOM_OFFLINE_TEMPLATES[level] || [];
@@ -1250,7 +1220,6 @@ function reframeOffline(qi, level) {
   if(lvlEl) lvlEl.title = `Variant ${idx+1} of ${templates.length} — click again to cycle`;
 }
 
-/* ── Online AI reframe — uses API key from settings panel ─────────── */
 const BLOOM_VERBS={
   Remember:['List','Define','Recall','Identify','Name','State','Label','Enumerate'],
   Understand:['Explain','Describe','Summarize','Interpret','Classify','Compare','Illustrate'],
@@ -1338,10 +1307,7 @@ Reframed question:`;
         max_tokens: 300,
         temperature: 0.7,
         messages: [
-          {
-            role: 'system',
-            content: 'You are an expert exam question designer for engineering practical examinations. You write clear, precise, academically rigorous single-sentence exam questions.'
-          },
+          { role: 'system', content: 'You are an expert exam question designer for engineering practical examinations. You write clear, precise, academically rigorous single-sentence exam questions.' },
           { role: 'user', content: prompt }
         ]
       })
@@ -1350,7 +1316,6 @@ Reframed question:`;
     if(!resp.ok){
       const errData = await resp.json().catch(()=>({}));
       const errMsg = errData?.error?.message || `HTTP ${resp.status}`;
-      // Friendly messages for common errors
       if(resp.status===401) throw new Error('Invalid API key — check your Groq key starts with gsk_');
       if(resp.status===429) throw new Error('Rate limit hit — wait a moment and try again (free tier limit)');
       throw new Error(errMsg);
@@ -1360,10 +1325,9 @@ Reframed question:`;
     const text = data?.choices?.[0]?.message?.content?.trim() || '';
     if(!text) throw new Error('Empty response from Groq');
 
-    // Clean up any accidental (i)/(ii) sub-parts the model might produce
     const cleaned = text
-      .replace(/^\s*\([ivx]+\)\s*/gim, '')   // remove leading (i), (ii) etc
-      .replace(/\n+/g, ' ')                    // flatten to single line
+      .replace(/^\s*\([ivx]+\)\s*/gim, '')
+      .replace(/\n+/g, ' ')
       .trim();
 
     G.bloomCache[cacheKey] = cleaned;
@@ -1394,7 +1358,6 @@ function showBloomResult(qi, level, text) {
   const lvlEl=document.getElementById(`blevel_${qi}`);
   if(lvlEl){ lvlEl.className='bloom-tag '+(BLOOM_COLORS[level]||'bt-Custom'); lvlEl.textContent=(BLOOM_ICONS[level]||'✏️')+' '+level; }
   resEl.dataset.currentLevel=level;
-  // Show variant number for offline
   const varEl=document.getElementById(`bvariant_${qi}`);
   if(varEl){
     const cycleKey=`${qi}_${level}_cycle`;
@@ -1408,7 +1371,6 @@ function showBloomResult(qi, level, text) {
 function useBloomResult(qi) {
   const resEl=document.getElementById(`bresult_${qi}`);
   const level=resEl.dataset.currentLevel||'Custom';
-  // Get plain text (strip HTML from innerHTML)
   const tmp=document.createElement('div');
   tmp.innerHTML=document.getElementById(`btext_${qi}`).innerHTML;
   const text=tmp.innerText||tmp.textContent;
@@ -1449,9 +1411,6 @@ function clearBloom(qi) {
   toast(`Q${qi+1}: Restored to original`,'inf');
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   STUDENT TABLE
-   ═══════════════════════════════════════════════════════════════════ */
 function renderStuTable() {
   const w=document.getElementById('stuWrap');
   const asn=Object.keys(G.assignments).length;
@@ -1610,9 +1569,6 @@ function chkReady() {
   document.getElementById('assignBtn').disabled=!(G.students.length>0&&G.questions.length>0);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DOCX GENERATION
-   ═══════════════════════════════════════════════════════════════════ */
 const NS_ALL=['xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"','xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"','xmlns:o="urn:schemas-microsoft-com:office:office"','xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"','xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"','xmlns:v="urn:schemas-microsoft-com:vml"','xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"','xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"','xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"','xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"','xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"','xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"'].join(' ');
 const SECPR=`<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="600" w:right="600" w:bottom="600" w:left="600" w:header="300" w:footer="300" w:gutter="0"/>`;
 
@@ -1628,9 +1584,10 @@ function buildSectionXml(student, question, rIdRemap) {
   const Q_MAR=`<w:tcMar><w:top w:w="55" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="55" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>`;
   const HDR_SHD=`<w:shd w:val="clear" w:color="auto" w:fill="C8C8C8"/>`;
   const qContentXml=buildQuestionCellXml(question, rIdRemap);
-  const markVal=question.marks[0]||'100';
-  const bloomNote=question.activeBloom?`<w:p><w:pPr>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:sz w:val="18"/><w:color w:val="5B21B6"/></w:rPr><w:t>[Bloom's: ${xesc(question.activeBloom)}]</w:t></w:r></w:p>`:'';
-  const qTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Question</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Marks</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${qContentXml}${bloomNote}</w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>${xesc(markVal)}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>`;
+  // ── FIXED: Render ALL marks from question.marks array (one <w:p> per mark) ──
+  const marksXml=question.marks.map(m=>`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>${xesc(m)}</w:t></w:r></w:p>`).join('');
+  const bloomNote=question.activeBloom?`<w:p><w:pPr>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:iCs/><w:sz w:val="18"/><w:color w:val="5B21B6"/></w:rPr><w:t>[Bloom's: ${xesc(question.activeBloom)}]</w:t></w:r></w:p>`:'';
+  const qTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Question</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Marks</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${qContentXml}${bloomNote}</w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${marksXml}</w:tc></w:tr></w:tbl>`;
   let rubricXml='';
   if(G.rubricCols.length){
     const nc=G.rubricCols.length,cw=Math.floor(10000/nc);
@@ -1732,13 +1689,11 @@ function showPreviewPg(idx) {
     let bloomActive=false;
     if(question.activeBloom&&question.bloomReframes?.[question.activeBloom]){
       bloomActive=true;
-      // Reconstruct paras for bloomed version
       const bloomText = question.bloomReframes[question.activeBloom];
       paras=[{text:bloomText,images:question.images,equations:question.equations,tables:question.nestedTables.length?[{rows:question.nestedTables[0]?.rows||[]}]:[]}];
     }
     let qContent='';
     for(const para of paras){
-      /* ── NESTED TABLE in paper preview: force visible borders + center align on every cell ── */
       for(const tbl of(para.tables||[])){
         if(!tbl.rows||!tbl.rows.length) continue;
         qContent+=`<div style="overflow-x:auto;margin:6px 0"><table style="border-collapse:collapse;width:auto;min-width:60%;font-family:'Times New Roman',serif;font-size:10.5pt;border:2px solid #111">`;
@@ -1748,13 +1703,10 @@ function showPreviewPg(idx) {
         });
         qContent+=`</table></div>`;
       }
-      // Images
       for(const img of(para.images||[]))
         qContent+=`<div style="text-align:center;margin:6px 0"><img src="data:${img.ct};base64,${img.b64}" style="max-width:100%;max-height:180px;object-fit:contain;border:1px solid #eee;border-radius:3px"/></div>`;
-      // Equations
       for(const eq of(para.equations||[]))
         if(eq.text) qContent+=`<span style="font-family:'Times New Roman',serif;font-style:italic;color:#4c1d95;background:#faf5ff;border:1px solid #ddd6fe;border-radius:3px;padding:1px 8px;font-size:12pt;display:inline-block;margin:2px">${esc(eq.text)}</span>`;
-      // Text — preserve (i)/(ii) sub-parts line breaks
       if(para.text&&para.text.trim()){
         const lines = para.text.split('\n');
         lines.forEach(line=>{
@@ -1764,7 +1716,8 @@ function showPreviewPg(idx) {
       }
     }
     if(!qContent) qContent=esc(question.text||'—');
-    const markVal=question.marks[0]||'100';
+    // ── FIXED: Show ALL marks in preview, one per line ──
+    const marksHtml=question.marks.map(m=>`<div style="text-align:center;font-weight:700;line-height:2">${esc(m)}</div>`).join('');
     const bloomNote=bloomActive?`<div style="font-size:9px;font-style:italic;color:#5b21b6;margin-top:5px;font-family:sans-serif">[Bloom's: ${question.activeBloom}]</div>`:'';
     return`<div style="font-family:'Times New Roman',Times,serif;font-size:11pt;line-height:1.5">
       <table style="width:100%;border-collapse:collapse;margin-bottom:5px;font-size:10.5pt">
@@ -1775,7 +1728,7 @@ function showPreviewPg(idx) {
         <thead><tr><th style="padding:5px 8px;border:1.5px solid #333;background:#e0e0e0;text-align:center">Question</th><th style="padding:5px 6px;border:1.5px solid #333;background:#e0e0e0;text-align:center;width:52px">Marks</th></tr></thead>
         <tbody><tr>
           <td style="padding:7px 9px;border:1.5px solid #333;line-height:1.85">${qContent}${bloomNote}</td>
-          <td style="padding:5px 6px;border:1.5px solid #333;text-align:center;font-weight:700">${esc(markVal)}</td>
+          <td style="padding:5px 6px;border:1.5px solid #333;vertical-align:middle">${marksHtml}</td>
         </tr></tbody>
       </table>
       ${G.rubricCols.length?`<p style="text-align:center;font-weight:700;text-decoration:underline;margin:5px 0 3px">RUBRICS</p><table style="width:100%;border-collapse:collapse"><thead><tr>${G.rubricCols.map(c=>`<th style="padding:4px 6px;border:1.5px solid #333;background:#e4e4e4;text-align:center;font-size:10pt">${esc(c)}</th>`).join('')}</tr></thead><tbody><tr>${G.rubricCols.map(()=>'<td style="border:1.5px solid #555;height:32px"></td>').join('')}</tr></tbody></table>`:''}
@@ -1824,7 +1777,6 @@ function toggleApiPanel(){
   if(p.style.display==='block') document.getElementById('apiKeyInp').focus();
 }
 
-/* ── Startup: restore saved Groq API key ────────────────────────── */
 (function initApp(){
   try {
     const saved=localStorage.getItem('labqp_groqkey')||'';
