@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Model Lab QP Generator </title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --c0:#f0f6ff;--b1:#1a56db;--b2:#2563eb;--b3:#3b82f6;--b4:#1d4ed8;
+  --g1:#059669;--g2:#10b981;--v1:#7c3aed;--v2:#8b5cf6;
+  --o1:#d97706;--o2:#f59e0b;--r1:#dc2626;--r2:#ef4444;
+  --t1:#0d9488;--t2:#14b8a6;
+  --n1:#0f172a;--n2:#1e293b;--n3:#475569;--n4:#94a3b8;--n5:#e2e8f0;
+  --border:#d1dde8;--border2:#e2eaf4;
+  --sh:0 2px 12px rgba(15,40,100,0.08);
+  --ff:'Plus Jakarta Sans',sans-serif;--fm:'JetBrains Mono',monospace;--fs:'Playfair Display',serif;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;
+  --ease:.2s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--ff);background:var(--c0);color:var(--n1);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(59,130,246,.07) 0,transparent 60%),var(--c0);pointer-events:none}
+.topbar{position:sticky;top:0;z-index:900;background:rgba(255,255,255,.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);height:60px;padding:0 24px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 8px rgba(15,40,100,.08)}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--b1),var(--v1));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tb-name{font-size:15px;font-weight:800;color:#0f172a;letter-spacing:-.4px}
+.tb-ver{font-size:9px;font-family:var(--fm);background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;padding:2px 8px;border-radius:20px;margin-left:4px}
+.tb-gap{flex:1}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:9px;font-family:var(--fm);font-weight:600;background:#f1f5f9;border:1px solid #cbd5e1;color:#64748b;transition:all var(--ease)}
+.pill.active{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pdot 2s infinite}
+@keyframes pdot{0%,100%{opacity:1}50%{opacity:.4}}
+.snav{background:rgba(255,255,255,.97);border-bottom:1px solid var(--border2);position:sticky;top:60px;z-index:800;padding:0 24px;overflow-x:auto}
+.snav-r{display:flex;max-width:1400px;margin:0 auto}
+.sn{display:flex;align-items:center;gap:7px;padding:10px 14px 10px 0;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;position:relative}
+.sn:not(:last-child)::after{content:'›';position:absolute;right:2px;color:#cbd5e1;font-size:12px}
+.sn-n{width:22px;height:22px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fm);transition:all var(--ease);border:1px solid #e2e8f0;flex-shrink:0}
+.sn-l{font-size:10px;font-weight:600;color:#64748b}
+.sn.act{border-bottom-color:var(--b3)}.sn.act .sn-n{background:var(--b2);color:#fff;border-color:var(--b3)}.sn.act .sn-l{color:#1d4ed8}
+.sn.done .sn-n{background:#059669;color:#fff;border-color:#34d399}.sn.done .sn-l{color:#059669}
+.main{max-width:1400px;margin:0 auto;padding:24px 24px 120px;position:relative;z-index:1}
+.sh{display:flex;align-items:center;gap:10px;margin:28px 0 12px}.sh:first-child{margin-top:0}
+.sh-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff}
+.si-b{background:linear-gradient(135deg,var(--b1),var(--b2))}.si-t{background:linear-gradient(135deg,var(--t1),var(--t2))}.si-g{background:linear-gradient(135deg,var(--g1),var(--g2))}.si-v{background:linear-gradient(135deg,var(--v1),var(--v2))}
+.sh h2{font-size:15px;font-weight:800;color:#0f172a;letter-spacing:-.3px}
+.sh-tag{font-size:8px;font-weight:700;font-family:var(--fm);text-transform:uppercase;padding:2px 9px;border-radius:20px;letter-spacing:.6px}
+.tag-b{background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8}
+.tag-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+.tag-g{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r20);margin-bottom:12px;overflow:hidden;box-shadow:var(--sh)}
+.card:hover{border-color:#93c5fd}
+.card-hdr{padding:12px 20px;border-bottom:1px solid #e2eaf4;display:flex;align-items:center;gap:9px;background:linear-gradient(to right,#f8faff,#fff)}
+.card-hdr h3{font-size:12px;font-weight:700;color:#0f172a}
+.card-body{padding:20px}
+.up-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.uz{border:1.5px dashed #cbd5e1;border-radius:var(--r16);padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#f8faff;position:relative;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.uz:hover,.uz.ov{border-color:#3b82f6;background:#eff6ff;transform:translateY(-2px)}
+.uz.done{border-color:#10b981;background:#f0fdf4;border-style:solid}
+.uz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-ic{font-size:32px}.uz-t{font-size:13px;font-weight:800;color:#0f172a}.uz-s{font-size:9.5px;color:#64748b;font-family:var(--fm)}.uz-ok{font-size:11px;color:#059669;font-weight:700}.uz-sz{font-size:8.5px;color:#94a3b8;font-family:var(--fm)}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm)}
+.fi,.fsel{border:1px solid #d1d5db;background:#fff;color:#0f172a;padding:8px 11px;border-radius:var(--r8);font-family:var(--ff);font-size:12px;outline:none;transition:all var(--ease);width:100%}
+.fi:focus,.fsel:focus{border-color:#3b82f6;background:#eff6ff;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.fi::placeholder{color:#cbd5e1}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 18px;border:none;border-radius:var(--r8);font-family:var(--ff);font-size:11.5px;font-weight:700;cursor:pointer;transition:all var(--ease)}
+.bp{background:linear-gradient(135deg,var(--b1),var(--b2));color:#fff;box-shadow:0 4px 16px rgba(26,86,219,.4)}
+.bp:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,86,219,.5)}
+.bg_{background:#f8fafc;color:#334155;border:1px solid #d1dde8}
+.bg_:hover:not(:disabled){background:#f1f5f9;border-color:#93c5fd;color:#1d4ed8}
+.bgreen{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 4px 16px rgba(5,150,105,.4)}
+.bv{background:linear-gradient(135deg,var(--v1),var(--v2));color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4)}
+.bv:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.5)}
+.bbig{padding:12px 28px;font-size:13px;border-radius:var(--r12)}
+.btn:disabled{opacity:.3;cursor:not-allowed!important;transform:none!important;box-shadow:none!important}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.alert{padding:9px 13px;border-radius:var(--r8);font-size:11px;display:flex;align-items:flex-start;gap:8px;margin-top:10px}
+.aok{background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46}
+.aerr{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+.awrn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e}
+.ainf{background:#eff6ff;border:1px solid #93c5fd;color:#1e40af}
+.notice{background:#eff6ff;border:1px solid #bfdbfe;border-left:3px solid #3b82f6;border-radius:var(--r8);padding:10px 14px;font-size:11px;color:#1e40af;display:flex;gap:8px;align-items:flex-start;margin-bottom:12px;line-height:1.6}
+.stats-bar{display:flex;flex-wrap:wrap;background:#f8faff;border:1px solid #dde8f5;border-radius:var(--r12);overflow:hidden;margin:12px 0}
+.sb{padding:12px 18px;border-right:1px solid #e2eaf4;flex:1;min-width:80px}.sb:last-child{border-right:none}
+.sbk{font-size:7.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm)}
+.sbv{font-size:21px;font-weight:800;line-height:1.15;margin-top:2px}
+.c-b{color:#1d4ed8}.c-g{color:#059669}.c-r{color:#dc2626}.c-v{color:#6d28d9}.c-o{color:#d97706}.c-w{color:#0f172a}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;margin-top:12px}
+.qc{background:#fff;border:1.5px solid #e2eaf4;border-radius:var(--r12);padding:14px;transition:all .2s}
+.qc:hover{border-color:#93c5fd}
+.qc-hdr{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.qc-num{font-size:9px;font-weight:700;font-family:var(--fm);background:#dbeafe;border:1px solid #93c5fd;padding:2px 8px;border-radius:8px;color:#1d4ed8}
+.qc-mark{font-size:9px;font-family:var(--fm);background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 7px;border-radius:8px;color:#64748b}
+.qc-limit-wrap{display:flex;align-items:center;gap:4px;margin-left:auto}
+.qc-limit-lbl{font-size:8px;color:#92400e;font-family:var(--fm);font-weight:600}
+.qc-limit-inp{width:52px;font-size:10px;font-family:var(--fm);font-weight:700;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:2px 5px;text-align:center;outline:none}
+.qc-usage{font-size:9px;font-family:var(--fm);background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:2px 7px;border-radius:7px}
+.qc-parts{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.qc-part{background:#f8faff;border:1px solid #e2eaf4;border-radius:var(--r8);padding:8px 10px}
+.qc-part-txt{font-size:10.5px;color:#1e293b;line-height:1.55;font-family:'Times New Roman',serif}
+.qc-tbl-prev{font-size:10px;font-family:'Times New Roman',serif;border-collapse:collapse;margin:4px 0;width:100%;border:1.5px solid #333}
+.qc-tbl-prev th{background:#e8edf5;font-weight:700;font-size:9px;padding:3px 7px;border:1.5px solid #333;text-align:center}
+.qc-tbl-prev td{padding:3px 7px;border:1.5px solid #555;font-size:9.5px;text-align:center}
+.qc-media{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.qc-thumb{height:44px;max-width:100px;object-fit:contain;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafc}
+.eq-chip{font-family:'Times New Roman',Times,serif;font-style:italic;background:#faf5ff;border:1px solid #ddd6fe;border-radius:4px;padding:2px 9px;font-size:11px;color:#4c1d95;display:inline-block;margin:2px 2px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8.5px;font-weight:700;font-family:var(--fm);white-space:nowrap}
+.bdg-b{background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8}
+.bdg-g{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46}
+.bdg-r{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b}
+.bdg-sky{background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1}
+.bdg-v{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+.bdg-o{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
+.bloom-panel{margin-top:10px;border:1px solid #ddd6fe;border-radius:var(--r8);overflow:hidden;display:none}
+.bloom-panel.show{display:block}
+.bloom-hdr{background:linear-gradient(90deg,#ede9fe,#f5f3ff);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ddd6fe;flex-wrap:wrap}
+.bloom-hdr-title{font-size:10px;font-weight:700;color:#5b21b6}
+.bloom-mode-tabs{display:flex;background:#fff;border:1px solid #ddd6fe;border-radius:6px;overflow:hidden;margin-left:auto}
+.bloom-mode-tab{padding:3px 10px;font-size:9px;font-weight:700;cursor:pointer;color:#6d28d9;font-family:var(--ff);transition:all .15s}
+.bloom-mode-tab.act{background:linear-gradient(135deg,var(--v1),var(--v2));color:#fff}
+.bloom-levels{display:flex;gap:5px;flex-wrap:wrap;padding:10px}
+.bloom-btn{padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;background:none;font-family:var(--ff)}
+.bloom-btn:hover{transform:translateY(-1px)}
+.bl-R{background:#fef9c3;border-color:#fde047;color:#713f12}
+.bl-U{background:#dcfce7;border-color:#86efac;color:#166534}
+.bl-Ap{background:#dbeafe;border-color:#93c5fd;color:#1e40af}
+.bl-An{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6}
+.bl-E{background:#fce7f3;border-color:#f9a8d4;color:#9d174d}
+.bl-C{background:#ffedd5;border-color:#fdba74;color:#9a3412}
+.bloom-offline-area{padding:10px 12px;display:none}
+.bloom-offline-area.show{display:block}
+.bloom-custom-ta{width:100%;border:1px solid #ddd6fe;border-radius:var(--r8);padding:9px 11px;font-family:'Times New Roman',serif;font-size:11.5px;color:#1e1b4b;min-height:80px;resize:vertical;outline:none;background:#faf5ff;line-height:1.7}
+.bloom-custom-ta:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.bloom-custom-actions{display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.bloom-result{padding:0 12px 12px;display:none}
+.bloom-result.show{display:block}
+.bloom-result-text{font-size:11px;color:#1e1b4b;line-height:1.7;font-family:'Times New Roman',serif;background:#faf5ff;border:1px solid #ede9fe;border-radius:var(--r8);padding:10px 12px;margin-top:6px}
+.bloom-spin{padding:10px;text-align:center;font-size:10px;color:#7c3aed;font-family:var(--fm);display:none;align-items:center;justify-content:center;gap:8px}
+.bloom-spin.show{display:flex}
+.bloom-spin::before{content:'';width:14px;height:14px;border:2px solid #ddd6fe;border-top-color:#7c3aed;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+.bloom-tag{font-size:7.5px;padding:1px 7px;border-radius:10px;font-weight:700;font-family:var(--fm)}
+.bt-R{background:#fef9c3;color:#713f12;border:1px solid #fde047}
+.bt-U{background:#dcfce7;color:#14532d;border:1px solid #4ade80}
+.bt-Ap{background:#dbeafe;color:#1e3a8a;border:1px solid #60a5fa}
+.bt-An{background:#f3e8ff;color:#4a044e;border:1px solid #c084fc}
+.bt-E{background:#fce7f3;color:#831843;border:1px solid #f0abfc}
+.bt-C{background:#ffedd5;color:#7c2d12;border:1px solid #fb923c}
+.bt-Custom{background:#f0fdf4;color:#065f46;border:1px solid #6ee7b7}
+.stbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.stbl th{background:#f1f5f9;color:#475569;padding:9px 12px;text-align:left;font-size:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;font-family:var(--fm);white-space:nowrap}
+.stbl td{padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle}
+.stbl tr:hover td{background:#eff6ff}
+.stbl tr.limit-exceeded td{background:#fff1f2!important;border-left:3px solid #ef4444}
+.tbl-wrap{overflow-x:auto;border-radius:var(--r12);border:1px solid #e2eaf4;max-height:480px;overflow-y:auto;background:#fff}
+.actl-bar{background:#f8faff;border:1px solid #dde8f5;border-radius:var(--r12);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.actl-lbl{font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.7px;font-family:var(--fm)}
+.mtabs{display:flex;background:#f1f5f9;border-radius:var(--r8);border:1px solid #e2e8f0;overflow:hidden}
+.mo{padding:6px 14px;font-size:10px;font-weight:600;cursor:pointer;color:#64748b;white-space:nowrap}
+.mo:hover{color:#1d4ed8}.mo.act{background:#2563eb;color:#fff}
+.sr{display:flex;gap:8px;margin-bottom:12px}
+.si-inp{flex:1;border:1px solid #d1d5db;background:#fff;color:#0f172a;padding:7px 12px;border-radius:var(--r8);font-size:11.5px;outline:none;transition:all var(--ease);font-family:var(--ff)}
+.si-inp:focus{border-color:#3b82f6;background:#eff6ff}
+.an-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.an-c{background:#fff;border:1px solid #e2eaf4;border-radius:var(--r12);padding:16px}
+.an-t{font-size:9px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.6px;font-family:var(--fm);margin-bottom:12px}
+.bar-r{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.bar-l{font-size:9px;color:#64748b;font-family:var(--fm);width:28px;text-align:right;flex-shrink:0}
+.bar-tr{flex:1;height:13px;background:#f1f5f9;border-radius:6px;overflow:hidden}
+.bar-f{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;min-width:24px}
+.bar-f span{font-size:8px;font-weight:700;color:rgba(255,255,255,.9);font-family:var(--fm)}
+.bf1{background:linear-gradient(90deg,var(--b2),var(--b3))}.bf2{background:linear-gradient(90deg,var(--t1),var(--t2))}.bf3{background:linear-gradient(90deg,var(--v1),var(--v2))}.bf4{background:linear-gradient(90deg,var(--g1),var(--g2))}.bf-red{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.mod-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(12px);z-index:8000;align-items:center;justify-content:center;padding:20px}
+.mod-ov.show{display:flex}
+.mod-box{background:#fff;border:1px solid #e2eaf4;border-radius:var(--r20);max-width:540px;width:100%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(15,40,100,.2)}
+.mod-hdr{padding:14px 18px;border-bottom:1px solid #e2eaf4;display:flex;align-items:center;gap:9px;background:linear-gradient(to right,#f8faff,#fff)}
+.mod-hdr h3{font-size:13px;font-weight:700;color:#0f172a;flex:1}
+.mod-cl{width:26px;height:26px;border-radius:50%;background:#f1f5f9;border:1px solid #e2e8f0;cursor:pointer;color:#64748b;font-size:12px;display:flex;align-items:center;justify-content:center}
+.mod-cl:hover{background:#fee2e2;color:#991b1b}
+.mod-body{padding:14px 18px;overflow-y:auto;flex:1}
+.mod-ft{padding:11px 18px;border-top:1px solid #e2eaf4;display:flex;gap:8px;align-items:center;background:#f8fafc}
+.q-opt{border:1.5px solid #e2e8f0;border-radius:var(--r8);padding:10px 12px;cursor:pointer;margin-bottom:7px;background:#f8fafc}
+.q-opt:hover{border-color:#93c5fd;background:#eff6ff}.q-opt.sel{border-color:#3b82f6;background:#eff6ff}
+.q-opt.at-limit{opacity:.55;cursor:not-allowed;background:#fff5f5;border-color:#fca5a5}
+.qoh{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.qon{font-family:var(--fm);font-size:9.5px;font-weight:700;color:#1d4ed8;background:#dbeafe;padding:2px 7px;border-radius:7px;border:1px solid #93c5fd}
+.qot{font-size:11px;color:#475569;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-family:'Times New Roman',serif}
+.meta-p{background:linear-gradient(135deg,#dbeafe,#eff6ff);border-radius:var(--r12);padding:12px 16px;margin-top:12px;display:none;border:1px solid #93c5fd}
+.mp-t{font-size:8px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.9px;font-family:var(--fm);margin-bottom:8px}
+.mp-g{display:flex;flex-wrap:wrap}
+.mp-i{padding:5px 14px;border-right:1px solid #bfdbfe;flex:1;min-width:80px}.mp-i:last-child{border-right:none}
+.mp-k{font-size:7px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fm)}
+.mp-v{font-size:11.5px;font-weight:700;color:#1e3a8a;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pnav{background:#f8faff;border-bottom:1px solid #e2eaf4;padding:9px 16px;display:flex;align-items:center;gap:8px}
+.pnav-btn{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid #e2e8f0;color:#475569;background:#fff}
+.pnav-btn:hover{border-color:#3b82f6;color:#1d4ed8}
+.pnav-lbl{font-size:10px;font-weight:700;color:#1d4ed8;font-family:var(--fm)}
+.pp{padding:18px 22px;background:#fff;color:#111;font-family:'Times New Roman',Times,serif;font-size:11pt;line-height:1.5}
+.pcut{border-top:1.5px dashed #bbb;margin:10px 0;text-align:center;padding-top:4px;font-size:8pt;color:#bbb}
+.dl-p{display:none;background:linear-gradient(135deg,#f0f6ff,#eff6ff,#f5f3ff);border:1px solid #bfdbfe;border-radius:var(--r24);padding:40px;text-align:center;margin-top:14px}
+.dl-p.show{display:block}
+.dl-p h3{font-size:24px;font-weight:800;color:#0f172a;margin-bottom:5px;font-family:var(--fs)}
+.dl-p p{color:#475569;font-size:10px;margin-bottom:22px;font-family:var(--fm)}
+.dl-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.spin-ov{display:none;position:fixed;inset:0;background:rgba(240,246,255,.96);backdrop-filter:blur(18px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.spin-ov.show{display:flex}
+.spin-ring{width:52px;height:52px;position:relative}
+.spin-ring::before,.spin-ring::after{content:'';position:absolute;border-radius:50%;animation:spin .8s linear infinite}
+.spin-ring::before{inset:0;border:3px solid rgba(59,130,246,.1);border-top-color:var(--b3)}
+.spin-ring::after{inset:6px;border:2px solid rgba(13,148,136,.1);border-top-color:var(--t2);animation-direction:reverse;animation-duration:.5s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-t{color:#0f172a;font-size:16px;font-weight:800}
+.spin-s{color:#1d4ed8;font-size:10px;font-family:var(--fm)}
+.pt{width:260px;height:3px;background:#dbeafe;border-radius:2px;overflow:hidden}
+.pf{height:100%;background:linear-gradient(90deg,var(--b2),var(--t2));border-radius:2px;transition:width .3s ease;width:0}
+.toaster{position:fixed;bottom:22px;right:22px;z-index:99999;display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none}
+.toast{background:#fff;border:1px solid #e2eaf4;border-radius:var(--r12);padding:10px 14px;font-size:11px;color:#0f172a;box-shadow:0 8px 30px rgba(15,40,100,.15);max-width:320px;display:flex;align-items:center;gap:8px;pointer-events:all;animation:tIn .28s cubic-bezier(.22,1,.36,1)}
+.toast.tok{border-left:3px solid #10b981}.toast.terr{border-left:3px solid #ef4444}.toast.tinf{border-left:3px solid #3b82f6}.toast.twarn{border-left:3px solid #f59e0b}
+.toast.tout{animation:tOut .28s ease forwards}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+@keyframes tOut{to{opacity:0;transform:translateX(16px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,86,219,.4)}50%{box-shadow:0 0 0 10px rgba(26,86,219,0)}}
+@media(max-width:900px){.up-grid,.fr2,.fr3,.fr4,.an-grid,.q-grid{grid-template-columns:1fr}.dl-btns{flex-direction:column}}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#93c5fd;border-radius:3px}
+.pp-tbl-nested{border-collapse:collapse;margin:6px 0;font-size:10.5pt;max-width:100%;width:auto}
+.pp-tbl-nested th{border:1.5px solid #222;padding:4px 9px;text-align:center;background:#d4d4d4;font-weight:700}
+.pp-tbl-nested td{border:1.5px solid #444;padding:4px 9px;text-align:center}
+</style>
+</head>
+<body>
+<div class="toaster" id="toaster"></div>
+<div class="spin-ov" id="spinOv">
+  <div class="spin-ring"></div>
+  <div class="spin-t" id="spinT">Processing…</div>
+  <div class="spin-s" id="spinS">Please wait</div>
+  <div class="pt"><div class="pf" id="pf"></div></div>
+</div>
+<div class="mod-ov" id="assignModal">
+  <div class="mod-box">
+    <div class="mod-hdr"><span>✏️</span><h3 id="modTitle">Assign Question</h3><button class="mod-cl" onclick="closeModal()">✕</button></div>
+    <div class="mod-body" id="modBody"></div>
+    <div class="mod-ft">
+      <button class="btn bp" id="modOk" onclick="confirmAssign()" disabled>✅ Confirm</button>
+      <button class="btn bg_" onclick="closeModal()">Cancel</button>
+      <span id="modSt" style="margin-left:auto;font-size:9.5px;font-family:var(--fm);color:var(--n3)"></span>
+    </div>
+  </div>
+</div>
+<div class="topbar">
+  <div class="logo">🧪</div>
+  <div><div style="display:flex;align-items:center;gap:4px"><span class="tb-name">Model Lab QP Generator</span><span class="tb-ver">KCET</span></div></div>
+  <div class="tb-gap"></div>
+  <div class="pill" id="bankPill"><div class="pill-dot"></div>No bank</div>
+  <div class="pill" id="stuPill"><div class="pill-dot"></div>No students</div>
+  <div class="pill" id="asnPill" style="display:none"><div class="pill-dot"></div><span id="asnTxt">0 assigned</span></div>
+  <button class="btn bg_" style="padding:4px 12px;font-size:10px;border-radius:20px;gap:5px" onclick="toggleApiPanel()" title="Set FREE Groq API Key for AI Online Bloom's Reframe">🔑 Groq Key</button>
+</div>
+<div class="snav">
+  <div class="snav-r">
+    <div class="sn act" id="sn1"><div class="sn-n">1</div><div class="sn-l">Upload Files</div></div>
+    <div class="sn" id="sn2"><div class="sn-n">2</div><div class="sn-l">Exam Details</div></div>
+    <div class="sn" id="sn3"><div class="sn-n">3</div><div class="sn-l">Question Bank</div></div>
+    <div class="sn" id="sn4"><div class="sn-n">4</div><div class="sn-l">Assign</div></div>
+    <div class="sn" id="sn5"><div class="sn-n">5</div><div class="sn-l">Generate</div></div>
+  </div>
+</div>
+<div class="main">
+<div class="sh"><div class="sh-icon si-b">1</div><h2>Upload Source Files</h2><span class="sh-tag tag-b">Step 1</span></div>
+<div class="card">
+  <div class="card-hdr"><span>📁</span><h3>Question Bank &amp; Student Database</h3></div>
+  <div class="card-body">
+    <div class="up-grid">
+      <div class="uz" id="qbZ" ondragover="ev(event,'qbZ','ov')" ondragleave="ev(event,'qbZ','')" ondrop="dr(event,'qbZ')">
+        <input type="file" id="qbF" accept=".docx" onchange="handleQB(this.files[0])"/>
+        <div class="uz-ic">📋</div><div class="uz-t">Question Bank</div>
+        <div class="uz-s">.DOCX · Questions + Equations + Images + Tables</div>
+        <div class="uz-ok" id="qbOk" style="display:none"></div><div class="uz-sz" id="qbSz"></div>
+      </div>
+      <div class="uz" id="stZ" ondragover="ev(event,'stZ','ov')" ondragleave="ev(event,'stZ','')" ondrop="dr(event,'stZ')">
+        <input type="file" id="stF" accept=".xlsx,.xls" onchange="handleStu(this.files[0])"/>
+        <div class="uz-ic">👥</div><div class="uz-t">Student Database</div>
+        <div class="uz-s">.XLSX · Register details</div>
+        <div class="uz-ok" id="stOk" style="display:none"></div><div class="uz-sz" id="stSz"></div>
+      </div>
+    </div>
+    <div class="uz" id="lgZ" ondragover="ev(event,'lgZ','ov')" ondragleave="ev(event,'lgZ','')" ondrop="drLogo(event)">
+  <input type="file" id="lgF" accept=".png,.jpg,.jpeg" onchange="handleLogo(this.files[0])"/>
+  <div class="uz-ic">🏫</div><div class="uz-t">College Logo</div>
+  <div class="uz-s">.PNG or .JPG · Shown in Output_1 header</div>
+  <div class="uz-ok" id="lgOk" style="display:none"></div>
+</div>
+    <div id="upAlert" style="display:none"></div>
+    <div class="meta-p" id="metaP"><div class="mp-t">📜 Detected Exam Info</div><div class="mp-g" id="metaG"></div></div>
+  </div>
+</div>
+<div class="sh"><div class="sh-icon si-t">2</div><h2>Exam Header Details</h2></div>
+<div class="card">
+  <div class="card-hdr"><span>🎓</span><h3>Examination Information</h3></div>
+  <div class="card-body">
+    <div class="fr2" style="margin-bottom:10px">
+      <div class="fg"><label>Exam Title</label><input class="fi" id="examTitle" placeholder="MODEL PRACTICAL EXAMINATIONS"/></div>
+      <div class="fg"><label>Department</label><input class="fi" id="examDept" placeholder="ECE"/></div>
+    </div>
+    <div class="fr3" style="margin-bottom:10px">
+      <div class="fg"><label>Course &amp; Class</label><input class="fi" id="examClass" placeholder="B.E. ECE"/></div>
+      <div class="fg"><label>Semester</label><input class="fi" id="examSem" placeholder="IV"/></div>
+      <div class="fg"><label>Subject Code &amp; Name</label><input class="fi" id="examSubject" placeholder="EC2257 - LIC Lab"/></div>
+    </div>
+    <div class="fr4">
+      <div class="fg"><label>Staff Name</label><input class="fi" id="examStaff" placeholder="Staff Name"/></div>
+      <div class="fg"><label>Venue</label><input class="fi" id="examVenue" placeholder="ECE Lab I"/></div>
+      <div class="fg"><label>Date</label><input class="fi" id="examDate" placeholder="04.05.2024"/></div>
+      <div class="fg"><label>Session</label><input class="fi" id="examSession" placeholder="FN"/></div>
+    </div>
+    <div id="rubricBlk" style="display:none"></div>
+  </div>
+</div>
+<div id="apiKeyPanel" style="background:#f0fdf4;border:1px solid #6ee7b7;border-left:4px solid #059669;border-radius:16px;padding:16px 20px;margin-bottom:12px;display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <span style="font-size:18px">🆓</span>
+    <span style="font-size:13px;font-weight:800;color:#064e3b">Groq API Key — <span style="color:#059669">100% Free</span> · for 🌐 AI Online Bloom's Reframe</span>
+    <button class="btn bg_" style="margin-left:auto;padding:3px 10px;font-size:9px" onclick="document.getElementById('apiKeyPanel').style.display='none'">✕ Close</button>
+  </div>
+  <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:10.5px;color:#065f46;line-height:1.85">
+    <b>📋 How to get your FREE Groq API key (2 minutes):</b><br>
+    <b>Step 1:</b> Open <a href="https://console.groq.com" target="_blank" style="color:#059669;font-weight:700">console.groq.com</a> → Click <b>Sign Up</b> (free, no credit card needed)<br>
+    <b>Step 2:</b> After login → click <b>API Keys</b> in the left sidebar → click <b>Create API Key</b><br>
+    <b>Step 3:</b> Give it any name → click <b>Submit</b> → Copy the key shown<br>
+    <b>Step 4:</b> Paste the key below and click <b>💾 Save Key</b><br>
+    <span style="font-size:9px;color:#047857">✅ Groq is completely free with generous rate limits · Uses Llama 3.3 70B model · Key stored only in your browser</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input id="apiKeyInp" type="password" placeholder="gsk_…" style="flex:1;min-width:260px;border:1.5px solid #6ee7b7;background:#fff;color:#064e3b;padding:8px 12px;border-radius:8px;font-family:monospace;font-size:12px;outline:none" oninput="this.style.borderColor=this.value.startsWith('gsk_')?'#059669':'#6ee7b7'"/>
+    <button class="btn bgreen" style="padding:7px 18px" onclick="saveApiKey()">💾 Save Key</button>
+    <button class="btn bg_" style="padding:7px 14px;font-size:10px" onclick="document.getElementById('apiKeyInp').type=document.getElementById('apiKeyInp').type==='password'?'text':'password'">👁 Show/Hide</button>
+  </div>
+  <div style="margin-top:8px;font-size:9px;color:#059669;font-family:var(--fm)" id="apiKeyStatus"></div>
+</div>
+<div class="sh"><div class="sh-icon si-b">3</div><h2>Question Bank</h2><span class="sh-tag tag-b">Lossless Eq · Images · Tables</span><span class="sh-tag tag-v" style="margin-left:4px">🧠 Bloom's</span><span class="sh-tag tag-g" style="margin-left:4px">✈️ Offline</span></div>
+<div class="card" id="qbCard">
+  <div class="card-hdr"><span>📚</span><h3>Parsed Questions</h3><span id="qbLbl" style="margin-left:auto;font-size:9px;color:var(--n3);font-family:var(--fm)"></span></div>
+  <div class="card-body">
+    <div class="notice"><span>✏️</span><span>Tables inside question cells are extracted and rendered faithfully. Equations cloned losslessly. <b>Bloom's Reframe</b> works <b>offline</b> (5 variants, no internet) or <b>online</b> via <b>FREE Groq AI</b> (Llama 3.3 70B).</span></div>
+    <div class="q-grid" id="qGrid"><div style="color:var(--n3);font-size:11px;padding:8px">Upload question bank to view…</div></div>
+  </div>
+</div>
+<div class="sh"><div class="sh-icon si-t">4</div><h2>Assign Questions</h2></div>
+<div class="card">
+  <div class="card-hdr"><span>🎲</span><h3>Question Assignment</h3></div>
+  <div class="card-body">
+    <div class="notice"><span>🎯</span><div><b>Smart mode:</b> Every question assigned at least once, then remaining filled by limit. <b>Red rows</b> = over limit.</div></div>
+    <div class="actl-bar">
+      <span class="actl-lbl">Mode:</span>
+      <div class="mtabs">
+        <div class="mo act" id="mode-smart" onclick="setMode('smart')">🎯 Smart (1× Each First)</div>
+        <div class="mo" id="mode-balanced" onclick="setMode('balanced')">⚖️ Balanced</div>
+        <div class="mo" id="mode-random" onclick="setMode('random')">🎲 Random</div>
+      </div>
+      <button class="btn bp" id="assignBtn" onclick="doAssign()" disabled>⚡ Auto-Assign</button>
+      <button class="btn bg_" onclick="reshuffleAll()" id="reShBtn" disabled>🔀 Re-shuffle</button>
+      <button class="btn bg_" id="clrBtn" onclick="clearAssign()" disabled>🗑 Clear</button>
+    </div>
+    <div id="asnAlert" style="display:none"></div>
+    <div class="stats-bar" id="asnStats" style="display:none">
+      <div class="sb"><div class="sbk">Total</div><div class="sbv c-w" id="st0">0</div></div>
+      <div class="sb"><div class="sbk">Assigned</div><div class="sbv c-g" id="st1">0</div></div>
+      <div class="sb"><div class="sbk">Pending</div><div class="sbv c-r" id="st2">0</div></div>
+      <div class="sb"><div class="sbk">Q Used</div><div class="sbv c-b" id="st3">0</div></div>
+      <div class="sb"><div class="sbk">Over Limit</div><div class="sbv c-r" id="st5">0</div></div>
+    </div>
+    <div class="sr">
+      <input class="si-inp" id="stuSearch" placeholder="🔍  Search name / register no…" oninput="filterStu()"/>
+      <div class="fg" style="min-width:110px"><select class="fsel" id="fAsn" onchange="filterStu()"><option value="all">All</option><option value="y">Assigned</option><option value="n">Unassigned</option><option value="over">Over Limit</option></select></div>
+      <div class="fg" style="min-width:100px"><select class="fsel" id="fQ" onchange="filterStu()"><option value="all">All Qs</option></select></div>
+    </div>
+    <div class="tbl-wrap" id="stuWrap"><div style="padding:20px;color:var(--n3);font-size:11px;text-align:center">Upload student database…</div></div>
+  </div>
+</div>
+<div class="card" id="anCard" style="display:none">
+  <div class="card-hdr"><span>📊</span><h3>Analytics</h3></div>
+  <div class="card-body"><div class="an-grid" id="anGrid"></div></div>
+</div>
+<div class="sh"><div class="sh-icon si-g">5</div><h2>Generate &amp; Export</h2></div>
+<div class="card">
+  <div class="card-body">
+    <div class="btn-row">
+      <button class="btn bp bbig" id="genBtn" onclick="doGenerate()" disabled style="animation:pulse 2.5s infinite">⚡ Generate All Papers</button>
+      <button class="btn bg_" id="prvBtn" onclick="togPreview()" disabled>👁 Preview</button>
+    </div>
+    <div id="genAlert" style="display:none"></div>
+  </div>
+</div>
+<div id="prvSec" style="display:none">
+  <div class="sh"><div class="sh-icon si-g">✓</div><h2>Print Preview</h2></div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="pnav">
+        <button class="pnav-btn" onclick="pNav(-1)">‹ Prev</button>
+        <span class="pnav-lbl" id="pLbl">—</span>
+        <button class="pnav-btn" onclick="pNav(1)">Next ›</button>
+        <span style="margin-left:auto;font-size:9px;color:var(--b4);font-family:var(--fm)" id="pTot"></span>
+      </div>
+      <div id="previewPaper"></div>
+    </div>
+  </div>
+</div>
+<div class="dl-p" id="dlPanel">
+  <div style="font-size:52px;margin-bottom:12px">✅</div>
+  <h3>Question Papers Ready!</h3>
+  <p id="dlDesc">Generated successfully</p>
+  <div class="dl-btns">
+  <button class="btn bp bbig" onclick="dlDocx()">⬇ Download DOCX (Merged)</button>
+  <button class="btn bp bbig" onclick="dlSinglePageMerged()">📄 Single-Page Format</button>
+  <button class="btn bgreen bbig" onclick="dlZip()">📦 ZIP (Individual)</button>
+  <button class="btn bv bbig" onclick="dlConsolidated()">📋 Consolidated Register</button>
+</div>
+</div>
+</div>
+
+<script>
+'use strict';
+const WN  = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const MN  = 'http://schemas.openxmlformats.org/officeDocument/2006/math';
+const RN  = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+const AN  = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+const PICN= 'http://schemas.openxmlformats.org/drawingml/2006/picture';
+const WPN = 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing';
+
+let G = {
+  questions:[], rubricCols:[], students:[],
+  assignments:{}, examInfo:{},
+  docxBlobs:[], mergedBlob:null, pairedPages:[],
+  mode:'smart', prevPage:0, _mSI:-1, _mSel:-1,
+  imageMap:{}, rawZip:null, bloomCache:{}, scratchDoc:null, logoB64: null,
+logoExt: 'png'
+};
+
+const toA  = nl => Array.from(nl);
+const esc  = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const xesc = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtB = b  => b<1048576?(b/1024).toFixed(0)+'KB':(b/1048576).toFixed(1)+'MB';
+const delay= ms => new Promise(r=>setTimeout(r,ms));
+const gei  = (id,fb='')=>{const el=document.getElementById(id);return(el&&el.value.trim())?el.value.trim():fb;};
+function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
+function toast(msg,type='ok',dur=3200){
+  const tr=document.getElementById('toaster'),el=document.createElement('div');
+  el.className=`toast t${type}`;
+  el.innerHTML=`<span>${{ok:'✅',err:'❌',warn:'⚠️',inf:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
+  tr.appendChild(el);
+  setTimeout(()=>{el.classList.add('tout');setTimeout(()=>el.remove(),300);},dur);
+}
+function ev(e,id,cls){e.preventDefault();document.getElementById(id).className='uz'+(cls?' '+cls:'');}
+function dr(e,id){
+  e.preventDefault();document.getElementById(id).className='uz';
+  const f=e.dataTransfer.files[0];if(!f)return;
+  if(id==='qbZ'){if(f.name.toLowerCase().endsWith('.docx'))handleQB(f);else toast('Must be .docx','err');}
+  else handleStu(f);
+}
+
+function directChildren(node, localName, ns) {
+  const res=[];
+  for(let i=0;i<node.childNodes.length;i++){
+    const c=node.childNodes[i];
+    if(c.nodeType===1 && c.localName===localName && (!ns||c.namespaceURI===ns)) res.push(c);
+  }
+  return res;
+}
+function directRows(tblNode){
+  const res=[];
+  for(let i=0;i<tblNode.childNodes.length;i++){
+    const c=tblNode.childNodes[i];
+    if(c.nodeType!==1) continue;
+    if(c.localName==='tr') res.push(c);
+    else if(c.localName==='tblPr'||c.localName==='tblGrid') continue;
+    else { for(let j=0;j<c.childNodes.length;j++){ const cc=c.childNodes[j]; if(cc.nodeType===1&&cc.localName==='tr') res.push(cc); } }
+  }
+  return res;
+}
+function directCells(trNode){
+  return directChildren(trNode,'tc',WN);
+}
+function drLogo(e){ e.preventDefault(); document.getElementById('lgZ').className='uz'; const f=e.dataTransfer.files[0]; if(f) handleLogo(f); }
+async function handleLogo(file) {
+  const r=new FileReader(); r.readAsDataURL(file);
+  r.onload=()=>{ 
+    const[header,b64]=r.result.split(',');
+    G.logoB64=b64; G.logoExt=file.name.split('.').pop().toLowerCase();
+    document.getElementById('lgZ').classList.add('done');
+    document.getElementById('lgOk').style.display='block';
+    document.getElementById('lgOk').textContent='✓ '+file.name;
+    toast('Logo loaded','ok');
+  };
+}
+function safeImp(targetDoc, srcNode) {
+  try { return targetDoc.importNode(srcNode, true); } catch(e) {}
+  const s = new XMLSerializer().serializeToString(srcNode);
+  const nsD = [
+    'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"',
+    'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"',
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"',
+    'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"',
+    'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"',
+    'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"',
+    'xmlns:v="urn:schemas-microsoft-com:vml"',
+    'xmlns:o="urn:schemas-microsoft-com:office:office"',
+  ].join(' ');
+  const parsed = new DOMParser().parseFromString(`<root ${nsD}>${s}</root>`,'application/xml');
+  const inner = parsed.documentElement.firstElementChild;
+  if(!inner) throw new Error('safeImp: failed for '+srcNode.localName);
+  try { return targetDoc.importNode(inner, true); } catch(e2) { return inner; }
+}
+
+function remapRIds(node, rIdMap) {
+  if(!node || node.nodeType!==1) return;
+  const ln=node.localName;
+  if(ln==='blip'){
+    for(let i=0;i<node.attributes.length;i++){
+      const a=node.attributes[i];
+      if(a.localName==='embed' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
+    }
+  }
+  if(ln==='imagedata'){
+    for(let i=0;i<node.attributes.length;i++){
+      const a=node.attributes[i];
+      if(a.localName==='id' && rIdMap[a.value]){ a.value=rIdMap[a.value]; break; }
+    }
+  }
+  for(let i=0;i<node.childNodes.length;i++)
+    if(node.childNodes[i].nodeType===1) remapRIds(node.childNodes[i], rIdMap);
+}
+
+async function buildImageMap(zip) {
+  G.imageMap={};
+  const rF=zip.file('word/_rels/document.xml.rels'); if(!rF) return;
+  const rDoc=new DOMParser().parseFromString(await rF.async('string'),'application/xml');
+  for(const rel of rDoc.querySelectorAll('Relationship')){
+    const type=rel.getAttribute('Type')||'';
+    if(!type.includes('/image')) continue;
+    const rId=rel.getAttribute('Id');
+    const target=rel.getAttribute('Target')||'';
+    const path=target.startsWith('/')?target.slice(1):('word/'+target.replace('../',''));
+    const f=zip.file(path)||zip.file('word/media/'+target.split('/').pop());
+    if(!f) continue;
+    const ext=(path.split('.').pop()||'png').toLowerCase();
+    const mimes={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',bmp:'image/bmp',svg:'image/svg+xml',wmf:'image/x-wmf',emf:'image/x-emf'};
+    try {
+      const b64=await f.async('base64');
+      G.imageMap[rId]={b64,ct:mimes[ext]||'image/png',origRId:rId,ext:ext==='jpeg'?'jpg':ext};
+    } catch(e){ console.warn('img fail',path); }
+  }
+}
+
+function _cellText(cell) {
+  const lines=[];
+  for(const p of cell.getElementsByTagNameNS(WN,'p')){
+    let l='';
+    for(const r of p.getElementsByTagNameNS(WN,'r'))
+      for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
+    for(const m of p.getElementsByTagNameNS(MN,'oMath')) l+=' '+ommlToText(m).trim();
+    if(l.trim()) lines.push(l.trim());
+  }
+  return lines.join('\n');
+}
+
+function _getBlipRId(blipEl) {
+  for(let i=0;i<blipEl.attributes.length;i++)
+    if(blipEl.attributes[i].localName==='embed') return blipEl.attributes[i].value;
+  return null;
+}
+
+function parseParasLossless(tcNode, imageMap) {
+  const res=[];
+  for(let i=0;i<tcNode.childNodes.length;i++){
+    const child=tcNode.childNodes[i];
+    if(child.nodeType!==1) continue;
+    const ln=child.localName||'';
+    if(ln==='p'){
+      const para=_parseParagraph(child, imageMap);
+      para.rawNode=child;
+      res.push(para);
+    } else if(ln==='tbl'){
+      const tblData=_parseNestedTableDeep(child, imageMap);
+      tblData.rawNode=child;
+      res.push(tblData);
+    } else if(ln==='oMath'||ln==='oMathPara'){
+      const eqText=ommlToText(child);
+      res.push({ rawNode:child, text:eqText, images:[], equations:[{text:eqText}], tables:[], isMath:true });
+    }
+  }
+  return res.filter((p,i)=>{
+    if(!p.rawNode) return true;
+    const ln=p.rawNode.localName;
+    if(ln!=='p') return true;
+    if(p.text||p.images.length||p.equations.length) return true;
+    const prev=res[i-1];
+    if(!prev) return false;
+    return !!(prev.text||prev.images.length||prev.equations.length||(prev.rawNode&&prev.rawNode.localName!=='p'));
+  });
+}
+
+function _parseParagraph(pNode, imageMap) {
+  let text='';
+  const images=[], equations=[];
+  for(const pc of pNode.childNodes){
+    if(pc.nodeType!==1) continue;
+    const pln=pc.localName||'';
+    if(pln==='r'){
+      for(const t of pc.getElementsByTagNameNS(WN,'t')) text+=t.textContent;
+      for(const el of pc.getElementsByTagName('*')){
+        if(el.localName==='blip'){
+          const rId=_getBlipRId(el);
+          if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+        }
+      }
+      for(const img of pc.getElementsByTagNameNS('urn:schemas-microsoft-com:vml','imagedata')){
+        const rId=img.getAttributeNS(RN,'id')||img.getAttribute('r:id');
+        if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+      }
+    } else if(pln==='oMath'||pln==='oMathPara'){
+      const et=ommlToText(pc).trim();
+      if(et){ equations.push({text:et}); text+=' '+et+' '; }
+    } else if(pln==='drawing'){
+      for(const el of pc.getElementsByTagName('*')){
+        if(el.localName==='blip'){
+          const rId=_getBlipRId(el);
+          if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+        }
+      }
+    } else if(pln==='object'){
+      for(const img of pc.getElementsByTagNameNS('urn:schemas-microsoft-com:vml','imagedata')){
+        const rId=img.getAttributeNS(RN,'id')||img.getAttribute('r:id');
+        if(rId&&imageMap[rId]&&!images.find(x=>x.origRId===rId)) images.push({...imageMap[rId]});
+      }
+    }
+  }
+  return { text:text.trim(), images, equations, tables:[], isMath:false };
+}
+
+function _parseNestedTableDeep(tblNode, imageMap) {
+  const gridRows=[];
+  const rows=directRows(tblNode);
+  for(const tblRow of rows){
+    const gRow=[];
+    const cells=directCells(tblRow);
+    for(const gc of cells){
+      let ct=_cellTextDeep(gc);
+      gRow.push({ text:ct.trim() });
+    }
+    if(gRow.length) gridRows.push(gRow);
+  }
+  return { text:'', images:[], equations:[], tables:[{rows:gridRows, rawNode:tblNode}], isMath:false };
+}
+
+function _cellTextDeep(cellNode) {
+  const lines=[];
+  for(const p of cellNode.getElementsByTagNameNS(WN,'p')){
+    let l='';
+    for(const r of p.getElementsByTagNameNS(WN,'r'))
+      for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
+    for(const m of p.getElementsByTagNameNS(MN,'oMath')) l+=' '+ommlToText(m).trim();
+    if(l.trim()) lines.push(l.trim());
+  }
+  return lines.join('\n');
+}
+
+function ommlToText(node) {
+  if(!node) return '';
+  const ln=node.localName||'';
+  if(ln==='oMathPara'){ const m=node.getElementsByTagNameNS(MN,'oMath'); return m.length?ommlToText(m[0]):_omC(node); }
+  if(ln==='oMath') return _omC(node);
+  if(ln==='f'){
+    const n=node.getElementsByTagNameNS(MN,'num'),d=node.getElementsByTagNameNS(MN,'den');
+    return'('+( n.length?_omC(n[0]):'?')+')/('+( d.length?_omC(d[0]):'?')+')';
+  }
+  if(ln==='sSup'){ const e=node.getElementsByTagNameNS(MN,'e'),s=node.getElementsByTagNameNS(MN,'sup'); return(e.length?_omC(e[0]):'?')+'^{'+(s.length?_omC(s[0]):'?')+'}'; }
+  if(ln==='sSub'){ const e=node.getElementsByTagNameNS(MN,'e'),s=node.getElementsByTagNameNS(MN,'sub'); return(e.length?_omC(e[0]):'?')+'_{'+(s.length?_omC(s[0]):'?')+'}'; }
+  if(ln==='sSubSup'){ const e=node.getElementsByTagNameNS(MN,'e'),sub=node.getElementsByTagNameNS(MN,'sub'),sup=node.getElementsByTagNameNS(MN,'sup'); return(e.length?_omC(e[0]):'?')+'_{'+(sub.length?_omC(sub[0]):'?')+'}^{'+(sup.length?_omC(sup[0]):'?')+'}'; }
+  if(ln==='rad'){ const e=node.getElementsByTagNameNS(MN,'e'),dg=node.getElementsByTagNameNS(MN,'deg'); const deg=dg.length?dg[0].textContent.trim():''; return(deg&&deg!=='2'?deg+'√':'√')+'('+(e.length?_omC(e[0]):'?')+')'; }
+  if(ln==='nary'){ let chr='∫',subT='',supT='',eT=''; for(const c of node.childNodes){ if(c.localName==='naryPr') for(const cc of c.childNodes) if(cc.localName==='chr') chr=cc.getAttribute('m:val')||cc.getAttribute('val')||'∫'; else if(c.localName==='sub') subT=_omC(c); else if(c.localName==='sup') supT=_omC(c); else if(c.localName==='e') eT=_omC(c); } return chr+(subT?'_{'+subT+'}':'')+(supT?'^{'+supT+'}':'')+(eT?' '+eT:''); }
+  if(ln==='d'){ let op='(',cl=')'; const parts=[]; for(const c of node.childNodes){ if(c.localName==='dPr') for(const cc of c.childNodes){ if(cc.localName==='begChr') op=cc.getAttribute('m:val')||cc.getAttribute('val')||'('; if(cc.localName==='endChr') cl=cc.getAttribute('m:val')||cc.getAttribute('val')||')'; } else if(c.localName==='e') parts.push(_omC(c)); } return op+parts.join('; ')+cl; }
+  if(ln==='func'){ const fN=node.getElementsByTagNameNS(MN,'fName')[0],eN=node.getElementsByTagNameNS(MN,'e')[0]; return(fN?_omC(fN):'')+'('+(eN?_omC(eN):'')+')'; }
+  if(ln==='eqArr'){ const ps=[]; for(const c of node.childNodes) if(c.localName==='e') ps.push(_omC(c)); return ps.join(' = '); }
+  if(ln==='limLow'){ const e=node.getElementsByTagNameNS(MN,'e'),l=node.getElementsByTagNameNS(MN,'lim'); return(e.length?_omC(e[0]):'?')+'_{'+(l.length?_omC(l[0]):'')+'}'; }
+  if(ln==='limUpp'){ const e=node.getElementsByTagNameNS(MN,'e'),l=node.getElementsByTagNameNS(MN,'lim'); return(e.length?_omC(e[0]):'?')+'^{'+(l.length?_omC(l[0]):'')+'}'; }
+  if(ln==='m'){ const rows=[]; for(const c of node.childNodes) if(c.localName==='mr'){ const cols=[]; for(const cc of c.childNodes) if(cc.localName==='e') cols.push(_omC(cc)); rows.push('['+cols.join(', ')+']'); } return '['+rows.join('; ')+']'; }
+  if(ln==='r'){ let t=''; for(const x of node.getElementsByTagNameNS(MN,'t')) t+=x.textContent; for(const x of node.getElementsByTagNameNS(WN,'t')) t+=x.textContent; return t; }
+  if(ln==='t') return node.textContent;
+  return _omC(node);
+}
+function _omC(n){ let r=''; for(let i=0;i<n.childNodes.length;i++){ const c=n.childNodes[i]; if(c.nodeType===3) r+=c.textContent; else if(c.nodeType===1) r+=ommlToText(c); } return r; }
+
+function collectRIds(question, startN=2) {
+  const map={};let n=startN;
+  for(const para of(question.paras||[]))
+    for(const img of(para.images||[]))
+      if(img.origRId&&!map[img.origRId]) map[img.origRId]=`rId${n++}`;
+  return map;
+}
+function collectAllRIds(assignments, questions) {
+  const map={};let n=2;
+  for(const qi of new Set(Object.values(assignments)))
+    for(const para of(questions[qi].paras||[]))
+      for(const img of(para.images||[]))
+        if(img.origRId&&!map[img.origRId]) map[img.origRId]=`rId${n++}`;
+  return map;
+}
+
+const SP   = `<w:spacing w:before="40" w:after="40" w:line="360" w:lineRule="auto"/>`;
+const SP1  = `<w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="auto"/>`;
+const TNRPR= (sz=22,bold=false)=>`<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${bold?'<w:b/><w:bCs/>':''}</w:rPr>`;
+const IMG_XML=(nRId)=>{ const uid=Math.floor(Math.random()*89000+10000); return `<w:drawing><wp:inline distT="0" distB="0" distL="114400" distR="114400"><wp:extent cx="3429000" cy="2286000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${uid}" name="Img${nRId}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Img${nRId}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${nRId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3429000" cy="2286000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`; };
+
+const FORCED_TBL_BDRS = `<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders>`;
+const FORCED_TC_BDRS  = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
+
+function _forceTblBorders(xmlSeg) {
+  xmlSeg = xmlSeg.replace(/<w:tblBorders\b[^>]*>[\s\S]*?<\/w:tblBorders>/g, FORCED_TBL_BDRS);
+  if(!xmlSeg.includes('<w:tblBorders')) {
+    xmlSeg = xmlSeg.replace(/(<w:tblPr\b[^>]*>)([\s\S]*?)(<\/w:tblPr>)/,
+      (m,open,inner,close)=>`${open}${inner}${FORCED_TBL_BDRS}${close}`);
+  }
+  xmlSeg = xmlSeg.replace(/<w:tcBorders\b[^>]*>[\s\S]*?<\/w:tcBorders>/g, FORCED_TC_BDRS);
+  xmlSeg = xmlSeg.replace(/(<w:tcPr\b[^>]*>)([\s\S]*?)(<\/w:tcPr>)/g, (m,open,inner,close)=>{
+    if(inner.includes('w:tcBorders')) return m;
+    return `${open}${inner}${FORCED_TC_BDRS}${close}`;
+  });
+  xmlSeg = xmlSeg.replace(/(<w:p\b[^>]*>)([\s\S]*?)(<\/w:p>)/g, (m, pOpen, pInner, pClose)=>{
+    if(pInner.includes('w:jc')) {
+      return pOpen + pInner.replace(/<w:jc\b[^\/]*\/>/g,'<w:jc w:val="center"/>') + pClose;
+    }
+    if(pInner.includes('<w:pPr>') || pInner.includes('<w:pPr ')) {
+      return pOpen + pInner.replace(/(<w:pPr\b[^>]*>)/,'$1<w:jc w:val="center"/>') + pClose;
+    }
+    return pOpen + '<w:pPr><w:jc w:val="center"/></w:pPr>' + pInner + pClose;
+  });
+  return xmlSeg;
+}
+
+function buildQuestionCellXml(question, rIdRemap) {
+  if(question.activeBloom && question.bloomReframes?.[question.activeBloom])
+    return _buildBloomXml(question.bloomReframes[question.activeBloom], question, rIdRemap);
+
+  if(!G.scratchDoc)
+    G.scratchDoc = new DOMParser().parseFromString(
+      `<root xmlns:w="${WN}" xmlns:m="${MN}" xmlns:r="${RN}" xmlns:wp="${WPN}" xmlns:a="${AN}" xmlns:pic="${PICN}"/>`,
+      'application/xml'
+    );
+
+  let xml='';
+  for(const para of(question.paras||[])){
+    if(para.rawNode){
+      try {
+        const cloned=safeImp(G.scratchDoc, para.rawNode);
+        remapRIds(cloned, rIdRemap);
+        let seg=new XMLSerializer().serializeToString(cloned);
+        if(para.rawNode.localName==='tbl') {
+          seg = _forceTblBorders(seg);
+        }
+        xml+=seg;
+        continue;
+      } catch(e){ console.warn('safeImp fallback:', e.message); }
+    }
+    xml+=_buildParaFallback(para, rIdRemap);
+  }
+  if(!xml.trim()) xml=_buildBloomXml(question.text||'', question, rIdRemap);
+  return xml;
+}
+
+function _buildParaFallback(para, rIdRemap) {
+  let xml='';
+  for(const tbl of(para.tables||[])){
+    if(!tbl.rows||!tbl.rows.length) continue;
+    const nCols=tbl.rows.reduce((mx,r)=>Math.max(mx,r.length),1), colW=Math.floor(9200/nCols);
+    const BDR=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+    const MAR=`<w:tcMar><w:top w:w="40" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+    let t=`<w:tbl><w:tblPr><w:tblW w:w="${nCols*colW}" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders></w:tblPr><w:tblGrid>${Array(nCols).fill(`<w:gridCol w:w="${colW}"/>`).join('')}</w:tblGrid>`;
+    tbl.rows.forEach((row,ri)=>{
+      t+=`<w:tr>`; const isH=ri===0;
+      for(let ci=0;ci<nCols;ci++){
+        const cell=row[ci]||{text:''};
+        t+=`<w:tc><w:tcPr><w:tcW w:w="${colW}" w:type="dxa"/>${isH?`<w:shd w:val="clear" w:color="auto" w:fill="CCCCCC"/>`:''}${BDR}${MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(20,isH)}<w:t xml:space="preserve">${xesc(cell.text||'')}</w:t></w:r></w:p></w:tc>`;
+      }
+      t+=`</w:tr>`;
+    });
+    xml+=t+`</w:tbl><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+  }
+  for(const img of(para.images||[])){
+    const nRId=rIdRemap[img.origRId]; if(!nRId) continue;
+    xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/>${IMG_XML(nRId)}</w:r></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+  }
+  for(const eq of(para.equations||[])){ if(eq.text) xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:i/><w:iCs/><w:sz w:val="24"/><w:szCs w:val="24"/><w:color w:val="4C1D95"/></w:rPr><w:t xml:space="preserve">${xesc(eq.text)}</w:t></w:r></w:p>`; }
+  if(para.text&&para.text.trim()){
+    for(const line of para.text.split('\n')){
+      if(!line.trim()){xml+=`<w:p><w:pPr>${SP}</w:pPr></w:p>`;continue;}
+      xml+=`<w:p><w:pPr><w:jc w:val="both"/>${SP}</w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r></w:p>`;
+    }
+  }
+  return xml;
+}
+
+function _buildBloomXml(text, question, rIdRemap) {
+  let xml=''; const seen=new Set();
+  for(const para of(question.paras||[]))
+    for(const img of(para.images||[])){
+      if(seen.has(img.origRId)) continue; seen.add(img.origRId);
+      const nRId=rIdRemap[img.origRId]; if(!nRId) continue;
+      xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/>${IMG_XML(nRId)}</w:r></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+    }
+  for(const line of text.split('\n')){
+    if(!line.trim()){xml+=`<w:p><w:pPr>${SP}</w:pPr></w:p>`;continue;}
+    xml+=`<w:p><w:pPr><w:jc w:val="both"/>${SP}</w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r></w:p>`;
+  }
+  return xml;
+}
+
+async function handleQB(file) {
+  showAlert('upAlert','ainf','⏳ Parsing '+file.name+'…');
+  try {
+    G.rawZip=await JSZip.loadAsync(await file.arrayBuffer());
+    G.scratchDoc=null;
+    await buildImageMap(G.rawZip);
+    await parseQB(G.rawZip);
+    document.getElementById('qbZ').classList.add('done');
+    document.getElementById('qbOk').style.display='block';
+    document.getElementById('qbOk').textContent='✓ '+file.name;
+    document.getElementById('qbSz').textContent=fmtB(file.size);
+    const imgC=Object.keys(G.imageMap).length;
+    const eqC=G.questions.reduce((a,q)=>a+q.equations.length,0);
+    const tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
+    renderMeta(); renderRubric(); renderQGrid();
+    showAlert('upAlert','aok',`✅ ${G.questions.length} questions · ${imgC} images · ${eqC} equations · ${tblC} embedded tables`);
+    document.getElementById('bankPill').innerHTML=`<div class="pill-dot"></div>${G.questions.length} Questions`;
+    document.getElementById('bankPill').className='pill active';
+    populateQF(); setStep(2); chkReady();
+    toast(`${G.questions.length} Q · ${imgC} img · ${eqC} eq · ${tblC} tbl`,'ok');
+  } catch(ex){ showAlert('upAlert','aerr','❌ '+ex.message); toast(ex.message,'err'); console.error(ex); }
+}
+
+async function parseQB(zip) {
+  const xmlStr=await zip.file('word/document.xml').async('string');
+  const xd=new DOMParser().parseFromString(xmlStr,'application/xml');
+  G.questions=[]; G.rubricCols=[]; G.examInfo={};
+
+  const lines=[];
+  for(const p of xd.getElementsByTagNameNS(WN,'p')){
+    let t='';
+    for(const r of p.getElementsByTagNameNS(WN,'r')) for(const tx of r.getElementsByTagNameNS(WN,'t')) t+=tx.textContent;
+    if(t.trim()) lines.push(t.trim());
+  }
+  G.examInfo.title=lines[0]||''; G.examInfo.department=lines[1]||'';
+  for(const l of lines){
+    const m=l.match(/Course\s*[&]\s*Class\s*[:]\s*(.+?)(?:\s+Semester\s*[:]\s*(.+?))?$/i);
+    if(m){ G.examInfo.courseClass=(m[1]||'').trim(); G.examInfo.semester=(m[2]||'').trim(); }
+    const m3=l.match(/Subject.*?[:]\s*(.+?)$/i); if(m3) G.examInfo.subject=m3[1].trim();
+    const m2=l.match(/Staff.*?[:]\s*(.+?)$/i);   if(m2) G.examInfo.staff=m2[1].trim();
+    const m4=l.match(/Date.*?[:]\s*(.+?)$/i);     if(m4) G.examInfo.date=m4[1].trim();
+  }
+
+  const bodyNode = xd.getElementsByTagNameNS(WN,'body')[0];
+  if(!bodyNode){ console.warn('No w:body found'); return; }
+
+  const topLevelTbls = directChildren(bodyNode, 'tbl', WN);
+
+  for(const tbl of topLevelTbls){
+    const rows = directRows(tbl);
+    if(!rows.length) continue;
+
+    const headerCells = directCells(rows[0]);
+    const c0 = headerCells.map(tc=>_cellText(tc));
+    const h0 = (c0[0]||'').toLowerCase();
+
+    if(h0.includes('aim')||h0.includes('rubric')||h0.includes('apparatus')){
+      G.rubricCols=c0.filter(c=>c.trim()); continue;
+    }
+    if(!h0.includes('q.no')&&!h0.includes('q. no')&&!c0.some(c=>c.toLowerCase().includes('question'))) continue;
+
+    const qi_col  = c0.findIndex(c=>c.toLowerCase().includes('question'));
+    const mi_col  = c0.findIndex(c=>c.toLowerCase().includes('mark'));
+    const lim_col = c0.findIndex(c=>{ const cl=c.toLowerCase(); return(cl.includes('assign')&&cl.includes('student'))||(cl.includes('no.')&&cl.includes('student'))||cl.includes('no of student'); });
+
+    for(let ri=1; ri<rows.length; ri++){
+      const row    = rows[ri];
+      const tcs    = directCells(row);
+      if(!tcs.length) continue;
+
+      const qci = qi_col>=0?qi_col:1;
+      const mci = mi_col>=0?mi_col:2;
+      const lci = lim_col>=0?lim_col:-1;
+
+      const cs = tcs.map(tc=>_cellText(tc));
+      const qT = qci<cs.length?cs[qci]:'';
+      const mT = mci<cs.length?cs[mci]:'';
+      const limitRaw = lci>=0&&lci<cs.length?cs[lci].trim():'';
+      const studentLimit = (limitRaw&&/^\d+$/.test(limitRaw))?parseInt(limitRaw):null;
+      if(!qT.trim()) continue;
+
+      const qCell = qci<tcs.length ? tcs[qci] : null;
+      let paras=[];
+      if(qCell){ try{ paras=parseParasLossless(qCell, G.imageMap); }catch(e){ console.warn('parseParasLossless err',e); } }
+      if(!paras.length) paras=[{text:qT.trim(), images:[], equations:[], tables:[], isMath:false}];
+
+      const allImages=[], allEquations=[], allTables=[];
+      for(const p of paras){
+        allImages.push(...(p.images||[]));
+        allEquations.push(...(p.equations||[]));
+        allTables.push(...(p.tables||[]));
+      }
+
+      // ── FIXED: Parse ALL mark values from the marks cell (one per line) ──
+      const mCell = mci<tcs.length ? tcs[mci] : null;
+      let marks = ['100'];
+      if(mCell) {
+        // Each paragraph in the marks cell = one mark value
+        const mParas = [];
+        for(const p of mCell.getElementsByTagNameNS(WN,'p')){
+          let l='';
+          for(const r of p.getElementsByTagNameNS(WN,'r'))
+            for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
+          if(l.trim()) mParas.push(l.trim());
+        }
+        const mArr = mParas.length ? mParas : mT.split('\n').map(s=>s.trim()).filter(Boolean);
+        const numArr = mArr.filter(s=>/^\d+$/.test(s));
+        marks = numArr.length ? numArr : (mT.trim() ? [mT.trim()] : ['100']);
+      } else {
+        const mArr = mT.split('\n').map(s=>s.trim()).filter(s=>/^\d+$/.test(s));
+        marks = mArr.length ? mArr : ['100'];
+      }
+
+      G.questions.push({
+        idx:G.questions.length,
+        text:qT.trim(), marks, paras,
+        images:allImages, equations:allEquations, nestedTables:allTables,
+        totalMark:marks.reduce((a,v)=>a+(+v||0),0)||100,
+        studentLimit,
+        has_image:allImages.length>0,
+        has_equation:allEquations.length>0,
+        has_nested_table:allTables.length>0,
+        bloomReframes:{}, activeBloom:null
+      });
+    }
+  }
+
+  const fmap={examTitle:'title',examDept:'department',examClass:'courseClass',examSem:'semester',examSubject:'subject',examStaff:'staff'};
+  for(const[id,key]of Object.entries(fmap)){ const v=G.examInfo[key]||''; if(v) document.getElementById(id).value=v; }
+  if(G.examInfo.date){ const dp=G.examInfo.date.split(/[\s(]+/); if(dp[0]) document.getElementById('examDate').value=dp[0]; }
+}
+
+async function handleStu(file) {
+  try {
+    await parseXLSX(await file.arrayBuffer());
+    document.getElementById('stZ').classList.add('done');
+    document.getElementById('stOk').style.display='block';
+    document.getElementById('stOk').textContent='✓ '+file.name;
+    document.getElementById('stSz').textContent=fmtB(file.size);
+    document.getElementById('stuPill').innerHTML=`<div class="pill-dot"></div>${G.students.length} Students`;
+    document.getElementById('stuPill').className='pill active';
+    renderStuTable(); setStep(2); chkReady();
+    toast(`${G.students.length} students`,'ok');
+  } catch(ex){ toast('Excel: '+ex.message,'err'); console.error(ex); }
+}
+async function parseXLSX(ab) {
+  const zip=await JSZip.loadAsync(ab); G.students=[];
+  const ss2=[]; const sf=zip.file('xl/sharedStrings.xml');
+  if(sf){ const d=new DOMParser().parseFromString(await sf.async('string'),'application/xml'); for(const si of d.getElementsByTagName('si')){ let t=''; for(const el of si.getElementsByTagName('t')) t+=el.textContent; ss2.push(t); } }
+  const sh=zip.file('xl/worksheets/sheet1.xml'); if(!sh) throw new Error('No sheet1');
+  const sd=new DOMParser().parseFromString(await sh.async('string'),'application/xml');
+  const rows=sd.getElementsByTagName('row'); let hdr=[];
+  for(let ri=0;ri<rows.length;ri++){
+    const cells=toA(rows[ri].getElementsByTagName('c'));
+    const rd=cells.map(c=>{ const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0]?.textContent||''; return t==='s'?ss2[+v]||'':v; });
+    if(ri===0){ hdr=rd; continue; } if(!rd.some(d=>d)) continue;
+    const o={}; hdr.forEach((h,i)=>{ o[h]=rd[i]||''; });
+    G.students.push({ sno:o['S.No.']||o['S.No']||String(ri), regNo:o['Register No.']||o['Register No']||o['RegNo']||'', name:o['Students Name']||o['Student Name']||o['Name']||'', dept:o['Department ']||o['Department']||'', year:o['Year']||'', sem:o['Semester']||'' });
+  }
+}
+
+function renderMeta() {
+  document.getElementById('metaP').style.display='block';
+  const imgC=Object.keys(G.imageMap).length, eqC=G.questions.reduce((a,q)=>a+q.equations.length,0), tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
+  document.getElementById('metaG').innerHTML=[['Title',G.examInfo.title||'—'],['Dept',G.examInfo.department||'—'],['Class',G.examInfo.courseClass||'—'],['Sem',G.examInfo.semester||'—'],['Subject',(G.examInfo.subject||'—').substring(0,20)],['Qs',G.questions.length],['Images',imgC],['Equations',eqC],['Tables',tblC]].map(([k,v])=>`<div class="mp-i"><div class="mp-k">${k}</div><div class="mp-v">${esc(String(v))}</div></div>`).join('');
+}
+function renderRubric() {
+  if(!G.rubricCols.length) return;
+  const b=document.getElementById('rubricBlk'); b.style.display='block';
+  b.innerHTML=`<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r12);padding:12px;margin-top:12px"><div style="font-size:8px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.6px;font-family:var(--fm);margin-bottom:8px">📊 Rubric Columns</div><div style="display:flex;gap:6px;flex-wrap:wrap">${G.rubricCols.map(c=>`<span style="background:#fff;border:1px solid #93c5fd;padding:3px 10px;border-radius:8px;font-size:10px">${esc(c)}</span>`).join('')}</div></div>`;
+}
+
+function renderQGrid() {
+  const g=document.getElementById('qGrid'); g.innerHTML='';
+  if(!G.questions.length){ g.innerHTML='<div style="color:var(--n3);font-size:11px">No questions found.</div>'; return; }
+  document.getElementById('qbLbl').textContent=`${G.questions.length} questions`;
+
+  G.questions.forEach((q,qi)=>{
+    const u=Object.values(G.assignments).filter(x=>x===qi).length;
+    const el=document.createElement('div'); el.className='qc'; el.id=`qcard_${qi}`;
+    const flags=[
+      q.has_equation?'<span class="badge bdg-v">∑ Eq</span>':'',
+      q.has_image   ?'<span class="badge bdg-g">📷 Img</span>':'',
+      q.has_nested_table?'<span class="badge bdg-o">⊞ Tbl</span>':''
+    ].filter(Boolean).join('');
+    const limitW=`<div class="qc-limit-wrap"><span class="qc-limit-lbl">Limit:</span><input class="qc-limit-inp" type="number" min="1" max="999" placeholder="∞" value="${q.studentLimit||''}" onchange="updateLimit(${qi},this.value)"/></div>`;
+
+    let eqHtml='';
+    if(q.equations.length){
+      eqHtml='<div style="margin:4px 0;display:flex;flex-wrap:wrap;gap:3px">';
+      q.equations.slice(0,4).forEach(eq=>{ eqHtml+=`<span class="eq-chip">${esc(eq.text.substring(0,50))}${eq.text.length>50?'…':''}</span>`; });
+      if(q.equations.length>4) eqHtml+=`<span style="font-size:8.5px;color:#6d28d9;font-family:var(--fm)">+${q.equations.length-4} more</span>`;
+      eqHtml+='</div>';
+    }
+
+    let tblHtml='';
+    if(q.nestedTables.length){
+      const tbl=q.nestedTables[0];
+      if(tbl.rows&&tbl.rows.length){
+        tblHtml='<div style="overflow-x:auto;margin:5px 0"><table class="qc-tbl-prev">';
+        tbl.rows.forEach((row,ri)=>{
+          const isH=ri===0;
+          tblHtml+=`<tr>${row.map(cell=>`<${isH?'th':'td'} style="text-align:center;vertical-align:middle">${esc((cell.text||'').substring(0,30))}</${isH?'th':'td'}>`).join('')}</tr>`;
+        });
+        tblHtml+=`</table></div>`;
+        if(q.nestedTables.length>1) tblHtml+=`<div style="font-size:8px;color:#d97706;font-family:var(--fm)">+${q.nestedTables.length-1} more tables</div>`;
+      }
+    }
+
+    // Show all marks in card header (e.g. "50+50=100M")
+    const marksDisplay = q.marks.length > 1
+      ? q.marks.join('+') + '=' + q.totalMark + 'M'
+      : q.totalMark + 'M';
+
+    const prevText=(q.paras.find(p=>p.text)?.text||q.text||'').substring(0,90);
+
+    el.innerHTML=`
+    <div class="qc-hdr">
+      <span class="qc-num">Q${qi+1}</span>
+      <span class="qc-mark">⭐${marksDisplay}</span>
+      ${flags}
+      ${limitW}
+      <span class="qc-usage" id="qu_${qi}">${u}/${q.studentLimit||'∞'}</span>
+    </div>
+    <div class="qc-media" id="qmedia_${qi}"></div>
+    <div class="qc-parts">
+      ${eqHtml}
+      ${tblHtml}
+      ${prevText?`<div class="qc-part"><div class="qc-part-txt">${esc(prevText)}${prevText.length>=90?'…':''}</div></div>`:''}
+    </div>
+    <div class="bloom-panel" id="bloom_${qi}">
+      <div class="bloom-hdr">
+        <span class="bloom-hdr-title">🧠 Bloom's Taxonomy Reframe</span>
+        <div class="bloom-mode-tabs">
+          <div class="bloom-mode-tab act" id="bmt_offline_${qi}" onclick="setBloomMode(${qi},'offline')">✈️ Offline</div>
+          <div class="bloom-mode-tab" id="bmt_online_${qi}" onclick="setBloomMode(${qi},'online')">🌐 AI Online</div>
+        </div>
+        <button class="btn bg_" style="padding:2px 8px;font-size:9px;margin-left:8px" onclick="hideBloom(${qi})">✕</button>
+      </div>
+      <div id="boffline_${qi}">
+        <div class="bloom-levels">
+          <button class="bloom-btn bl-R"  onclick="reframeOffline(${qi},'Remember')">📝 Remember</button>
+          <button class="bloom-btn bl-U"  onclick="reframeOffline(${qi},'Understand')">💡 Understand</button>
+          <button class="bloom-btn bl-Ap" onclick="reframeOffline(${qi},'Apply')">⚙️ Apply</button>
+          <button class="bloom-btn bl-An" onclick="reframeOffline(${qi},'Analyze')">🔍 Analyze</button>
+          <button class="bloom-btn bl-E"  onclick="reframeOffline(${qi},'Evaluate')">⚖️ Evaluate</button>
+          <button class="bloom-btn bl-C"  onclick="reframeOffline(${qi},'Create')">🎨 Create</button>
+        </div>
+        <div style="padding:0 10px 6px;font-size:8px;color:#7c3aed;font-family:var(--fm)">💡 Click the same level again to cycle through 5 different variants</div>
+      </div>
+      <div id="bonline_${qi}" style="display:none">
+        <div class="bloom-levels">
+          <button class="bloom-btn bl-R"  onclick="reframeOnline(${qi},'Remember')">📝 Remember</button>
+          <button class="bloom-btn bl-U"  onclick="reframeOnline(${qi},'Understand')">💡 Understand</button>
+          <button class="bloom-btn bl-Ap" onclick="reframeOnline(${qi},'Apply')">⚙️ Apply</button>
+          <button class="bloom-btn bl-An" onclick="reframeOnline(${qi},'Analyze')">🔍 Analyze</button>
+          <button class="bloom-btn bl-E"  onclick="reframeOnline(${qi},'Evaluate')">⚖️ Evaluate</button>
+          <button class="bloom-btn bl-C"  onclick="reframeOnline(${qi},'Create')">🎨 Create</button>
+        </div>
+      </div>
+      <div class="bloom-offline-area" id="bcustom_${qi}">
+        <div style="font-size:9px;font-weight:700;color:#5b21b6;margin-bottom:5px;font-family:var(--fm)">✏️ Custom / Edit Reframed Text</div>
+        <textarea class="bloom-custom-ta" id="bcustomta_${qi}" placeholder="Type or edit the reframed question here…" rows="3"></textarea>
+        <div class="bloom-custom-actions">
+          <button class="btn bv" style="padding:4px 12px;font-size:9.5px" onclick="useCustomBloom(${qi})">✅ Use This</button>
+          <button class="btn bg_" style="padding:4px 10px;font-size:9px" onclick="clearBloom(${qi})">↩ Restore Original</button>
+        </div>
+      </div>
+      <div class="bloom-spin" id="bspin_${qi}">Generating reframed question via AI…</div>
+      <div class="bloom-result" id="bresult_${qi}">
+        <div class="bloom-result-text" id="btext_${qi}"></div>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span id="blevel_${qi}" class="bloom-tag"></span>
+          <span id="bvariant_${qi}" style="font-size:8px;color:#94a3b8;font-family:var(--fm)"></span>
+          <button class="btn bv" style="padding:3px 10px;font-size:9px" id="buse_${qi}" onclick="useBloomResult(${qi})">✅ Use This</button>
+          <button class="btn bg_" style="padding:3px 10px;font-size:9px" onclick="editBloomResult(${qi})">✏️ Edit</button>
+          <button class="btn bg_" style="padding:3px 10px;font-size:9px" onclick="clearBloom(${qi})">↩ Restore Original</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <button class="btn bv" style="padding:4px 10px;font-size:9px" onclick="toggleBloom(${qi})">🧠 Bloom's Reframe</button>
+      <span id="bloom_active_${qi}"></span>
+    </div>`;
+
+    g.appendChild(el);
+
+    const md=el.querySelector(`#qmedia_${qi}`);
+    if(md) q.images.slice(0,3).forEach(img=>{ const im=document.createElement('img'); im.className='qc-thumb'; im.src=`data:${img.ct};base64,${img.b64}`; im.title='Image'; md.appendChild(im); });
+  });
+
+  const sb=document.createElement('div'); sb.className='stats-bar'; sb.style.marginTop='12px';
+  sb.innerHTML=`<div class="sb"><div class="sbk">Total Qs</div><div class="sbv c-b">${G.questions.length}</div></div><div class="sb"><div class="sbk">With Limits</div><div class="sbv c-o">${G.questions.filter(q=>q.studentLimit).length}</div></div><div class="sb"><div class="sbk">Images</div><div class="sbv c-g">${Object.keys(G.imageMap).length}</div></div><div class="sb"><div class="sbk">Equations</div><div class="sbv c-v">${G.questions.reduce((a,q)=>a+q.equations.length,0)}</div></div><div class="sb"><div class="sbk">Tables</div><div class="sbv c-o">${G.questions.reduce((a,q)=>a+q.nestedTables.length,0)}</div></div>`;
+  document.getElementById('qbCard').querySelector('.card-body').appendChild(sb);
+}
+
+function updateLimit(qi,val) {
+  const v=parseInt(val);
+  G.questions[qi].studentLimit=(!val||isNaN(v)||v<1)?null:v;
+  const u=Object.values(G.assignments).filter(x=>x===qi).length;
+  const el=document.getElementById(`qu_${qi}`); if(el) el.textContent=`${u}/${G.questions[qi].studentLimit||'∞'}`;
+  if(Object.keys(G.assignments).length) renderStuTable();
+}
+function updateUsage() {
+  G.questions.forEach((_,i)=>{ const c=Object.values(G.assignments).filter(qi=>qi===i).length; const el=document.getElementById(`qu_${i}`); if(el) el.textContent=`${c}/${G.questions[i].studentLimit||'∞'}`; });
+}
+function populateQF() {
+  const s=document.getElementById('fQ'); s.innerHTML='<option value="all">All Qs</option>';
+  G.questions.forEach((_,i)=>{ s.innerHTML+=`<option value="${i}">Q${i+1}</option>`; });
+}
+
+const BLOOM_COLORS={ Remember:'bt-R', Understand:'bt-U', Apply:'bt-Ap', Analyze:'bt-An', Evaluate:'bt-E', Create:'bt-C', Custom:'bt-Custom' };
+const BLOOM_ICONS={ Remember:'📝', Understand:'💡', Apply:'⚙️', Analyze:'🔍', Evaluate:'⚖️', Create:'🎨', Custom:'✏️' };
+
+const BLOOM_OFFLINE_TEMPLATES = {
+  Remember: [
+    (q,t,n)=>`List the components required for the ${t} experiment${n?', given ('+n+')':''}, state the function of each component, and draw the standard circuit diagram with all terminal connections labelled.`,
+    (q,t,n)=>`State the working principle of ${t}${n?' for the given data ('+n+')':''} and write the formula used to compute the expected output, defining all symbols.`,
+    (q,t,n)=>`Enumerate the step-by-step procedure to conduct the ${t} experiment${n?', using the specified values ('+n+')':''}, and identify the instruments used with their ranges.`,
+    (q,t,n)=>`Recall the characteristic equation of ${t}${n?' corresponding to ('+n+')':''} and reproduce the standard observation table with all column headings and SI units.`,
+    (q,t,n)=>`Identify the operating modes of ${t}${n?' for the given conditions ('+n+')':''} and state the boundary condition that defines each mode on the characteristic curve.`,
+  ],
+  Understand: [
+    (q,t,n)=>`Explain the operating principle of ${t}${n?' for ('+n+')':''} with a neat circuit diagram, and describe how the output changes when the key parameters are varied.`,
+    (q,t,n)=>`Describe the input–output relationship of ${t}${n?' using the given data ('+n+')':''} and interpret the shape of the expected characteristic curve in terms of the underlying physics.`,
+    (q,t,n)=>`Summarize the working of ${t}${n?' with reference to ('+n+')':''}, distinguish between its ideal and practical behaviour, and explain the non-ideality observed.`,
+    (q,t,n)=>`Explain the role of each component in the ${t} circuit${n?' operating at ('+n+')':''} and describe the effect on the output if any one element is removed or replaced.`,
+    (q,t,n)=>`Compare the theoretical and practical behaviour of ${t}${n?' using the parameters ('+n+')':''} and describe the factors responsible for any discrepancy.`,
+  ],
+  Apply: [
+    (q,t,n)=>`Set up the ${t} circuit${n?', using the given values ('+n+')':''}, apply the appropriate input, record the output at a minimum of five readings, and tabulate the results with calculated values.`,
+    (q,t,n)=>`Construct and test the ${t} circuit${n?' for ('+n+')':''}, compute the required performance parameters from your measurements, and verify against theoretical predictions.`,
+    (q,t,n)=>`Implement the ${t} experiment${n?' with ('+n+')':''}, record all observations systematically, and present the results as a graph with properly labelled axes and units.`,
+    (q,t,n)=>`Perform the ${t} experiment${n?' using the values ('+n+')':''}, apply the relevant formula to your measured data, and demonstrate consistency with theory within acceptable tolerance.`,
+    (q,t,n)=>`Demonstrate the operation of ${t}${n?' for ('+n+')':''} by measuring the output at all key test points and calculate the figures of merit from the observations.`,
+  ],
+  Analyze: [
+    (q,t,n)=>`Examine the output characteristics of ${t}${n?' obtained with ('+n+')':''}, differentiate between ideal and practical behaviour, and identify all sources of deviation with their causes.`,
+    (q,t,n)=>`Investigate the effect of varying the critical parameters of ${t}${n?' around the given values ('+n+')':''} and present a comparative analysis of performance in tabular and graphical form.`,
+    (q,t,n)=>`Deconstruct the ${t} circuit${n?' operating at ('+n+')':''} and analyze the contribution of each element to the overall output, supporting the analysis with experimental evidence.`,
+    (q,t,n)=>`Distinguish the operating regions of ${t}${n?' using the data ('+n+')':''}, correlate each region with the characteristic curve, and explain the physical mechanism in each region.`,
+    (q,t,n)=>`Analyze the frequency or load response of ${t}${n?' for ('+n+')':''}, determine the bandwidth or regulation from the plotted characteristic, and account for any non-linearity observed.`,
+  ],
+  Evaluate: [
+    (q,t,n)=>`Assess the performance of ${t}${n?' against the specifications ('+n+')':''} using experimental data, justify whether the results meet the design criteria, and recommend specific improvements.`,
+    (q,t,n)=>`Evaluate the accuracy of the ${t} experiment${n?' for ('+n+')':''} by computing the percentage error between theoretical and practical results, and judge whether the discrepancy is acceptable.`,
+    (q,t,n)=>`Critique the design of ${t}${n?' with reference to ('+n+')':''}, identify its practical limitations, and recommend an improved configuration with supporting calculations.`,
+    (q,t,n)=>`Validate the ${t} circuit${n?' at ('+n+')':''} by comparing experimental results with theoretical specifications, and defend your conclusion regarding compliance with performance criteria.`,
+    (q,t,n)=>`Appraise the impact of component tolerances on ${t}${n?' for the given values ('+n+')':''}, evaluate which parameter most influences performance, and suggest a procedure to minimise uncertainty.`,
+  ],
+  Create: [
+    (q,t,n)=>`Design a ${t} circuit${n?' to satisfy ('+n+')':''}, derive the component values analytically, construct the circuit, and verify all specifications through experimental measurements.`,
+    (q,t,n)=>`Develop an improved version of ${t}${n?' beyond ('+n+')':''} that overcomes its identified limitations, justify every design decision with calculations, and validate experimentally.`,
+    (q,t,n)=>`Propose a novel application of the ${t} principle${n?' incorporating ('+n+')':''}, implement the circuit, and present the complete design procedure with experimental performance verification.`,
+    (q,t,n)=>`Synthesize a multi-stage system incorporating ${t}${n?' with ('+n+')':''}, document the design methodology, component selection rationale, and provide experimental verification results.`,
+    (q,t,n)=>`Devise an experiment to characterize the non-ideal behaviour of ${t}${n?' beyond the range ('+n+')':''}, formulate the measurement procedure, execute it, and present a detailed analysis of results.`,
+  ]
+};
+
+const _bloomVariantIdx = {};
+
+function _nums(q) {
+  const t = q.text || '';
+  const tableCells = [];
+  for(const nt of (q.nestedTables||[])) {
+    for(const row of (nt.rows||[])) {
+      for(const cell of row) {
+        const v = (cell.text||'').trim();
+        if(v && v.length < 20 && v !== '') tableCells.push(v);
+      }
+    }
+  }
+  const inlineNums = t.match(/(?:[-+]?\d+(?:\.\d+)?\s*(?:[kKmMΩµnpF]|kHz|MHz|kΩ|mA|µA|nF|µF|Hz|V\b|mV|dB)?|\bk\b|2k|3k|nk|\bk\b)/g) || [];
+  const combined = [...new Set([...tableCells.slice(0,10), ...inlineNums.slice(0,6)])].filter(v=>v.trim().length>0);
+  if(!combined.length) return null;
+  return combined.slice(0,8).join(', ');
+}
+
+function _topic(q) {
+  const t = q.text || '';
+  const m1 = t.match(/\bof\s+(?:a\s+|an\s+|the\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|using|with|and|experiment|characteristics|amplifier|oscillator|filter|rectifier|regulator|modulator|demodulator|converter|meter|bridge|network|system|response|curve|plot|graph|table|via|by|to|\.|\,|$))/i);
+  if(m1) return m1[1].trim();
+  const m2 = t.match(/\b(?:design|implement|construct|study|verify|demonstrate|test|measure|determine|calculate|plot|draw|obtain)\s+(?:the\s+|a\s+|an\s+)?([A-Z][A-Za-z0-9 \-\/]{3,45}?)(?:\s+(?:circuit|characteristics|using|and|experiment|with|for|to|\.|\,|$))/i);
+  if(m2) return m2[1].trim();
+  const m3 = t.match(/\b([A-Z]{2,}(?:\s+[A-Z]{2,}){0,3})\b/);
+  if(m3 && m3[1].length > 3) return m3[1];
+  const words = t.replace(/[^\w\s\-]/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,6);
+  return words.join(' ') || 'this experiment';
+}
+
+function setBloomMode(qi, mode) {
+  document.getElementById(`boffline_${qi}`).style.display = mode==='offline'?'block':'none';
+  document.getElementById(`bonline_${qi}`).style.display  = mode==='online'?'block':'none';
+  document.getElementById(`bmt_offline_${qi}`).className = 'bloom-mode-tab'+(mode==='offline'?' act':'');
+  document.getElementById(`bmt_online_${qi}`).className  = 'bloom-mode-tab'+(mode==='online'?' act':'');
+  document.getElementById(`bresult_${qi}`).classList.remove('show');
+  document.getElementById(`bspin_${qi}`).classList.remove('show');
+  document.getElementById(`bcustom_${qi}`).classList.remove('show');
+}
+
+function toggleBloom(qi){ document.getElementById(`bloom_${qi}`).classList.toggle('show'); }
+function hideBloom(qi)  { document.getElementById(`bloom_${qi}`).classList.remove('show'); }
+
+function reframeOffline(qi, level) {
+  const q = G.questions[qi];
+  const templates = BLOOM_OFFLINE_TEMPLATES[level] || [];
+  const cycleKey = `${qi}_${level}_cycle`;
+  _bloomVariantIdx[cycleKey] = ((_bloomVariantIdx[cycleKey] ?? (qi % templates.length)) + 1) % templates.length;
+  const idx = _bloomVariantIdx[cycleKey];
+  const topic = _topic(q);
+  const nums  = _nums(q);
+  const tpl = templates[idx] || templates[0];
+  const text = tpl ? tpl(q, topic, nums) : `${level}: ${q.text.substring(0,200)}`;
+  const cacheKey = `${qi}_${level}_offline`;
+  G.bloomCache[cacheKey] = text;
+  showBloomResult(qi, level, text);
+  const ta = document.getElementById(`bcustomta_${qi}`);
+  if(ta) ta.value = text;
+  document.getElementById(`bcustom_${qi}`).classList.add('show');
+  const lvlEl = document.getElementById(`blevel_${qi}`);
+  if(lvlEl) lvlEl.title = `Variant ${idx+1} of ${templates.length} — click again to cycle`;
+}
+
+const BLOOM_VERBS={
+  Remember:['List','Define','Recall','Identify','Name','State','Label','Enumerate'],
+  Understand:['Explain','Describe','Summarize','Interpret','Classify','Compare','Illustrate'],
+  Apply:['Demonstrate','Calculate','Implement','Solve','Execute','Construct','Perform','Verify'],
+  Analyze:['Differentiate','Examine','Deconstruct','Investigate','Distinguish','Trace','Compare'],
+  Evaluate:['Assess','Critique','Justify','Defend','Appraise','Recommend','Validate','Judge'],
+  Create:['Design','Develop','Formulate','Propose','Synthesize','Invent','Devise','Construct']
+};
+
+function getApiKey() {
+  return (document.getElementById('apiKeyInp')?.value||'').trim() ||
+         (typeof localStorage!=='undefined'?localStorage.getItem('labqp_groqkey')||'':'');
+}
+function saveApiKey() {
+  const k=(document.getElementById('apiKeyInp')?.value||'').trim();
+  if(typeof localStorage!=='undefined') localStorage.setItem('labqp_groqkey',k);
+  const st=document.getElementById('apiKeyStatus');
+  if(k && !k.startsWith('gsk_')){
+    if(st) st.textContent='⚠️ Groq keys start with gsk_ — please check your key';
+    toast('Groq keys start with gsk_ — check your key','warn'); return;
+  }
+  if(st) st.textContent=k?`✅ Groq key saved (${k.substring(0,14)}…)`:'Key cleared.';
+  const btn=document.querySelector('.topbar button[onclick="toggleApiPanel()"]');
+  if(btn){
+    if(k){ btn.style.background='#d1fae5'; btn.style.borderColor='#6ee7b7'; btn.style.color='#065f46'; btn.textContent='🆓 Groq ✓'; }
+    else { btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; btn.textContent='🔑 API Key'; }
+  }
+  toast(k?'Groq key saved — AI Online ready ✓':'API key cleared','ok');
+}
+
+async function reframeOnline(qi, level) {
+  const apiKey = getApiKey();
+  if(!apiKey){
+    toast('Enter your FREE Groq API key first — click 🔑 API Key in the topbar','warn',5000);
+    document.getElementById('apiKeyPanel').style.display='block';
+    document.getElementById('apiKeyInp').focus();
+    return;
+  }
+  if(!apiKey.startsWith('gsk_')){
+    toast('Invalid Groq key — must start with gsk_','err',5000);
+    document.getElementById('apiKeyPanel').style.display='block';
+    return;
+  }
+
+  const q=G.questions[qi];
+  const nums=_nums(q);
+  const cacheKey=`${qi}_${level}_online`;
+  if(G.bloomCache[cacheKey]){ showBloomResult(qi,level,G.bloomCache[cacheKey]); return; }
+
+  const spinEl=document.getElementById(`bspin_${qi}`);
+  const resEl =document.getElementById(`bresult_${qi}`);
+  spinEl.classList.add('show'); resEl.classList.remove('show');
+  document.getElementById(`bcustom_${qi}`).classList.remove('show');
+
+  const topic=_topic(q);
+  const prompt=`You are an expert educational assessment designer for engineering practical/laboratory examinations (Anna University / Indian engineering college style).
+
+Reframe the following question at Bloom's Taxonomy level: ${level}
+
+Original question: "${q.text.substring(0,600)}"
+${nums?`Numeric/variable values present in the question: ${nums}`:''}
+${q.equations.length?`Equations: ${q.equations.map(e=>e.text).join(', ')}`:''}
+
+Action verbs for ${level}: ${(BLOOM_VERBS[level]||[]).join(', ')}
+
+Requirements:
+- Write ONE single complete exam question (no sub-parts, no (i)/(ii), no bullet points)
+- Embed the numeric/variable values from the original question naturally into the reframed question
+- Use formal academic language suitable for undergraduate engineering examinations
+- Keep the original experiment/topic name exactly as given
+- Length: 1–3 sentences maximum
+- Return ONLY the reframed question — no preamble, no explanation, no label
+
+Reframed question:`;
+
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 300,
+        temperature: 0.7,
+        messages: [
+          { role: 'system', content: 'You are an expert exam question designer for engineering practical examinations. You write clear, precise, academically rigorous single-sentence exam questions.' },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      const errMsg = errData?.error?.message || `HTTP ${resp.status}`;
+      if(resp.status===401) throw new Error('Invalid API key — check your Groq key starts with gsk_');
+      if(resp.status===429) throw new Error('Rate limit hit — wait a moment and try again (free tier limit)');
+      throw new Error(errMsg);
+    }
+
+    const data = await resp.json();
+    const text = data?.choices?.[0]?.message?.content?.trim() || '';
+    if(!text) throw new Error('Empty response from Groq');
+
+    const cleaned = text
+      .replace(/^\s*\([ivx]+\)\s*/gim, '')
+      .replace(/\n+/g, ' ')
+      .trim();
+
+    G.bloomCache[cacheKey] = cleaned;
+    showBloomResult(qi, level, cleaned);
+    const ta=document.getElementById(`bcustomta_${qi}`);
+    if(ta) ta.value = cleaned;
+    document.getElementById(`bcustom_${qi}`).classList.add('show');
+    toast(`✅ ${level} reframe generated via Groq`, 'ok');
+
+  } catch(err){
+    spinEl.classList.remove('show');
+    resEl.classList.add('show');
+    document.getElementById(`btext_${qi}`).innerHTML=
+      `<span style="color:#dc2626">❌ ${esc(err.message)}</span><br>
+       <small style="color:#64748b;font-family:var(--ff)">
+         Switch to ✈️ <b>Offline</b> mode, or check your key at
+         <a href="https://console.groq.com" target="_blank" style="color:#059669">console.groq.com</a>
+       </small>`;
+    toast('Groq error: '+err.message, 'err', 5000);
+  }
+}
+
+function showBloomResult(qi, level, text) {
+  document.getElementById(`bspin_${qi}`).classList.remove('show');
+  const resEl=document.getElementById(`bresult_${qi}`);
+  resEl.classList.add('show');
+  document.getElementById(`btext_${qi}`).innerHTML = text.replace(/\n/g,'<br>');
+  const lvlEl=document.getElementById(`blevel_${qi}`);
+  if(lvlEl){ lvlEl.className='bloom-tag '+(BLOOM_COLORS[level]||'bt-Custom'); lvlEl.textContent=(BLOOM_ICONS[level]||'✏️')+' '+level; }
+  resEl.dataset.currentLevel=level;
+  const varEl=document.getElementById(`bvariant_${qi}`);
+  if(varEl){
+    const cycleKey=`${qi}_${level}_cycle`;
+    const idx=_bloomVariantIdx[cycleKey];
+    const total=(BLOOM_OFFLINE_TEMPLATES[level]||[]).length;
+    if(idx!==undefined && total>1) varEl.textContent=`Variant ${idx+1}/${total}`;
+    else varEl.textContent='';
+  }
+}
+
+function useBloomResult(qi) {
+  const resEl=document.getElementById(`bresult_${qi}`);
+  const level=resEl.dataset.currentLevel||'Custom';
+  const tmp=document.createElement('div');
+  tmp.innerHTML=document.getElementById(`btext_${qi}`).innerHTML;
+  const text=tmp.innerText||tmp.textContent;
+  _applyBloom(qi, level, text);
+}
+
+function useCustomBloom(qi) {
+  const ta=document.getElementById(`bcustomta_${qi}`);
+  if(!ta||!ta.value.trim()){ toast('Enter a reframed question first','warn'); return; }
+  _applyBloom(qi, 'Custom', ta.value.trim());
+}
+
+function _applyBloom(qi, level, text) {
+  G.questions[qi].bloomReframes[level]=text;
+  G.questions[qi].activeBloom=level;
+  const activeEl=document.getElementById(`bloom_active_${qi}`);
+  if(activeEl) activeEl.innerHTML=`<span class="bloom-tag ${BLOOM_COLORS[level]||'bt-Custom'}">${BLOOM_ICONS[level]||'✏️'} ${level} active</span>`;
+  hideBloom(qi);
+  if(Object.keys(G.assignments).length) renderStuTable();
+  toast(`Q${qi+1}: ${level} version will be used`,'ok');
+}
+
+function editBloomResult(qi) {
+  const tmp=document.createElement('div');
+  tmp.innerHTML=document.getElementById(`btext_${qi}`).innerHTML;
+  const text=tmp.innerText||tmp.textContent;
+  const ta=document.getElementById(`bcustomta_${qi}`);
+  if(ta) ta.value=text;
+  document.getElementById(`bcustom_${qi}`).classList.add('show');
+}
+
+function clearBloom(qi) {
+  G.questions[qi].activeBloom=null;
+  const activeEl=document.getElementById(`bloom_active_${qi}`); if(activeEl) activeEl.innerHTML='';
+  document.getElementById(`bresult_${qi}`).classList.remove('show');
+  document.getElementById(`bcustom_${qi}`).classList.remove('show');
+  if(Object.keys(G.assignments).length) renderStuTable();
+  toast(`Q${qi+1}: Restored to original`,'inf');
+}
+
+function renderStuTable() {
+  const w=document.getElementById('stuWrap');
+  const asn=Object.keys(G.assignments).length;
+  document.getElementById('asnStats').style.display='flex';
+  document.getElementById('st0').textContent=G.students.length;
+  document.getElementById('st1').textContent=asn;
+  document.getElementById('st2').textContent=G.students.length-asn;
+  const uq=new Set(Object.values(G.assignments)).size;
+  document.getElementById('st3').textContent=uq+'/'+G.questions.length;
+  let overCount=0;
+  const qUsedMap={};
+  Object.values(G.assignments).forEach(qi=>{ qUsedMap[qi]=(qUsedMap[qi]||0)+1; });
+  for(const[qi,cnt]of Object.entries(qUsedMap)){ const lim=G.questions[qi].studentLimit; if(lim&&cnt>lim) overCount+=cnt-lim; }
+  document.getElementById('st5').textContent=overCount;
+  if(asn>0){ document.getElementById('asnPill').style.display='flex'; document.getElementById('asnTxt').textContent=asn+'/'+G.students.length; }
+  G.pairedPages=[];
+  for(let i=0;i<G.students.length;i+=2) G.pairedPages.push([i,i+1<G.students.length?i+1:null]);
+  w.innerHTML=`<table class="stbl" id="sTbl">
+  <thead><tr><th>S.No</th><th>Reg. No.</th><th>Name</th><th>Dept</th><th>Page</th><th>Assigned Q</th><th>Bloom</th><th>Status</th><th style="text-align:center">Action</th></tr></thead>
+  <tbody>${G.students.map((s,i)=>{
+    const qi=G.assignments[i]; const q=qi!==undefined?G.questions[qi]:null;
+    const pg=Math.floor(i/2)+1; const sl=i%2===0?'Top':'Btm';
+    const qUsed=qi!==undefined?(qUsedMap[qi]||0):0;
+    const isOver=!!(q&&q.studentLimit&&qUsed>q.studentLimit);
+    const bloomBadge=q&&q.activeBloom?`<span class="bloom-tag ${BLOOM_COLORS[q.activeBloom]||'bt-Custom'}">${BLOOM_ICONS[q.activeBloom]||'✏️'} ${q.activeBloom}</span>`:'<span style="color:var(--n4);font-size:9.5px">—</span>';
+    const qText=(q?.paras.find(p=>p.text)?.text||q?.text||'').substring(0,35);
+    return`<tr data-si="${i}" class="${isOver?'limit-exceeded':''}">
+      <td><span class="badge bdg-b">${esc(s.sno)}</span></td>
+      <td><code style="font-family:var(--fm);font-size:10px;color:var(--b4);font-weight:600">${esc(s.regNo||'—')}</code></td>
+      <td style="font-weight:600">${esc(s.name||'—')}</td>
+      <td style="font-size:10px;color:var(--n3)">${esc(s.dept||'—')}</td>
+      <td><span class="badge bdg-sky">P${pg} ${sl}</span></td>
+      <td style="max-width:200px">${qi!==undefined?`<span class="badge ${isOver?'bdg-r':'bdg-b'}">Q${qi+1}${isOver?' ⚠️':''}</span> <span style="font-size:10px;color:var(--n3);font-family:'Times New Roman',serif">${esc(qText)}…</span>`:'<span style="color:var(--n3);font-size:10px">—</span>'}</td>
+      <td>${bloomBadge}</td>
+      <td>${qi!==undefined?(isOver?'<span class="badge bdg-r">⚠️ Over</span>':'<span class="badge bdg-g">✓ Done</span>'):'<span class="badge bdg-r">Pending</span>'}</td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="btn bg_" style="padding:3px 8px;font-size:9.5px;margin-right:3px" onclick="openModal(${i})">✏️</button>
+        <button class="btn bg_" style="padding:3px 8px;font-size:9.5px" onclick="reSingle(${i})">🎲</button>
+      </td>
+    </tr>`;
+  }).join('')}</tbody></table>`;
+  if(asn>0){ document.getElementById('anCard').style.display='block'; renderAn(); }
+}
+
+function filterStu() {
+  const q=(document.getElementById('stuSearch').value||'').toLowerCase();
+  const fa=document.getElementById('fAsn').value, fq=document.getElementById('fQ').value;
+  const t=document.getElementById('sTbl'); if(!t) return;
+  const qUsedMap={}; Object.values(G.assignments).forEach(qi=>{ qUsedMap[qi]=(qUsedMap[qi]||0)+1; });
+  for(const r of t.tBodies[0].rows){
+    const si=+r.dataset.si; const s=G.students[si];
+    const txt=(s.regNo+' '+s.name+' '+s.dept).toLowerCase();
+    const a=G.assignments[si]!==undefined; const qi=G.assignments[si];
+    const isOver=qi!==undefined&&G.questions[qi].studentLimit&&(qUsedMap[qi]||0)>G.questions[qi].studentLimit;
+    r.style.display=((!q||txt.includes(q))&&(fa==='all'||(fa==='y'&&a)||(fa==='n'&&!a)||(fa==='over'&&isOver))&&(fq==='all'||(a&&qi===+fq)))?'':'none';
+  }
+}
+
+function setMode(m) {
+  G.mode=m;
+  ['smart','balanced','random'].forEach(n=>{ const el=document.getElementById('mode-'+n); if(el) el.className='mo'+(n===m?' act':''); });
+}
+
+function getAssignments(mode) {
+  const n=G.students.length, q=G.questions.length;
+  const result=new Array(n).fill(-1);
+  const usedCount=new Array(q).fill(0);
+  const studentOrder=shuf([...Array(n).keys()]);
+
+  if(mode==='smart'){
+    const qOrder=shuf([...Array(q).keys()]);
+    let p1=0;
+    for(let qi=0;qi<qOrder.length&&p1<n;qi++){ result[studentOrder[p1]]=qOrder[qi]; usedCount[qOrder[qi]]++; p1++; }
+    for(const si of shuf(studentOrder.slice(p1))){
+      const avail=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; if(!lim||usedCount[qi]<lim) avail.push(qi); }
+      if(avail.length){ avail.sort((a,b)=>usedCount[a]-usedCount[b]); result[si]=avail[0]; usedCount[avail[0]]++; }
+      else{ const minQ=usedCount.indexOf(Math.min(...usedCount)); result[si]=minQ; usedCount[minQ]++; }
+    }
+  } else if(mode==='random'){
+    for(const si of shuf([...Array(n).keys()])){
+      const avail=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; if(!lim||usedCount[qi]<lim) avail.push(qi); }
+      const picked=avail.length?avail[0|Math.random()*avail.length]:usedCount.indexOf(Math.min(...usedCount));
+      result[si]=picked; usedCount[picked]++;
+    }
+  } else {
+    let pool=[]; for(let qi=0;qi<q;qi++){ const lim=G.questions[qi].studentLimit; const slots=lim||Math.ceil(n/q); for(let s=0;s<slots;s++) pool.push(qi); }
+    pool=shuf(pool); while(pool.length<n){ const minQ=usedCount.indexOf(Math.min(...usedCount)); pool.push(minQ); usedCount[minQ]++; }
+    shuf([...Array(n).keys()]).forEach((si,rank)=>{ result[si]=pool[rank%pool.length]; });
+  }
+  return result;
+}
+
+function doAssign() {
+  if(!G.students.length||!G.questions.length){ toast('Upload both files first','warn'); return; }
+  const asgn=getAssignments(G.mode);
+  G.assignments={}; asgn.forEach((qi,si)=>{ if(qi>=0) G.assignments[si]=qi; });
+  renderStuTable(); updateUsage();
+  document.getElementById('clrBtn').disabled=false; document.getElementById('reShBtn').disabled=false;
+  const qUsedMap={}; Object.values(G.assignments).forEach(qi=>{ qUsedMap[qi]=(qUsedMap[qi]||0)+1; });
+  const covered=new Set(Object.values(G.assignments)).size;
+  const viol=G.questions.filter((_,qi)=>{ const lim=G.questions[qi].studentLimit; return lim&&(qUsedMap[qi]||0)>lim; }).length;
+  if(viol>0) showAlert('asnAlert','awrn',`⚠️ ${viol} question(s) over limit (red rows). ${G.mode==='smart'?covered+'/'+G.questions.length+' Qs covered.':''}`);
+  else showAlert('asnAlert','aok',`✅ ${G.students.length} students assigned · ${covered}/${G.questions.length} questions covered${G.mode==='smart'?' (each Q ≥1×)':''}`);
+  toast(`${G.students.length} assigned · ${covered}/${G.questions.length} Qs`,'ok'); chkReady(); setStep(4);
+}
+function reshuffleAll(){ if(!Object.keys(G.assignments).length){ toast('Assign first','warn'); return; } doAssign(); }
+function reSingle(si){
+  const qUsedMap={}; Object.entries(G.assignments).forEach(([k,v])=>{ if(+k!==si) qUsedMap[v]=(qUsedMap[v]||0)+1; });
+  const avail=G.questions.map((_,qi)=>{ const lim=G.questions[qi].studentLimit; return(!lim||(qUsedMap[qi]||0)<lim)?qi:-1; }).filter(qi=>qi>=0);
+  const picked=avail.length?avail[0|Math.random()*avail.length]:0|Math.random()*G.questions.length;
+  G.assignments[si]=picked; renderStuTable(); updateUsage(); chkReady();
+  toast(`Q${picked+1} → ${G.students[si].name}`,'inf');
+}
+function clearAssign(){
+  G.assignments={}; renderStuTable(); updateUsage();
+  document.getElementById('genBtn').disabled=true; document.getElementById('prvBtn').disabled=true;
+  document.getElementById('anCard').style.display='none'; document.getElementById('asnPill').style.display='none';
+  toast('Cleared','inf');
+}
+function openModal(si){
+  G._mSI=si; G._mSel=G.assignments[si]??-1; const s=G.students[si];
+  document.getElementById('modTitle').textContent=`Assign — ${s.name||s.regNo}`;
+  document.getElementById('modSt').textContent=G._mSel>=0?`Q${G._mSel+1}`:'None';
+  document.getElementById('modOk').disabled=G._mSel<0;
+  const excl={}; Object.entries(G.assignments).forEach(([k,v])=>{ if(+k!==si) excl[v]=(excl[v]||0)+1; });
+  document.getElementById('modBody').innerHTML=G.questions.map((q,i)=>{
+    const u=excl[i]||0,lim=q.studentLimit,atLim=lim&&u>=lim;
+    const lb=lim?`<span class="badge ${atLim?'bdg-r':'bdg-o'}">${u}/${lim}</span>`:`<span class="badge bdg-g">${u}/∞</span>`;
+    const bloomB=q.activeBloom?`<span class="bloom-tag ${BLOOM_COLORS[q.activeBloom]||'bt-Custom'}" style="font-size:7px">${q.activeBloom}</span>`:'';
+    return`<div class="q-opt${G.assignments[si]===i?' sel':''}${atLim?' at-limit':''}" data-qi="${i}" onclick="${atLim?'':('selModalQ('+i+')')}">
+      <div class="qoh"><span class="qon">Q${i+1}</span><span style="font-size:8.5px;color:var(--n3)">⭐${q.totalMark}M</span>${lb}${bloomB}<span class="badge ${atLim?'bdg-r':'bdg-v'}" style="margin-left:auto">${atLim?'FULL':'OK'}</span></div>
+      <div class="qot">${esc((q.paras.find(p=>p.text)?.text||q.text||'').substring(0,100))}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('assignModal').classList.add('show');
+}
+function selModalQ(qi){ G._mSel=qi; document.querySelectorAll('.q-opt').forEach(el=>el.classList.toggle('sel',+el.dataset.qi===qi)); document.getElementById('modOk').disabled=false; document.getElementById('modSt').textContent=`Q${qi+1}`; }
+function confirmAssign(){ if(G._mSI<0||G._mSel<0)return; G.assignments[G._mSI]=G._mSel; closeModal(); renderStuTable(); updateUsage(); chkReady(); toast(`Q${G._mSel+1} → ${G.students[G._mSI].name}`,'ok'); }
+function closeModal(){ document.getElementById('assignModal').classList.remove('show'); G._mSI=-1; G._mSel=-1; }
+
+function renderAn() {
+  const vals=Object.values(G.assignments); if(!vals.length) return;
+  const g=document.getElementById('anGrid'); g.innerHTML='';
+  const q=G.questions.length;
+  const qC=new Array(q).fill(0); vals.forEach(qi=>qC[qi]++); const mx=Math.max(...qC,1);
+  const cl=['bf1','bf2','bf3','bf4'];
+  const c1=document.createElement('div'); c1.className='an-c';
+  c1.innerHTML=`<div class="an-t">📊 Question Distribution</div>`+qC.map((cnt,i)=>{ const lim=G.questions[i].studentLimit,over=lim&&cnt>lim; return`<div class="bar-r"><div class="bar-l">Q${i+1}</div><div class="bar-tr"><div class="bar-f ${over?'bf-red':cl[i%4]}" style="width:${Math.max(Math.round(cnt/mx*100),cnt>0?8:0)}%"><span>${cnt}${lim?'/'+lim:''}</span></div></div></div>`; }).join(''); g.appendChild(c1);
+  const uq=new Set(vals).size,pct=Math.round(uq/q*100),r=33,ci2=2*Math.PI*r,da=`${ci2*pct/100} ${ci2}`;
+  const c2=document.createElement('div'); c2.className='an-c';
+  c2.innerHTML=`<div class="an-t">🎯 Coverage</div><div style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 100 100" width="88" height="88"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#dbeafe" stroke-width="12"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="#2563eb" stroke-width="12" stroke-dasharray="${da}" stroke-dashoffset="${ci2*.25}" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="54" text-anchor="middle" font-size="14" font-weight="800" fill="#1d4ed8">${pct}%</text></svg><div>${G.questions.map((q2,i)=>`<div style="font-size:9px;margin-bottom:3px;font-family:var(--fm)"><span class="badge ${qC[i]>0?'bdg-g':'bdg-r'}">Q${i+1}</span> ${qC[i]} students</div>`).join('')}</div></div>`; g.appendChild(c2);
+}
+function chkReady() {
+  const a=Object.keys(G.assignments).length, r=G.students.length>0&&G.questions.length>0&&a>0;
+  document.getElementById('genBtn').disabled=!r; document.getElementById('prvBtn').disabled=!r;
+  document.getElementById('assignBtn').disabled=!(G.students.length>0&&G.questions.length>0);
+}
+
+const NS_ALL=['xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"','xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"','xmlns:o="urn:schemas-microsoft-com:office:office"','xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"','xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"','xmlns:v="urn:schemas-microsoft-com:vml"','xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"','xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"','xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"','xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"','xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"','xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"'].join(' ');
+const SECPR=`<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="600" w:right="600" w:bottom="600" w:left="600" w:header="300" w:footer="300" w:gutter="0"/>`;
+
+function buildSectionXml(student, question, rIdRemap) {
+  const cc=gei('examClass',''), sem=gei('examSem',student.sem||''), sub=gei('examSubject','');
+  const dt=gei('examDate',''), ses=gei('examSession',''), dept=gei('examDept',student.dept||'');
+  const HDR_BDR=`<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="333333"/><w:right w:val="nil"/></w:tcBorders>`;
+  const HDR_MAR=`<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+  const hCell=(txt,w2,bold=false)=>`<w:tc><w:tcPr><w:tcW w:w="${w2}" w:type="dxa"/>${HDR_BDR}${HDR_MAR}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr><w:r>${TNRPR(22,bold)}<w:t xml:space="preserve">${xesc(txt)}</w:t></w:r></w:p></w:tc>`;
+  const headerTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="3000"/><w:gridCol w:w="1300"/><w:gridCol w:w="5700"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${hCell('Course & Class: '+cc,3000)}${hCell('Semester: '+sem,1300)}${hCell('Subject: '+sub,5700)}</w:tr><w:tr><w:trPr><w:trHeight w:val="280" w:hRule="atLeast"/></w:trPr>${hCell('Reg No.: '+(student.regNo||''),3000,true)}${hCell('Session: '+ses,1300)}${hCell('Date: '+dt,5700)}</w:tr></w:tbl>`;
+  const QW=9200, MW=800;
+  const Q_BDR=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+  const Q_MAR=`<w:tcMar><w:top w:w="55" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="55" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>`;
+  const HDR_SHD=`<w:shd w:val="clear" w:color="auto" w:fill="C8C8C8"/>`;
+  const qContentXml=buildQuestionCellXml(question, rIdRemap);
+  // ── FIXED: Render ALL marks from question.marks array (one <w:p> per mark) ──
+  const marksXml=question.marks.map(m=>`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>${xesc(m)}</w:t></w:r></w:p>`).join('');
+  const bloomNote=question.activeBloom?`<w:p><w:pPr>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:iCs/><w:sz w:val="18"/><w:color w:val="5B21B6"/></w:rPr><w:t>[Bloom's: ${xesc(question.activeBloom)}]</w:t></w:r></w:p>`:'';
+  const qTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Question</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Marks</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${qContentXml}${bloomNote}</w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${marksXml}</w:tc></w:tr></w:tbl>`;
+  let rubricXml='';
+  if(G.rubricCols.length){
+    const nc=G.rubricCols.length,cw=Math.floor(10000/nc);
+    const RB=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+    const RM=`<w:tcMar><w:top w:w="45" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="45" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
+    const hc=G.rubricCols.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${HDR_SHD}${RB}${RM}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(20,true)}<w:t xml:space="preserve">${xesc(c)}</w:t></w:r></w:p></w:tc>`).join('');
+    const bc=G.rubricCols.map(()=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${RB}${RM}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc>`).join('');
+    rubricXml=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>RUBRICS</w:t></w:r></w:p><w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${G.rubricCols.map(()=>`<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid><w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${hc}</w:tr><w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${bc}</w:tr></w:tbl>`;
+  }
+  const sigXml=`<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}<w:tabs><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve"></w:t></w:r><w:r>${TNRPR(22)}<w:tab/></w:r><w:r>${TNRPR(22)}<w:t>Internal Examiner</w:t></w:r></w:p>`;
+  return headerTbl+`<w:p><w:pPr>${SP1}</w:pPr></w:p>`+qTbl+rubricXml+sigXml;
+}
+
+const CUT_LINE=`<w:p><w:pPr><w:pBdr><w:top w:val="dashed" w:sz="6" w:space="1" w:color="888888"/></w:pBdr><w:jc w:val="center"/><w:spacing w:before="60" w:after="60"/></w:pPr><w:r><w:rPr><w:sz w:val="14"/><w:szCs w:val="14"/><w:color w:val="888888"/></w:rPr><w:t>✂ – – – – – – – – – – – – – – CUT HERE – – – – – – – – – – – – – – ✂</w:t></w:r></w:p>`;
+
+async function buildDocxZip(bodyXml, rIdRemap) {
+  const zip=new JSZip(); let imgRels='',imgTypes=''; const seen=new Set();
+  for(const[orig,newR]of Object.entries(rIdRemap)){
+    if(seen.has(newR)) continue; seen.add(newR);
+    const d=G.imageMap[orig]; if(!d) continue;
+    const fname=`img_${newR}.${d.ext}`;
+    zip.file(`word/media/${fname}`,d.b64,{base64:true});
+    imgRels+=`<Relationship Id="${newR}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${fname}"/>`;
+    if(!imgTypes.includes(`Extension="${d.ext}"`)) imgTypes+=`<Default Extension="${d.ext}" ContentType="${d.ct}"/>`;
+  }
+  // ── ADD LOGO if uploaded ──
+  if(G.logoB64){
+    const logoExt=G.logoExt||'png';
+    const logoMime={'png':'image/png','jpg':'image/jpeg','jpeg':'image/jpeg'}[logoExt]||'image/png';
+    zip.file(`word/media/college_logo.${logoExt}`,G.logoB64,{base64:true});
+    imgRels+=`<Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/college_logo.${logoExt}"/>`;
+    if(!imgTypes.includes(`Extension="${logoExt}"`)) imgTypes+=`<Default Extension="${logoExt}" ContentType="${logoMime}"/>`;
+  }
+  const CT=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>${imgTypes}</Types>`;
+  const PKG_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+  const DOC_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>${imgRels}</Relationships>`;
+  const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:type="paragraph" w:styleId="Normal" w:default="1"><w:name w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="0" w:line="360" w:lineRule="auto"/></w:pPr><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:style></w:styles>`;
+  const DOC=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${NS_ALL}><w:body>${bodyXml}<w:sectPr>${SECPR}</w:sectPr></w:body></w:document>`;
+  zip.file('[Content_Types].xml',CT); zip.file('_rels/.rels',PKG_RELS); zip.file('word/styles.xml',STYLES); zip.file('word/_rels/document.xml.rels',DOC_RELS); zip.file('word/document.xml',DOC);
+  return zip;
+}
+async function buildStudentDocx(student, question) {
+  const rIdRemap=collectRIds(question);
+  const sec=buildSectionXml(student, question, rIdRemap);
+  const zip=await buildDocxZip(sec+CUT_LINE+sec, rIdRemap);
+  return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE',compressionOptions:{level:6}});
+}
+async function buildMergedDocx() {
+  const allRidMap=collectAllRIds(G.assignments, G.questions);
+  const pgBrk=`<w:p><w:pPr><w:sectPr>${SECPR}</w:sectPr></w:pPr></w:p>`;
+  let body='';
+  for(let pi=0;pi<G.pairedPages.length;pi++){
+    const[s1i,s2i]=G.pairedPages[pi];
+    body+=buildSectionXml(G.students[s1i],G.questions[G.assignments[s1i]],allRidMap);
+    if(s2i!==null){ body+=CUT_LINE; body+=buildSectionXml(G.students[s2i],G.questions[G.assignments[s2i]],allRidMap); }
+    if(pi<G.pairedPages.length-1) body+=pgBrk;
+  }
+  const zip=await buildDocxZip(body, allRidMap);
+  return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE',compressionOptions:{level:6}});
+}
+
+async function doGenerate() {
+  if(!G.students.length||!G.questions.length){ toast('Upload files first','warn'); return; }
+  showSpin('Generating Papers…','Lossless equations · Tables · Images',0); await delay(30);
+  try {
+    G.docxBlobs=[]; G.pairedPages=[];
+    const tot=G.students.length;
+    for(let i=0;i<tot;i++) if(G.assignments[i]===undefined) G.assignments[i]=Math.floor(Math.random()*G.questions.length);
+    for(let i=0;i<tot;i+=2) G.pairedPages.push([i,i+1<tot?i+1:null]);
+    for(let i=0;i<tot;i++){
+      setSP(Math.round(i/tot*70));
+      document.getElementById('spinS').textContent=`Paper ${i+1}/${tot}: ${G.students[i].name||G.students[i].regNo}`;
+      await delay(1);
+      const blob=await buildStudentDocx(G.students[i],G.questions[G.assignments[i]]);
+      G.docxBlobs.push({blob,student:G.students[i],qi:G.assignments[i]});
+    }
+    setSP(80); document.getElementById('spinS').textContent='Merging…'; await delay(10);
+    G.mergedBlob=await buildMergedDocx();
+    setSP(100); await delay(200); hideSpin();
+    renderPreview(); chkReady();
+    const eqC=G.questions.reduce((a,q)=>a+q.equations.length,0);
+    const imgC=Object.keys(G.imageMap).length;
+    const tblC=G.questions.reduce((a,q)=>a+q.nestedTables.length,0);
+    showAlert('genAlert','aok',`✅ ${tot} papers · ${G.pairedPages.length} pages · ${imgC} images · ${eqC} equations (lossless) · ${tblC} tables`);
+    document.getElementById('dlPanel').classList.add('show');
+    document.getElementById('prvSec').style.display='block';
+    document.getElementById('prvBtn').disabled=false;
+    document.getElementById('dlDesc').textContent=`${tot} papers · ${G.pairedPages.length} pages · 11pt Times New Roman`;
+    document.getElementById('dlPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+    setStep(5); toast(`✅ ${tot} papers ready!`,'ok');
+  } catch(err){ hideSpin(); showAlert('genAlert','aerr','❌ '+err.message); toast(err.message,'err'); console.error(err); }
+}
+
+function renderPreview(){ G.prevPage=0; showPreviewPg(0); document.getElementById('pTot').textContent=`${G.pairedPages.length} pages · ${G.docxBlobs.length} students`; }
+
+function showPreviewPg(idx) {
+  if(!G.pairedPages.length) return;
+  idx=Math.max(0,Math.min(idx,G.pairedPages.length-1)); G.prevPage=idx;
+  const[s1i,s2i]=G.pairedPages[idx];
+  const s1=G.students[s1i], q1=G.questions[G.assignments[s1i]];
+  document.getElementById('pLbl').textContent=`${idx+1}/${G.pairedPages.length} — ${s1.name||s1.regNo}${s2i!==null?' + '+(G.students[s2i].name||G.students[s2i].regNo):''}`;
+  const cc=gei('examClass',''),sem=gei('examSem',''),sub=gei('examSubject','');
+  const dt=gei('examDate',''),ses=gei('examSession',''),dept=gei('examDept','');
+
+  function buildPrev(student, question) {
+    let paras=question.paras;
+    let bloomActive=false;
+    if(question.activeBloom&&question.bloomReframes?.[question.activeBloom]){
+      bloomActive=true;
+      const bloomText = question.bloomReframes[question.activeBloom];
+      paras=[{text:bloomText,images:question.images,equations:question.equations,tables:question.nestedTables.length?[{rows:question.nestedTables[0]?.rows||[]}]:[]}];
+    }
+    let qContent='';
+    for(const para of paras){
+      for(const tbl of(para.tables||[])){
+        if(!tbl.rows||!tbl.rows.length) continue;
+        qContent+=`<div style="overflow-x:auto;margin:6px 0"><table style="border-collapse:collapse;width:auto;min-width:60%;font-family:'Times New Roman',serif;font-size:10.5pt;border:2px solid #111">`;
+        tbl.rows.forEach((row,ri)=>{
+          const isH=ri===0;
+          qContent+=`<tr>${row.map(c=>`<${isH?'th':'td'} style="border:1.5px solid #111;padding:5px 14px;text-align:center;vertical-align:middle${isH?';background:#d0d0d0;font-weight:700;font-size:10pt':';background:#fff'}">${esc(c.text||'')}</${isH?'th':'td'}>`).join('')}</tr>`;
+        });
+        qContent+=`</table></div>`;
+      }
+      for(const img of(para.images||[]))
+        qContent+=`<div style="text-align:center;margin:6px 0"><img src="data:${img.ct};base64,${img.b64}" style="max-width:100%;max-height:180px;object-fit:contain;border:1px solid #eee;border-radius:3px"/></div>`;
+      for(const eq of(para.equations||[]))
+        if(eq.text) qContent+=`<span style="font-family:'Times New Roman',serif;font-style:italic;color:#4c1d95;background:#faf5ff;border:1px solid #ddd6fe;border-radius:3px;padding:1px 8px;font-size:12pt;display:inline-block;margin:2px">${esc(eq.text)}</span>`;
+      if(para.text&&para.text.trim()){
+        const lines = para.text.split('\n');
+        lines.forEach(line=>{
+          if(line.trim())
+            qContent+=`<div style="line-height:1.85;margin:3px 0">${esc(line)}</div>`;
+        });
+      }
+    }
+    if(!qContent) qContent=esc(question.text||'—');
+    // ── FIXED: Show ALL marks in preview, one per line ──
+    const marksHtml=question.marks.map(m=>`<div style="text-align:center;font-weight:700;line-height:2">${esc(m)}</div>`).join('');
+    const bloomNote=bloomActive?`<div style="font-size:9px;font-style:italic;color:#5b21b6;margin-top:5px;font-family:sans-serif">[Bloom's: ${question.activeBloom}]</div>`:'';
+    return`<div style="font-family:'Times New Roman',Times,serif;font-size:11pt;line-height:1.5">
+      <table style="width:100%;border-collapse:collapse;margin-bottom:5px;font-size:10.5pt">
+        <tr><td style="padding:3px 5px;border-bottom:1px solid #999">Course &amp; Class: <b>${esc(cc)}</b></td><td style="padding:3px 5px;border-bottom:1px solid #999">Semester: <b>${esc(sem)}</b></td><td style="padding:3px 5px;border-bottom:1px solid #999">Subject: <b>${esc(sub)}</b></td></tr>
+        <tr><td style="padding:3px 5px;border-bottom:2px solid #333"><b>Reg No.: ${esc(student.regNo||'—')}</b></td><td style="padding:3px 5px;border-bottom:2px solid #333">Dept: ${esc(student.dept||dept||'')}</td><td style="padding:3px 5px;border-bottom:2px solid #333">Session: <b>${esc(ses)}</b> &nbsp; Date: <b>${esc(dt)}</b></td></tr>
+      </table>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:5px">
+        <thead><tr><th style="padding:5px 8px;border:1.5px solid #333;background:#e0e0e0;text-align:center">Question</th><th style="padding:5px 6px;border:1.5px solid #333;background:#e0e0e0;text-align:center;width:52px">Marks</th></tr></thead>
+        <tbody><tr>
+          <td style="padding:7px 9px;border:1.5px solid #333;line-height:1.85">${qContent}${bloomNote}</td>
+          <td style="padding:5px 6px;border:1.5px solid #333;vertical-align:middle">${marksHtml}</td>
+        </tr></tbody>
+      </table>
+      ${G.rubricCols.length?`<p style="text-align:center;font-weight:700;text-decoration:underline;margin:5px 0 3px">RUBRICS</p><table style="width:100%;border-collapse:collapse"><thead><tr>${G.rubricCols.map(c=>`<th style="padding:4px 6px;border:1.5px solid #333;background:#e4e4e4;text-align:center;font-size:10pt">${esc(c)}</th>`).join('')}</tr></thead><tbody><tr>${G.rubricCols.map(()=>'<td style="border:1.5px solid #555;height:32px"></td>').join('')}</tr></tbody></table>`:''}
+      <div style="margin-top:26px;display:flex;justify-content:space-between"><span></span><span>Internal Examiner</span></div>
+    </div>`;
+  }
+  let html=`<div class="pp">${buildPrev(s1,q1)}`;
+  if(s2i!==null){ const s2=G.students[s2i],q2=G.questions[G.assignments[s2i]]; html+=`<div class="pcut">✂ – – – – – – – – – – – – – – CUT HERE – – – – – – – – – – – – – – ✂</div>${buildPrev(s2,q2)}`; }
+  html+='</div>';
+  document.getElementById('previewPaper').innerHTML=html;
+}
+function pNav(d){ showPreviewPg(G.prevPage+d); }
+function togPreview(){ const s=document.getElementById('prvSec'); const show=s.style.display==='none'; s.style.display=show?'block':'none'; if(show&&G.pairedPages.length) showPreviewPg(G.prevPage); }
+
+function dlDocx(){
+  if(!G.mergedBlob) return;
+  const url=URL.createObjectURL(G.mergedBlob),a=document.createElement('a'); a.href=url;
+  const sub=gei('examSubject','QP').split(/[-–]/)[0].trim().replace(/[^a-zA-Z0-9]/g,'_');
+  a.download=`LabQP_v6_${sub}_${G.pairedPages.length}Pages.docx`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast('DOCX downloaded','ok');
+}
+async function dlZip(){
+  if(!G.docxBlobs.length) return;
+  showSpin('Packaging…','Creating individual files',0); await delay(20);
+  const zip=new JSZip();
+  for(let i=0;i<G.docxBlobs.length;i++){
+    const{blob,student}=G.docxBlobs[i];
+    const fname=`${String(i+1).padStart(3,'0')}_${(student.regNo||'s'+i).replace(/[^a-zA-Z0-9]/g,'_')}_${(student.name||'').replace(/[^a-zA-Z0-9]/g,'_').substring(0,18)}.docx`;
+    zip.file(fname,await blob.arrayBuffer()); setSP(Math.round(i/G.docxBlobs.length*90));
+  }
+  const zb=await zip.generateAsync({type:'blob',compression:'DEFLATE'}); hideSpin();
+  const url=URL.createObjectURL(zb),a=document.createElement('a'); a.href=url;
+  a.download=`LabQP_v6_${G.docxBlobs.length}Students.zip`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast('ZIP downloaded','ok');
+}
+
+function setStep(n){ for(let i=1;i<=5;i++){ const el=document.getElementById('sn'+i); if(!el) continue; const sn=el.querySelector('.sn-n'); if(i<n){el.className='sn done';sn.textContent='✓';}else if(i===n){el.className='sn act';sn.textContent=i;}else{el.className='sn';sn.textContent=i;} } }
+function showSpin(t,s,p){ document.getElementById('spinT').textContent=t; document.getElementById('spinS').textContent=s; document.getElementById('pf').style.width=p+'%'; document.getElementById('spinOv').classList.add('show'); }
+function setSP(p){ document.getElementById('pf').style.width=p+'%'; }
+function hideSpin(){ document.getElementById('spinOv').classList.remove('show'); }
+function showAlert(id,cls,msg){ const el=document.getElementById(id); el.style.display='flex'; el.className='alert '+cls; el.innerHTML=`<span>${{ainf:'ℹ️',aok:'✅',aerr:'❌',awrn:'⚠️'}[cls]||'ℹ️'}</span><span style="line-height:1.6">${msg}</span>`; }
+
+function toggleApiPanel(){
+  const p=document.getElementById('apiKeyPanel');
+  p.style.display=p.style.display==='none'?'block':'none';
+  if(p.style.display==='block') document.getElementById('apiKeyInp').focus();
+}
+
+(function initApp(){
+  try {
+    const saved=localStorage.getItem('labqp_groqkey')||'';
+    if(saved){
+      document.getElementById('apiKeyInp').value=saved;
+      const st=document.getElementById('apiKeyStatus');
+      if(st) st.textContent=`✅ Groq key loaded (${saved.substring(0,14)}…)`;
+      const btn=document.querySelector('.topbar button[onclick="toggleApiPanel()"]');
+      if(btn){ btn.style.background='#d1fae5'; btn.style.borderColor='#6ee7b7'; btn.style.color='#065f46'; btn.textContent='🆓 Groq ✓'; }
+    }
+  } catch(e){}
+})();
+
+document.getElementById('assignModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+// Replace the buildSectionXml function with this new version for single-page format
+function buildSinglePageSectionXml(student, question, rIdRemap) {
+  const cc  = gei('examClass','');
+  const sem = gei('examSem', student.sem||'');
+  const sub = gei('examSubject','');
+  const dt  = gei('examDate','');
+  const ses = gei('examSession','');
+  const dept= gei('examDept', student.dept||'');
+  const title = gei('examTitle','END SEMESTER PRACTICAL EXAMINATIONS');
+ 
+  const subParts   = sub.split(/[-–]/);
+  const courseCode = subParts[0]?.trim() || sub;
+  const courseName = subParts.slice(1).join('-').trim() || sub;
+ 
+  const NIL_BDR = `<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>`;
+  const HDR_MAR = `<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+  const Q_BDR   = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
+  const Q_MAR   = `<w:tcMar><w:top w:w="55" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="55" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>`;
+ 
+  // ── ANSWER BOOK CODE top bar ──
+  const BOX_W = 400, ABC_LABEL_W = 1900;
+  const LEFT_W = 10000 - ABC_LABEL_W - 6 * BOX_W;
+  const BOX_BDR = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
+  const emptyBox = `<w:tc><w:tcPr><w:tcW w:w="${BOX_W}" w:type="dxa"/>${BOX_BDR}<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar></w:tcPr><w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="60" w:after="60"/></w:pPr></w:p></w:tc>`;
+ 
+  const answerBookRow = `<w:tbl>
+<w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:jc w:val="right"/>
+<w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>
+<w:tblLayout w:type="fixed"/></w:tblPr>
+<w:tblGrid><w:gridCol w:w="${LEFT_W}"/><w:gridCol w:w="${ABC_LABEL_W}"/>${Array(6).fill(`<w:gridCol w:w="${BOX_W}"/>`).join('')}</w:tblGrid>
+<w:tr><w:trPr><w:trHeight w:val="380" w:hRule="atLeast"/></w:trPr>
+<w:tc><w:tcPr><w:tcW w:w="${LEFT_W}" w:type="dxa"/>${NIL_BDR}${HDR_MAR}</w:tcPr><w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr></w:p></w:tc>
+<w:tc><w:tcPr><w:tcW w:w="${ABC_LABEL_W}" w:type="dxa"/>
+<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>
+${HDR_MAR}<w:vAlign w:val="center"/></w:tcPr>
+<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:before="60" w:after="60"/></w:pPr><w:r>${TNRPR(20,false)}<w:t>Answer Book Code.</w:t></w:r></w:p></w:tc>
+${Array(6).fill(emptyBox).join('')}
+</w:tr></w:tbl>`;
+ 
+  // ── LOGO cell ──
+  const LOGO_W  = 1800;
+  const TITLE_W = 10000 - LOGO_W;
+ 
+  const logoCell = G.logoB64
+    ? `<w:tc><w:tcPr><w:tcW w:w="${LOGO_W}" w:type="dxa"/>${NIL_BDR}${HDR_MAR}<w:vAlign w:val="center"/></w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0"/></w:pPr>
+<w:r><w:rPr><w:noProof/></w:rPr><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="1600200" cy="1143000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="9001" name="CollegeLogo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="CollegeLogo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1600200" cy="1143000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>
+</w:p></w:tc>`
+    : `<w:tc><w:tcPr><w:tcW w:w="${LOGO_W}" w:type="dxa"/>
+<w:tcBorders><w:top w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="6" w:space="0" w:color="000000"/></w:tcBorders>
+${HDR_MAR}<w:vAlign w:val="center"/></w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="300" w:after="300"/></w:pPr><w:r>${TNRPR(20,true)}<w:t>COLLEGE LOGO</w:t></w:r></w:p>
+</w:tc>`;
+ 
+  //const instName = 'Kamaraj College of Engineering and Technology';
+  //const instSub  = '(An Autonomous Institution)';
+  const coeText  = 'Controller of Examination';
+ 
+  // ── TITLE BLOCK (logo left | college name right) ──
+  const titleBlock = `<w:tbl>
+
+<w:tblPr>
+  <w:tblW w:w="10000" w:type="dxa"/>
+  <w:tblBorders>
+    <w:top w:val="nil"/>
+    <w:left w:val="nil"/>
+    <w:bottom w:val="nil"/>
+    <w:right w:val="nil"/>
+    <w:insideH w:val="nil"/>
+    <w:insideV w:val="nil"/>
+  </w:tblBorders>
+  <w:tblLayout w:type="fixed"/>
+</w:tblPr>
+
+<w:tblGrid>
+  <w:gridCol w:w="10000"/>
+</w:tblGrid>
+
+<!-- ✅ ROW 1 → LOGO -->
+<w:tr>
+  <w:tc>
+    <w:tcPr>
+      <w:tcW w:w="10000" w:type="dxa"/>
+      ${NIL_BDR}
+      ${HDR_MAR}
+      <w:vAlign w:val="center"/>
+    </w:tcPr>
+
+    ${G.logoB64 ? `
+    <w:p>
+      <w:pPr><w:jc w:val="center"/></w:pPr>
+      <w:r>
+        <w:drawing>
+  <wp:inline distT="0" distB="0" distL="0" distR="0">
+    <wp:extent cx="3600000" cy="800000"/>
+    <wp:docPr id="${Math.floor(Math.random()*100000)}" name="CollegeLogo"/>
+    <wp:cNvGraphicFramePr>
+      <a:graphicFrameLocks noChangeAspect="1"/>
+    </wp:cNvGraphicFramePr>
+    <a:graphic>
+      <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+        <pic:pic>
+          <pic:nvPicPr>
+            <pic:cNvPr id="0" name="CollegeLogo"/>
+            <pic:cNvPicPr/>
+          </pic:nvPicPr>
+          <pic:blipFill>
+            <a:blip r:embed="rIdLogo"/>
+            <a:stretch><a:fillRect/></a:stretch>
+          </pic:blipFill>
+          <pic:spPr>
+            <a:xfrm>
+              <a:off x="0" y="0"/>
+              <a:ext cx="3600000" cy="800000"/>
+            </a:xfrm>
+            <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+          </pic:spPr>
+        </pic:pic>
+      </a:graphicData>
+    </a:graphic>
+  </wp:inline>
+</w:drawing>
+      </w:r>
+    </w:p>
+    ` : `
+    <w:p>
+      <w:pPr><w:jc w:val="center"/></w:pPr>
+      <w:r>${TNRPR(20,true)}<w:t>COLLEGE LOGO</w:t></w:r>
+    </w:p>
+    `}
+
+  </w:tc>
+</w:tr>
+
+<!-- ✅ ROW 2 → TEXT -->
+<w:tr>
+  <w:tc>
+    <w:tcPr>
+      <w:tcW w:w="10000" w:type="dxa"/>
+      ${NIL_BDR}
+      ${HDR_MAR}
+    </w:tcPr>
+
+       <w:p>
+      <w:pPr><w:jc w:val="center"/></w:pPr>
+      <w:r>${TNRPR(22,true)}<w:t>${xesc(coeText)}</w:t></w:r>
+    </w:p>
+
+    <w:p>
+      <w:pPr><w:jc w:val="center"/><w:spacing w:after="60"/></w:pPr>
+      <w:r>${TNRPR(22,true)}<w:t>${xesc(title)}</w:t></w:r>
+    </w:p>
+
+  </w:tc>
+</w:tr>
+
+</w:tbl>`;
+ 
+  // ── STUDENT INFO TABLE (4-col, all borders) ──
+  const HDR_MAR2 = `<w:tcMar><w:top w:w="40" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+ 
+  const infoCell = (label, val, w) =>
+    `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${HDR_MAR2}</w:tcPr>
+<w:p><w:pPr><w:spacing w:before="20" w:after="20" w:line="240" w:lineRule="auto"/></w:pPr>
+<w:r>${TNRPR(20,true)}<w:t xml:space="preserve">${xesc(label)}</w:t></w:r>
+<w:r>${TNRPR(20)}<w:t xml:space="preserve"> ${xesc(val)}</w:t></w:r>
+</w:p></w:tc>`;
+ 
+  const emptyInfoCell = (w) =>
+    `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${HDR_MAR2}</w:tcPr>
+<w:p><w:pPr><w:spacing w:before="20" w:after="20"/></w:pPr></w:p></w:tc>`;
+ 
+  const headerInfoTbl = `<w:tbl>
+<w:tblPr>
+  <w:tblW w:w="10000" w:type="dxa"/><w:jc w:val="right"/>
+  <w:tblBorders>
+   <w:top w:val="nil"/>
+    <w:left w:val="nil"/>
+    <w:bottom w:val="nil"/>
+    <w:right w:val="nil"/>
+    <w:insideH w:val="nil"/>
+    <w:insideV w:val="nil"/>
+  </w:tblBorders>
+  <w:tblLayout w:type="fixed"/>
+</w:tblPr>
+
+<w:tblGrid>
+  <w:gridCol w:w="4000"/>
+  <w:gridCol w:w="6000"/>
+</w:tblGrid>
+
+<w:tr>
+  ${infoCell('Register No.:', student.regNo||'', 4000)}
+  ${infoCell('Department:', dept, 6000)}
+</w:tr>
+
+<w:tr>
+  ${infoCell('Course Code:', courseCode, 4000)}
+  ${infoCell('Course Name:', courseName, 6000)}
+</w:tr>
+
+<w:tr>
+  ${infoCell('Session:', ses, 4000)}
+  ${infoCell('Date:', dt, 6000)}
+</w:tr>
+
+<w:tr>
+  ${infoCell('Semester:', sem, 4000)}
+  ${emptyInfoCell(6000)}
+</w:tr>
+
+</w:tbl>`;
+ 
+  // ── QUESTION TABLE ──
+  const QW = 9200, MW = 800;
+  const qContentXml = buildQuestionCellXml(question, rIdRemap);
+  const marksXml = question.marks.map(m =>
+    `<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22)}<w:t>${xesc(m)}</w:t></w:r></w:p>`
+  ).join('');
+ 
+  const qTbl = `<w:p><w:pPr>${SP1}</w:pPr></w:p>
+<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:jc w:val="right"/>
+<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders>
+<w:tblLayout w:type="fixed"/></w:tblPr>
+<w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid>
+<w:tr>
+<w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Question</w:t></w:r></w:p></w:tc>
+<w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Mark</w:t></w:r></w:p></w:tc></w:tr>
+<w:tr>
+<w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${qContentXml}</w:tc>
+<w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${marksXml}</w:tc>
+</w:tr></w:tbl>`;
+ 
+  // ── MODIFIED QUESTION TABLE ──
+  const modTbl = `<w:p><w:pPr>${SP1}</w:pPr></w:p>
+<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:jc w:val="right"/>
+<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders></w:tblPr>
+<w:tblGrid><w:gridCol w:w="10000"/></w:tblGrid>
+<w:tr><w:tc><w:tcPr><w:tcW w:w="10000" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Modified Question</w:t></w:r></w:p></w:tc></w:tr>
+<w:tr><w:tc><w:tcPr><w:tcW w:w="10000" w:type="dxa"/><w:trHeight w:val="600" w:hRule="atLeast"/>${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc></w:tr>
+<w:tr><w:tc><w:tcPr><w:tcW w:w="10000" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Reason for Modification</w:t></w:r></w:p></w:tc></w:tr>
+<w:tr><w:tc><w:tcPr><w:tcW w:w="10000" w:type="dxa"/><w:trHeight w:val="400" w:hRule="atLeast"/>${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc></w:tr>
+</w:tbl>`;
+ 
+  // ── RUBRICS ──
+  let rubricXml = '';
+  if (G.rubricCols.length) {
+    const nc = G.rubricCols.length, cw = Math.floor(10000/nc);
+    const RB = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
+    const RM = `<w:tcMar><w:top w:w="45" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="45" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
+    const hc = G.rubricCols.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${RB}${RM}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(18,true)}<w:t xml:space="preserve">${xesc(c)}</w:t></w:r></w:p></w:tc>`).join('');
+    const bc = G.rubricCols.map(()=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/><w:trHeight w:val="500" w:hRule="atLeast"/>${RB}${RM}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc>`).join('');
+    rubricXml = `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="80" w:after="40"/></w:pPr><w:r>${TNRPR(22,true)}<w:t>RUBRICS</w:t></w:r></w:p>
+<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:jc w:val="right"/>
+<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders></w:tblPr>
+<w:tblGrid>${G.rubricCols.map(()=>`<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid>
+<w:tr>${hc}</w:tr><w:tr>${bc}</w:tr></w:tbl>`;
+  }
+ 
+  const sigXml = `<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>
+<w:p><w:pPr><w:jc w:val="both"/><w:spacing w:before="200" w:after="0"/><w:tabs><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr>
+<w:r>${TNRPR(22)}<w:t xml:space="preserve"></w:t></w:r>
+<w:r>${TNRPR(22)}<w:tab/></w:r>
+<w:r>${TNRPR(22)}<w:t>Internal Examiner</w:t></w:r></w:p>`;
+ 
+  return answerBookRow + titleBlock + headerInfoTbl + qTbl + modTbl + rubricXml + sigXml;
+}
+ 
+// ── ADD THIS NEW FUNCTION after dlSinglePageMerged ──────────────────
+async function dlConsolidated() {
+  if (!G.students.length || !G.questions.length || !Object.keys(G.assignments).length) {
+    toast('Assign questions first', 'warn'); return;
+  }
+  showSpin('Creating Consolidated Register…', 'Generating student-question list', 0);
+  await delay(30);
+  try {
+    const sub   = gei('examSubject','');
+    const dept  = gei('examDept','');
+    const dt    = gei('examDate','');
+    const ses   = gei('examSession','');
+    const title = gei('examTitle','END SEMESTER PRACTICAL EXAMINATIONS');
+
+    // ── Collect ALL image rIds across all assigned questions ──
+    const allRidMap = collectAllRIds(G.assignments, G.questions);
+
+    const NIL_BDR = `<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>`;
+    const HDR_MAR = `<w:tcMar><w:top w:w="30" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="30" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+    const Q_BDR   = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
+    const Q_MAR   = `<w:tcMar><w:top w:w="40" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
+    const HDR_SHD = `<w:shd w:val="clear" w:color="auto" w:fill="CCCCCC"/>`;
+
+    // ── Title block (logo + exam info) ──
+    const titleBlock = `<w:tbl>
+<w:tblPr>
+  <w:tblW w:w="10000" w:type="dxa"/>
+  <w:tblBorders>
+    <w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/>
+    <w:insideH w:val="nil"/><w:insideV w:val="nil"/>
+  </w:tblBorders>
+  <w:tblLayout w:type="fixed"/>
+</w:tblPr>
+<w:tblGrid><w:gridCol w:w="10000"/></w:tblGrid>
+<w:tr>
+  <w:tc>
+    <w:tcPr><w:tcW w:w="10000" w:type="dxa"/>${NIL_BDR}${HDR_MAR}<w:vAlign w:val="center"/></w:tcPr>
+    ${G.logoB64 ? `
+    <w:p><w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r><w:rPr><w:noProof/></w:rPr><w:drawing>
+      <wp:inline distT="0" distB="0" distL="0" distR="0">
+        <wp:extent cx="3000000" cy="700000"/>
+        <wp:docPr id="${Math.floor(Math.random()*100000)}" name="ConsLogo"/>
+        <wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>
+        <a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+          <pic:pic>
+            <pic:nvPicPr><pic:cNvPr id="0" name="ConsLogo"/><pic:cNvPicPr/></pic:nvPicPr>
+            <pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>
+            <pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3000000" cy="700000"/></a:xfrm>
+            <a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>
+          </pic:pic>
+        </a:graphicData></a:graphic>
+      </wp:inline>
+    </w:drawing></w:r></w:p>` : `
+    <w:p><w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r>${TNRPR(18,true)}<w:t>COLLEGE LOGO</w:t></w:r></w:p>`}
+  </w:tc>
+</w:tr>
+<w:tr>
+  <w:tc>
+    <w:tcPr><w:tcW w:w="10000" w:type="dxa"/>${NIL_BDR}${HDR_MAR}</w:tcPr>
+    <w:p><w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r>${TNRPR(22,true)}<w:t>${xesc(title)}</w:t></w:r></w:p>
+    <w:p><w:pPr><w:jc w:val="center"/></w:pPr>
+    <w:r>${TNRPR(20)}<w:t xml:space="preserve">Dept: ${xesc(dept)}   Subject: ${xesc(sub)}</w:t></w:r></w:p>
+    <w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="60"/></w:pPr>
+    <w:r>${TNRPR(20)}<w:t xml:space="preserve">Date: ${xesc(dt)}   Session: ${xesc(ses)}</w:t></w:r></w:p>
+  </w:tc>
+</w:tr>
+</w:tbl>
+<w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+
+    // ── CONSOLIDATED TABLE ──
+    // Layout: S.No | Reg No | Name | Dept | Q.No | Marks  (header row)
+    // Then per student: info row + full-width question content row
+    // Columns: [500, 1500, 2000, 1000, 600, 800] + question spans cols 1-5 in data row 500 400 1200
+    const colW  = [500, 1000, 1800, 600, 5100, 1000];
+    const colH  = ['S.No.','Register No.','Student Name','Q.No','Question','Marks'];
+
+    const thCell = (txt, w) =>
+      `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr>
+<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr>
+<w:r>${TNRPR(14,true)}<w:t xml:space="preserve">${xesc(txt)}</w:t></w:r></w:p></w:tc>`;
+
+    const tdCell = (txt, w, center=false) =>
+      `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>
+<w:p><w:pPr>${center?'<w:jc w:val="center"/>':''}${SP1}</w:pPr>
+<w:r>${TNRPR(14)}<w:t xml:space="preserve">${xesc(txt)}</w:t></w:r></w:p></w:tc>`;
+
+    const headerRow = `<w:tr><w:trPr><w:trHeight w:val="380" w:hRule="atLeast"/></w:trPr>
+${colH.map((h,i)=>thCell(h,colW[i])).join('')}</w:tr>`;
+
+    let dataRows = '';
+    G.students.forEach((s, si) => {
+      setSP(Math.round(si / G.students.length * 80));
+      const qi = G.assignments[si];
+      if (qi === undefined) return;
+      const q = G.questions[qi];
+      const marksStr = q.marks.join('+') + (q.marks.length > 1 ? '='+q.totalMark : '');
+      const bloomSuffix = q.activeBloom ? ` [${q.activeBloom}]` : '';
+
+      // ── Full question content via buildQuestionCellXml (images, equations, tables) ──
+      const qContentXml = buildQuestionCellXmlco(q, allRidMap);
+
+      // ── Bloom label paragraph appended if active ──
+      const bloomNote = q.activeBloom
+        ? `<w:p><w:pPr>${SP1}</w:pPr><w:r><w:rPr>
+            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+            <w:i/><w:iCs/><w:sz w:val="16"/><w:color w:val="5B21B6"/>
+           </w:rPr><w:t>[Bloom's: ${xesc(q.activeBloom)}]</w:t></w:r></w:p>`
+        : '';
+
+      // ── ROW 1: student info (S.No, Reg, Name, Dept, Q.No, [empty question cell], Marks) ──
+      dataRows += `<w:tr>
+<w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr>
+${tdCell(s.sno||String(si+1), colW[0], true)}
+${tdCell(s.regNo||'', colW[1], true)}
+${tdCell(s.name||'', colW[2])}
+${tdCell('Q'+(qi+1)+bloomSuffix, colW[3], true)}
+<w:tc><w:tcPr><w:tcW w:w="${colW[4]}" w:type="dxa"/>${Q_BDR}${Q_MAR}<w:vAlign w:val="center"/></w:tcPr>
+${qContentXml}${bloomNote}
+</w:tc>
+${tdCell(marksStr, colW[5], true)}
+</w:tr>`;
+    });
+
+    const consTbl = `<w:tbl><w:tblPr>
+  <w:tblW w:w="10000" w:type="dxa"/>
+  <w:jc w:val="center"/>
+  <w:tblBorders>
+    <w:top w:val="single" w:sz="4" w:color="000000"/>
+    <w:left w:val="single" w:sz="4" w:color="000000"/>
+    <w:bottom w:val="single" w:sz="4" w:color="000000"/>
+    <w:right w:val="single" w:sz="4" w:color="000000"/>
+    <w:insideH w:val="single" w:sz="4" w:color="000000"/>
+    <w:insideV w:val="single" w:sz="4" w:color="000000"/>
+  </w:tblBorders>
+  <w:tblLayout w:type="fixed"/>
+</w:tblPr>
+<w:tblGrid>${colW.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>
+${headerRow}${dataRows}
+</w:tbl>`;
+
+    const sigXml = `<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>
+<w:p><w:pPr><w:jc w:val="both"/><w:spacing w:before="160" w:after="0"/>
+<w:tabs><w:tab w:val="center" w:pos="5000"/><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr>
+<w:r>${TNRPR(22)}<w:t xml:space="preserve"></w:t></w:r>
+<w:r>${TNRPR(22)}<w:tab/></w:r>
+<w:r>${TNRPR(22)}<w:tab/></w:r>
+<w:r>${TNRPR(22)}<w:t>Internal Examiner</w:t></w:r></w:p>`;
+
+    const body = titleBlock + consTbl + sigXml;
+
+    // ── Build DOCX zip using buildDocxZip (handles images + logo automatically) ──
+    const zip = await buildDocxZip(body, allRidMap);
+
+    setSP(95); await delay(100);
+    const blob = await zip.generateAsync({
+      type:'blob',
+      mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      compression:'DEFLATE',
+      compressionOptions:{level:6}
+    });
+    setSP(100); await delay(200); hideSpin();
+
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a'); a.href = url;
+    const code = gei('examSubject','QP').split(/[-–]/)[0].trim().replace(/[^a-zA-Z0-9]/g,'_');
+    a.download = `LabQP_v6_${code}_Consolidated_Register_${G.students.length}Students.docx`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(`✅ Consolidated register: ${G.students.length} students`, 'ok');
+  } catch(err) {
+    hideSpin();
+    toast('Error: ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+// Update the buildSinglePageMergedDocx function
+async function buildSinglePageMergedDocx() {
+  const allRidMap = collectAllRIds(G.assignments, G.questions);
+  const pgBrk = `<w:p><w:pPr><w:sectPr>${SECPR}</w:sectPr></w:pPr></w:p>`;
+  let body = '';
+  
+  for (let i = 0; i < G.students.length; i++) {
+    const qi = G.assignments[i];
+    if (qi === undefined) continue;
+    
+    body += buildSinglePageSectionXml(G.students[i], G.questions[qi], allRidMap);
+    
+    // Add page break after each student except the last one
+    if (i < G.students.length - 1) {
+      body += pgBrk;
+    }
+  }
+  
+  const zip = await buildDocxZip(body, allRidMap);
+  return zip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 }
+  });
+}
+
+async function dlSinglePageMerged() {
+  if (!G.students.length || !G.questions.length) {
+    toast('No papers to download', 'warn');
+    return;
+  }
+  
+  showSpin('Creating Single-Page Format…', 'Matching Output_1.docx format', 0);
+  await delay(30);
+  
+  try {
+    const tot = G.students.length;
+    
+    for (let i = 0; i < tot; i++) {
+      setSP(Math.round(i / tot * 70));
+      document.getElementById('spinS').textContent = `Processing ${i + 1}/${tot}: ${G.students[i].name || G.students[i].regNo}`;
+      await delay(1);
+    }
+    
+    setSP(80);
+    document.getElementById('spinS').textContent = 'Merging document…';
+    await delay(10);
+    
+    const blob = await buildSinglePageMergedDocx();
+    
+    setSP(100);
+    await delay(200);
+    hideSpin();
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const sub = gei('examSubject', 'QP').split(/[-–]/)[0].trim().replace(/[^a-zA-Z0-9]/g, '_');
+    a.download = `LabQP_v6_${sub}_${tot}Students_SinglePage_Format.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast(`✅ ${tot} papers in Output_1.docx format`, 'ok');
+  } catch (err) {
+    hideSpin();
+    toast('Error: ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+
+function buildQuestionCellXmlco(question, rIdRemap) {
+  if(question.activeBloom && question.bloomReframes?.[question.activeBloom])
+    return _buildBloomXml(question.bloomReframes[question.activeBloom], question, rIdRemap);
+
+  if(!G.scratchDoc)
+    G.scratchDoc = new DOMParser().parseFromString(
+      `<root xmlns:w="${WN}" xmlns:m="${MN}" xmlns:r="${RN}" xmlns:wp="${WPN}" xmlns:a="${AN}" xmlns:pic="${PICN}"/>`,
+      'application/xml'
+    );
+
+  let xml='';
+  for(const para of(question.paras||[])){
+    if(para.rawNode){
+      try {
+        const cloned=safeImp(G.scratchDoc, para.rawNode);
+        remapRIds(cloned, rIdRemap);
+        let seg=new XMLSerializer().serializeToString(cloned);
+        if(para.rawNode.localName==='tbl') {
+          seg = _forceTblBorders(seg);
+        }
+        xml+=seg;
+        continue;
+      } catch(e){ console.warn('safeImp fallback:', e.message); }
+    }
+    xml+=_buildParaFallbackco(para, rIdRemap);
+  }
+  if(!xml.trim()) xml=_buildBloomXmlco(question.text||'', question, rIdRemap);
+  return xml;
+}
+
+function _buildParaFallbackco(para, rIdRemap) {
+  let xml='';
+  for(const tbl of(para.tables||[])){
+    if(!tbl.rows||!tbl.rows.length) continue;
+    const nCols=tbl.rows.reduce((mx,r)=>Math.max(mx,r.length),1), colW=Math.floor(9200/nCols);
+    const BDR=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
+    const MAR=`<w:tcMar><w:top w:w="40" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>`;
+    let t=`<w:tbl><w:tblPr><w:tblW w:w="${nCols*colW}" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders></w:tblPr><w:tblGrid>${Array(nCols).fill(`<w:gridCol w:w="${colW}"/>`).join('')}</w:tblGrid>`;
+    tbl.rows.forEach((row,ri)=>{
+      t+=`<w:tr>`; const isH=ri===0;
+      for(let ci=0;ci<nCols;ci++){
+        const cell=row[ci]||{text:''};
+        t+=`<w:tc><w:tcPr><w:tcW w:w="${colW}" w:type="dxa"/>${isH?`<w:shd w:val="clear" w:color="auto" w:fill="CCCCCC"/>`:''}${BDR}${MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(26,isH)}<w:t xml:space="preserve">${xesc(cell.text||'')}</w:t></w:r></w:p></w:tc>`;
+      }
+      t+=`</w:tr>`;
+    });
+    xml+=t+`</w:tbl><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+  }
+  for(const img of(para.images||[])){
+    const nRId=rIdRemap[img.origRId]; if(!nRId) continue;
+    xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/>${IMG_XML(nRId)}</w:r></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+  }
+  for(const eq of(para.equations||[])){ if(eq.text) xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:i/><w:iCs/><w:sz w:val="24"/><w:szCs w:val="24"/><w:color w:val="4C1D95"/></w:rPr><w:t xml:space="preserve">${xesc(eq.text)}</w:t></w:r></w:p>`; }
+  if(para.text&&para.text.trim()){
+    for(const line of para.text.split('\n')){
+      if(!line.trim()){xml+=`<w:p><w:pPr>${SP}</w:pPr></w:p>`;continue;}
+      xml+=`<w:p><w:pPr><w:jc w:val="both"/>${SP}</w:pPr><w:r>${TNRPR(16)}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r></w:p>`;
+    }
+  }
+  return xml;
+}
+
+function _buildBloomXmlco(text, question, rIdRemap) {
+  let xml=''; const seen=new Set();
+  for(const para of(question.paras||[]))
+    for(const img of(para.images||[])){
+      if(seen.has(img.origRId)) continue; seen.add(img.origRId);
+      const nRId=rIdRemap[img.origRId]; if(!nRId) continue;
+      xml+=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r><w:rPr/>${IMG_XML(nRId)}</w:r></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>`;
+    }
+  for(const line of text.split('\n')){
+    if(!line.trim()){xml+=`<w:p><w:pPr>${SP}</w:pPr></w:p>`;continue;}
+    xml+=`<w:p><w:pPr><w:jc w:val="both"/>${SP}</w:pPr><w:r>${TNRPR(16)}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r></w:p>`;
+  }
+  return xml;
+}
+</script>
+</body>
+</html>
