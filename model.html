@@ -841,112 +841,248 @@ async function handleQB(file) {
 }
 
 async function parseQB(zip) {
-  const xmlStr=await zip.file('word/document.xml').async('string');
-  const xd=new DOMParser().parseFromString(xmlStr,'application/xml');
-  G.questions=[]; G.rubricCols=[]; G.examInfo={};
+  const xmlStr = await zip.file('word/document.xml').async('string');
+  const xd = new DOMParser().parseFromString(xmlStr, 'application/xml');
+  
+  // Initialize globals
+  G.questions = []; 
+  G.rubricCols = []; 
+  G.rubricTables = []; 
+  G.examInfo = {};
+  G.rubricContent = []; 
 
-  const lines=[];
-  for(const p of xd.getElementsByTagNameNS(WN,'p')){
-    let t='';
-    for(const r of p.getElementsByTagNameNS(WN,'r')) for(const tx of r.getElementsByTagNameNS(WN,'t')) t+=tx.textContent;
-    if(t.trim()) lines.push(t.trim());
+  const getSubAttr = (el, tagName, attrName) => {
+    const sub = el.getElementsByTagNameNS(WN, tagName)[0];
+    if (!sub) return null;
+    return sub.getAttribute(WN + ':' + attrName) || sub.getAttribute(attrName) || sub.getAttribute('w:' + attrName);
+  };
+
+  // 1. Extract Exam Info
+  const lines = [];
+  for (const p of xd.getElementsByTagNameNS(WN, 'p')) {
+    let t = '';
+    for (const r of p.getElementsByTagNameNS(WN, 'r'))
+      for (const tNode of r.getElementsByTagNameNS(WN, 't')) t += tNode.textContent;
+    if (t.trim()) lines.push(t.trim());
   }
-  G.examInfo.title=lines[0]||''; G.examInfo.department=lines[1]||'';
-  for(const l of lines){
-    const m=l.match(/Course\s*[&]\s*Class\s*[:]\s*(.+?)(?:\s+Semester\s*[:]\s*(.+?))?$/i);
-    if(m){ G.examInfo.courseClass=(m[1]||'').trim(); G.examInfo.semester=(m[2]||'').trim(); }
-    const m3=l.match(/Subject.*?[:]\s*(.+?)$/i); if(m3) G.examInfo.subject=m3[1].trim();
-    const m2=l.match(/Staff.*?[:]\s*(.+?)$/i);   if(m2) G.examInfo.staff=m2[1].trim();
-    const m4=l.match(/Date.*?[:]\s*(.+?)$/i);     if(m4) G.examInfo.date=m4[1].trim();
+  G.examInfo.title = lines[0] || ''; 
+  G.examInfo.department = lines[1] || '';
+  for (const l of lines) {
+    const m  = l.match(/Course\s*[&]\s*Class\s*[:]\s*(.+?)(?:\s+Semester\s*[:]\s*(.+?))?$/i);
+    if (m) { G.examInfo.courseClass = (m[1] || '').trim(); G.examInfo.semester = (m[2] || '').trim(); }
+    const m3 = l.match(/Subject.*?[:]\s*(.+?)$/i); if (m3) G.examInfo.subject = m3[1].trim();
+    const m2 = l.match(/Staff.*?[:]\s*(.+?)$/i);   if (m2) G.examInfo.staff   = m2[1].trim();
+    const m4 = l.match(/Date.*?[:]\s*(.+?)$/i);     if (m4) G.examInfo.date    = m4[1].trim();
   }
 
-  const bodyNode = xd.getElementsByTagNameNS(WN,'body')[0];
-  if(!bodyNode){ console.warn('No w:body found'); return; }
+  const bodyNode = xd.getElementsByTagNameNS(WN, 'body')[0];
+  if (!bodyNode) return;
 
-  const topLevelTbls = directChildren(bodyNode, 'tbl', WN);
+  let inRubricZone = false;
+  const bodyChildren = Array.from(bodyNode.childNodes).filter(n => n.nodeType === 1);
 
-  for(const tbl of topLevelTbls){
-    const rows = directRows(tbl);
-    if(!rows.length) continue;
+  // 2. Main Processing Loop
+  for (const child of bodyChildren) {
+    const ln = child.localName || '';
+
+    let detectText = '';
+    if (ln === 'p') {
+      for (const r of child.getElementsByTagNameNS(WN, 'r'))
+        for (const t of r.getElementsByTagNameNS(WN, 't')) detectText += t.textContent;
+    } else if (ln === 'tbl') {
+      const firstRow = directRows(child)[0];
+      if (firstRow) {
+        const firstCell = directCells(firstRow)[0];
+        if (firstCell) detectText = _cellText(firstCell);
+      }
+    }
+    const upper = detectText.trim().toUpperCase();
+
+    // Zone detection
+    if (upper.includes('RUBRIC') && !inRubricZone) {
+      inRubricZone = true;
+      if (ln === 'p' && detectText.trim()) {
+        G.rubricContent.push({ type: 'para', paras: parseParasLossless(child, G.imageMap) });
+        continue;
+      }
+    }
+    if (upper.includes('QUESTION PAPER')) { inRubricZone = false; continue; }
+
+    // ── RUBRIC ZONE ────────────────────────────────────────────────────────
+    if (inRubricZone) {
+      if (ln === 'p') {
+        if (detectText.trim()) {
+          G.rubricContent.push({ type: 'para', paras: parseParasLossless(child, G.imageMap) });
+        }
+      } else if (ln === 'tbl') {
+        const xmlRows = directRows(child);
+        if (!xmlRows.length) continue;
+
+        // --- STAGE 1: MAP TO VIRTUAL GRID (Detect spans and resolve merges) ---
+        const virtualGrid = []; // rowIdx -> colIdx -> cellObject
+        
+        for (let ri = 0; ri < xmlRows.length; ri++) {
+          if (!virtualGrid[ri]) virtualGrid[ri] = [];
+          const physicalCells = directCells(xmlRows[ri]);
+          let colPtr = 0;
+
+          for (const tc of physicalCells) {
+            // Skip slots already occupied by vertical merges from rows above
+            while (virtualGrid[ri][colPtr]) colPtr++;
+
+            const gSpan = parseInt(getSubAttr(tc, 'gridSpan', 'val') || '1');
+            const vMerge = getSubAttr(tc, 'vMerge', 'val'); // "restart" or (null/continue)
+            const isVContinue = (vMerge !== 'restart' && tc.getElementsByTagNameNS(WN, 'vMerge').length > 0);
+
+            // Create the primary cell data structure
+            const baseCell = {
+              text: isVContinue ? "" : _cellText(tc),
+              paras: isVContinue ? [] : parseParasLossless(tc, G.imageMap),
+              colspan: gSpan,
+              rowspan: 1, // Will be updated if it's a restart
+              isReal: !isVContinue
+            };
+
+            // If this is a continue, find the restart cell above and increment its rowspan
+            if (isVContinue) {
+              let searchRi = ri - 1;
+              while (searchRi >= 0) {
+                const above = virtualGrid[searchRi][colPtr];
+                if (above && above.isReal) {
+                  above.rowspan++;
+                  break;
+                }
+                searchRi--;
+              }
+            }
+
+            // Populate the grid footprint (Horizontal Span)
+            for (let s = 0; s < gSpan; s++) {
+              // Only the very first slot of the footprint gets the content
+              // All others get an empty filler to maintain alignment without duplicating text
+              virtualGrid[ri][colPtr + s] = (s === 0) ? baseCell : { text: "", paras: [], isFiller: true };
+            }
+            colPtr += gSpan;
+          }
+        }
+
+        // --- STAGE 2: BUILD BALANCED JSON (Ensures Row 1 length === Row 2 length) ---
+        const maxCols = Math.max(...virtualGrid.map(r => r.length));
+        const balancedRichRows = [];
+        const balancedTextRows = [];
+
+        for (let ri = 0; ri < virtualGrid.length; ri++) {
+          const richRow = [];
+          const textRow = [];
+          for (let ci = 0; ci < maxCols; ci++) {
+            const cell = virtualGrid[ri][ci] || { text: "", paras: [] };
+            richRow.push(cell);
+            textRow.push(cell.text || "");
+          }
+          balancedRichRows.push(richRow);
+          balancedTextRows.push(textRow);
+        }
+
+        // Store for Visual Output (Matching Image 1 alignment but Image 2 merging)
+        G.rubricContent.push({ type: 'table', rows: balancedRichRows });
+
+        // Backward compatibility (Corrected alignment for G.rubricTables)
+        G.rubricTables.push({
+          cols: balancedTextRows[0] || [],
+          dataRows: balancedTextRows.slice(1)
+        });
+        if (G.rubricTables.length === 1) G.rubricCols = G.rubricTables[0].cols;
+      }
+      continue; 
+    }
+
+    // ── QUESTION ZONE ───────────────────────────────────────────────────────
+    if (ln !== 'tbl') continue;
+    const rows = directRows(child);
+    if (!rows.length) continue;
 
     const headerCells = directCells(rows[0]);
-    const c0 = headerCells.map(tc=>_cellText(tc));
-    const h0 = (c0[0]||'').toLowerCase();
+    const c0  = headerCells.map(tc => _cellText(tc));
+    const h0  = (c0[0] || '').toLowerCase();
 
-    if(h0.includes('aim')||h0.includes('rubric')||h0.includes('apparatus')){
-      G.rubricCols=c0.filter(c=>c.trim()); continue;
-    }
-    if(!h0.includes('q.no')&&!h0.includes('q. no')&&!c0.some(c=>c.toLowerCase().includes('question'))) continue;
+    if (!h0.includes('q.no') && !h0.includes('q. no') &&
+        !c0.some(c => c.toLowerCase().includes('question'))) continue;
 
-    const qi_col  = c0.findIndex(c=>c.toLowerCase().includes('question'));
-    const mi_col  = c0.findIndex(c=>c.toLowerCase().includes('mark'));
-    const lim_col = c0.findIndex(c=>{ const cl=c.toLowerCase(); return(cl.includes('assign')&&cl.includes('student'))||(cl.includes('no.')&&cl.includes('student'))||cl.includes('no of student'); });
+    const qi_col  = c0.findIndex(c => c.toLowerCase().includes('question'));
+    const mi_col  = c0.findIndex(c => c.toLowerCase().includes('mark'));
+    const lim_col = c0.findIndex(c => {
+      const cl = c.toLowerCase();
+      return (cl.includes('assign') && cl.includes('student')) ||
+             (cl.includes('no.')    && cl.includes('student')) ||
+              cl.includes('no of student');
+    });
 
-    for(let ri=1; ri<rows.length; ri++){
-      const row    = rows[ri];
-      const tcs    = directCells(row);
-      if(!tcs.length) continue;
+    for (let ri = 1; ri < rows.length; ri++) {
+      const row = rows[ri];
+      const tcs = directCells(row);
+      if (!tcs.length) continue;
 
-      const qci = qi_col>=0?qi_col:1;
-      const mci = mi_col>=0?mi_col:2;
-      const lci = lim_col>=0?lim_col:-1;
+      const qci = qi_col  >= 0 ? qi_col  : 1;
+      const mci = mi_col  >= 0 ? mi_col  : 2;
+      const lci = lim_col >= 0 ? lim_col : -1;
 
-      const cs = tcs.map(tc=>_cellText(tc));
-      const qT = qci<cs.length?cs[qci]:'';
-      const mT = mci<cs.length?cs[mci]:'';
-      const limitRaw = lci>=0&&lci<cs.length?cs[lci].trim():'';
-      const studentLimit = (limitRaw&&/^\d+$/.test(limitRaw))?parseInt(limitRaw):null;
-      if(!qT.trim()) continue;
+      const cs = tcs.map(tc => _cellText(tc));
+      const qT = qci < cs.length ? cs[qci] : '';
+      const mT = mci < cs.length ? cs[mci] : '';
+      const limitRaw     = lci >= 0 && lci < cs.length ? cs[lci].trim() : '';
+      const studentLimit = (limitRaw && /^\d+$/.test(limitRaw)) ? parseInt(limitRaw) : null;
+      if (!qT.trim()) continue;
 
-      const qCell = qci<tcs.length ? tcs[qci] : null;
-      let paras=[];
-      if(qCell){ try{ paras=parseParasLossless(qCell, G.imageMap); }catch(e){ console.warn('parseParasLossless err',e); } }
-      if(!paras.length) paras=[{text:qT.trim(), images:[], equations:[], tables:[], isMath:false}];
+      const qCell = qci < tcs.length ? tcs[qci] : null;
+      let paras = [];
+      if (qCell) { try { paras = parseParasLossless(qCell, G.imageMap); } catch(e) { console.warn('parseParasLossless err', e); } }
+      if (!paras.length) paras = [{ text: qT.trim(), images: [], equations: [], tables: [], isMath: false }];
 
-      const allImages=[], allEquations=[], allTables=[];
-      for(const p of paras){
-        allImages.push(...(p.images||[]));
-        allEquations.push(...(p.equations||[]));
-        allTables.push(...(p.tables||[]));
+      const allImages = [], allEquations = [], allTables = [];
+      for (const p of paras) {
+        allImages   .push(...(p.images    || []));
+        allEquations.push(...(p.equations || []));
+        allTables   .push(...(p.tables    || []));
       }
 
-      // ── FIXED: Parse ALL mark values from the marks cell (one per line) ──
-      const mCell = mci<tcs.length ? tcs[mci] : null;
+      const mCell = mci < tcs.length ? tcs[mci] : null;
       let marks = ['100'];
-      if(mCell) {
-        // Each paragraph in the marks cell = one mark value
+      if (mCell) {
         const mParas = [];
-        for(const p of mCell.getElementsByTagNameNS(WN,'p')){
-          let l='';
-          for(const r of p.getElementsByTagNameNS(WN,'r'))
-            for(const t of r.getElementsByTagNameNS(WN,'t')) l+=t.textContent;
-          if(l.trim()) mParas.push(l.trim());
+        for (const p of mCell.getElementsByTagNameNS(WN, 'p')) {
+          let l = '';
+          for (const r of p.getElementsByTagNameNS(WN, 'r'))
+            for (const t of r.getElementsByTagNameNS(WN, 't')) l += t.textContent;
+          if (l.trim()) mParas.push(l.trim());
         }
-        const mArr = mParas.length ? mParas : mT.split('\n').map(s=>s.trim()).filter(Boolean);
-        const numArr = mArr.filter(s=>/^\d+$/.test(s));
+        const mArr    = mParas.length ? mParas : mT.split('\n').map(s => s.trim()).filter(Boolean);
+        const numArr  = mArr.filter(s => /^\d+$/.test(s));
         marks = numArr.length ? numArr : (mT.trim() ? [mT.trim()] : ['100']);
       } else {
-        const mArr = mT.split('\n').map(s=>s.trim()).filter(s=>/^\d+$/.test(s));
+        const mArr = mT.split('\n').map(s => s.trim()).filter(s => /^\d+$/.test(s));
         marks = mArr.length ? mArr : ['100'];
       }
 
       G.questions.push({
-        idx:G.questions.length,
-        text:qT.trim(), marks, paras,
-        images:allImages, equations:allEquations, nestedTables:allTables,
-        totalMark:marks.reduce((a,v)=>a+(+v||0),0)||100,
+        idx: G.questions.length,
+        text: qT.trim(), marks, paras,
+        images: allImages, equations: allEquations, nestedTables: allTables,
+        totalMark: marks.reduce((a, v) => a + (+v || 0), 0) || 100,
         studentLimit,
-        has_image:allImages.length>0,
-        has_equation:allEquations.length>0,
-        has_nested_table:allTables.length>0,
-        bloomReframes:{}, activeBloom:null
+        has_image:         allImages   .length > 0,
+        has_equation:      allEquations.length > 0,
+        has_nested_table:  allTables   .length > 0,
+        bloomReframes: {}, activeBloom: null
       });
     }
   }
 
-  const fmap={examTitle:'title',examDept:'department',examClass:'courseClass',examSem:'semester',examSubject:'subject',examStaff:'staff'};
-  for(const[id,key]of Object.entries(fmap)){ const v=G.examInfo[key]||''; if(v) document.getElementById(id).value=v; }
-  if(G.examInfo.date){ const dp=G.examInfo.date.split(/[\s(]+/); if(dp[0]) document.getElementById('examDate').value=dp[0]; }
+  const fmap = { examTitle:'title', examDept:'department', examClass:'courseClass',
+                 examSem:'semester', examSubject:'subject', examStaff:'staff' };
+  for (const [id, key] of Object.entries(fmap)) {
+    const v = G.examInfo[key] || '';
+    if (v) document.getElementById(id).value = v;
+  }
 }
 
 async function handleStu(file) {
@@ -1488,7 +1624,73 @@ function filterStu() {
     r.style.display=((!q||txt.includes(q))&&(fa==='all'||(fa==='y'&&a)||(fa==='n'&&!a)||(fa==='over'&&isOver))&&(fq==='all'||(a&&qi===+fq)))?'':'none';
   }
 }
+function buildRubricTablesXml() {
+  if (!G.rubricTables || !G.rubricTables.length) return '';
+  let xml = '';
 
+  G.rubricTables.forEach((rt, ti) => {
+    if (!rt.cols || !rt.cols.length) return;
+    const nc = rt.cols.length;
+    const cw = Math.floor(10000 / nc);
+    const RB = `<w:tcBorders>
+      <w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+      <w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+      <w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+      <w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+    </w:tcBorders>`;
+    const RM = `<w:tcMar>
+      <w:top w:w="45" w:type="dxa"/>
+      <w:left w:w="70" w:type="dxa"/>
+      <w:bottom w:w="45" w:type="dxa"/>
+      <w:right w:w="70" w:type="dxa"/>
+    </w:tcMar>`;
+    const HDR_SHD = `<w:shd w:val="clear" w:color="auto" w:fill="CCCCCC"/>`;
+
+    // Header row
+    const hc = rt.cols.map(c =>
+      `<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${HDR_SHD}${RB}${RM}</w:tcPr>
+      <w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr>
+      <w:r>${TNRPR(20, true)}<w:t xml:space="preserve">${xesc(c)}</w:t></w:r>
+      </w:p></w:tc>`
+    ).join('');
+
+    // Data rows (empty scoring rows from docx) or one blank row
+    let dataRowsXml = '';
+    const rowsToRender = rt.dataRows.length ? rt.dataRows : [new Array(nc).fill('')];
+    rowsToRender.forEach(row => {
+      const cells = rt.cols.map((_, ci) =>
+        `<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>
+        <w:trHeight w:val="500" w:hRule="atLeast"/>
+        ${RB}${RM}</w:tcPr>
+        <w:p><w:pPr>${SP1}</w:pPr>
+        ${row[ci] ? `<w:r>${TNRPR(20)}<w:t>${xesc(row[ci])}</w:t></w:r>` : ''}
+        </w:p></w:tc>`
+      ).join('');
+      dataRowsXml += `<w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr>${cells}</w:tr>`;
+    });
+
+    xml += `<w:tbl>
+      <w:tblPr>
+        <w:tblW w:w="10000" w:type="dxa"/>
+        <w:tblBorders>
+          <w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+          <w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+          <w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+          <w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+          <w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+          <w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+        </w:tblBorders>
+        <w:tblLayout w:type="fixed"/>
+      </w:tblPr>
+      <w:tblGrid>${rt.cols.map(() => `<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid>
+      <w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${hc}</w:tr>
+      ${dataRowsXml}
+    </w:tbl>
+    ${ti < G.rubricTables.length - 1 ? `<w:p><w:pPr>${SP1}</w:pPr></w:p>` : ''}`;
+  });
+
+  return xml;
+}
 function setMode(m) {
   G.mode=m;
   ['smart','balanced','random'].forEach(n=>{ const el=document.getElementById('mode-'+n); if(el) el.className='mo'+(n===m?' act':''); });
@@ -1608,15 +1810,12 @@ function buildSectionXml(student, question, rIdRemap) {
   const marksXml=question.marks.map(m=>`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>${xesc(m)}</w:t></w:r></w:p>`).join('');
   const bloomNote=question.activeBloom?`<w:p><w:pPr>${SP1}</w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:iCs/><w:sz w:val="18"/><w:color w:val="5B21B6"/></w:rPr><w:t>[Bloom's: ${xesc(question.activeBloom)}]</w:t></w:r></w:p>`:'';
   const qTbl=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="${QW}"/><w:gridCol w:w="${MW}"/></w:tblGrid><w:tr><w:trPr><w:trHeight w:val="320" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Question</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${HDR_SHD}${Q_BDR}${Q_MAR}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>Marks</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${QW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${qContentXml}${bloomNote}</w:tc><w:tc><w:tcPr><w:tcW w:w="${MW}" w:type="dxa"/>${Q_BDR}${Q_MAR}</w:tcPr>${marksXml}</w:tc></w:tr></w:tbl>`;
-  let rubricXml='';
-  if(G.rubricCols.length){
-    const nc=G.rubricCols.length,cw=Math.floor(10000/nc);
-    const RB=`<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tcBorders>`;
-    const RM=`<w:tcMar><w:top w:w="45" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="45" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
-    const hc=G.rubricCols.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${HDR_SHD}${RB}${RM}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(20,true)}<w:t xml:space="preserve">${xesc(c)}</w:t></w:r></w:p></w:tc>`).join('');
-    const bc=G.rubricCols.map(()=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${RB}${RM}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc>`).join('');
-    rubricXml=`<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(22,true)}<w:t>RUBRICS</w:t></w:r></w:p><w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${G.rubricCols.map(()=>`<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid><w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${hc}</w:tr><w:tr><w:trPr><w:trHeight w:val="400" w:hRule="atLeast"/></w:trPr>${bc}</w:tr></w:tbl>`;
-  }
+  // ── RUBRICS: render ALL tables between RUBRICS and QUESTION PAPER ──
+  const rubricXml = G.rubricTables && G.rubricTables.length
+    ? `<w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr>
+       <w:r>${TNRPR(22, true)}<w:t>RUBRICS</w:t></w:r></w:p>
+       ${buildRubricTablesXml()}`
+    : '';
   const sigXml=`<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}<w:tabs><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr><w:r>${TNRPR(22)}<w:t xml:space="preserve"></w:t></w:r><w:r>${TNRPR(22)}<w:tab/></w:r><w:r>${TNRPR(22)}<w:t>Internal Examiner</w:t></w:r></w:p>`;
   return headerTbl+`<w:p><w:pPr>${SP1}</w:pPr></w:p>`+qTbl+rubricXml+sigXml;
 }
@@ -2070,19 +2269,21 @@ ${HDR_MAR}<w:vAlign w:val="center"/></w:tcPr>
 </w:tbl>`;
  
   // ── RUBRICS ──
-  let rubricXml = '';
-  if (G.rubricCols.length) {
-    const nc = G.rubricCols.length, cw = Math.floor(10000/nc);
-    const RB = `<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tcBorders>`;
-    const RM = `<w:tcMar><w:top w:w="45" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="45" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tcMar>`;
-    const hc = G.rubricCols.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/>${RB}${RM}</w:tcPr><w:p><w:pPr><w:jc w:val="center"/>${SP1}</w:pPr><w:r>${TNRPR(18,true)}<w:t xml:space="preserve">${xesc(c)}</w:t></w:r></w:p></w:tc>`).join('');
-    const bc = G.rubricCols.map(()=>`<w:tc><w:tcPr><w:tcW w:w="${cw}" w:type="dxa"/><w:trHeight w:val="500" w:hRule="atLeast"/>${RB}${RM}</w:tcPr><w:p><w:pPr>${SP1}</w:pPr></w:p></w:tc>`).join('');
-    rubricXml = `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="80" w:after="40"/></w:pPr><w:r>${TNRPR(22,true)}<w:t>RUBRICS</w:t></w:r></w:p>
-<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="dxa"/><w:jc w:val="right"/>
-<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders></w:tblPr>
-<w:tblGrid>${G.rubricCols.map(()=>`<w:gridCol w:w="${cw}"/>`).join('')}</w:tblGrid>
-<w:tr>${hc}</w:tr><w:tr>${bc}</w:tr></w:tbl>`;
-  }
+  const rubricXml = G.rubricTables && G.rubricTables.length
+  ? `<w:p>
+       <w:pPr>
+         <w:jc w:val="center"/>
+         <w:spacing w:before="80" w:after="40"/>
+       </w:pPr>
+       <w:r>${TNRPR(22, true)}<w:t>RUBRICS</w:t></w:r>
+     </w:p>
+     ${buildRubricTablesXml().replace('<w:tbl>', `
+       <w:tbl>
+         <w:tblPr>
+           <w:jc w:val="right"/>
+         </w:tblPr>
+     `)}`
+  : '';
  
   const sigXml = `<w:p><w:pPr>${SP1}</w:pPr></w:p><w:p><w:pPr>${SP1}</w:pPr></w:p>
 <w:p><w:pPr><w:jc w:val="both"/><w:spacing w:before="200" w:after="0"/><w:tabs><w:tab w:val="right" w:pos="10000"/></w:tabs></w:pPr>
